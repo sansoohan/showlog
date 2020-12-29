@@ -124,9 +124,9 @@ export class RoomComponent implements OnInit {
       this.talkSub = this.talkContentsObserver.subscribe((talkContents) => {
         this.talkContents = talkContents;
         const videoFps = this.mediaContraints.video.frameRate.ideal;
-        this.localCanvasInterval = setInterval(() => {
-          this.drawContext(this.localVideo, this.localCanvas);
-        }, 1000 / videoFps);
+        this.localCanvasInterval = setInterval(this.drawContext.bind(
+          this, this.localVideo, this.localCanvas
+        ), 1000 / videoFps);
         window.addEventListener('resize', this.onResizeWindow.bind(this));
         if (params.roomId) {
           this.firestore
@@ -134,7 +134,7 @@ export class RoomComponent implements OnInit {
           .collection('rooms').doc(`${params.roomId}`).get()
           .forEach(async (roomData) => {
             let waitTime = 0;
-            if (roomData.data().answer) {
+            if (roomData?.data()?.answer) {
               waitTime = 10000;
             }
             this.roomId = params.roomId;
@@ -412,9 +412,17 @@ export class RoomComponent implements OnInit {
     const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
     this.localVideo.nativeElement.srcObject = stream;
     this.localVideo.nativeElement.muted = true;
+    this.localVideo.nativeElement.autoplay = true;
+    this.localVideo.nativeElement.play();
+    this.localVideo.nativeElement.setAttribute('playsinline', '');
+    this.localVideo.nativeElement.playsinline = true;
     this.localStream = stream;
     this.remoteStream = new MediaStream();
     this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+    this.remoteVideo.nativeElement.muted = false;
+    this.remoteVideo.nativeElement.autoplay = true;
+    this.remoteVideo.nativeElement.play();
+    this.remoteVideo.nativeElement.setAttribute('playsinline', '');
     // tslint:disable-next-line: no-console
     console.log('Stream:', this.localVideo.nativeElement.srcObject);
 
@@ -432,6 +440,9 @@ export class RoomComponent implements OnInit {
     this.canvasStream.addTrack(localVideoAudio);
     this.canvasVideo.nativeElement.srcObject = this.canvasStream;
     this.canvasVideo.nativeElement.muted = true;
+    this.remoteVideo.nativeElement.autoplay = true;
+    this.canvasVideo.nativeElement.play();
+    this.canvasVideo.nativeElement.setAttribute('playsinline', '');
   }
 
   async handleClickLeaveRoom() {
@@ -541,38 +552,40 @@ export class RoomComponent implements OnInit {
     }
   }
 
-  drawContext = (videoTag: ElementRef, canvasTag: ElementRef) => {
-    if (videoTag && videoTag.nativeElement && !videoTag.nativeElement.paused && !videoTag.nativeElement.ended) {
-      const isHorizontal = this.deviceRotation === 90 || this.deviceRotation === -90;
-      const width = videoTag.nativeElement.videoWidth;
-      const height = videoTag.nativeElement.videoHeight;
-      if (width / 4 > height / 3){
-        const overWidth = (width / 4 - height / 3) * 4;
-        const canvasWidth = canvasTag.nativeElement.width = width - overWidth;
-        const canvasHeight = canvasTag.nativeElement.height = height;
-        canvasTag.nativeElement.getContext('2d').drawImage(
-          videoTag.nativeElement,
-          overWidth / 2, 0, canvasWidth, canvasHeight,
-          0, 0, canvasWidth, canvasHeight,
-        );
-      }
-      else if (width / 4 < height / 3){
-        const overHeight = (width / 4 - height / 3) * (-3);
-        const canvasWidth = canvasTag.nativeElement.width = width;
-        const canvasHeight = canvasTag.nativeElement.height = height - overHeight;
-        canvasTag.nativeElement.getContext('2d').drawImage(
-          videoTag.nativeElement,
-          0, overHeight / 2, canvasWidth, canvasHeight,
-          0, 0, canvasWidth, canvasHeight,
-        );
-      }
-      else {
-        const canvasWidth = canvasTag.nativeElement.width = isHorizontal ? width : height;
-        const canvasHeight = canvasTag.nativeElement.height = isHorizontal ? height : height * 3 / 4;
-        canvasTag.nativeElement.getContext('2d').drawImage(videoTag.nativeElement,
-          0, 0, canvasWidth, canvasHeight
-        );
-      }
+  drawContext(videoTag: ElementRef, canvasTag: ElementRef) {
+    if (!videoTag?.nativeElement) {
+      return;
+    }
+
+    const isHorizontal = this.deviceRotation === 90 || this.deviceRotation === -90;
+    const width = videoTag.nativeElement.videoWidth;
+    const height = videoTag.nativeElement.videoHeight;
+    if (width / 4 > height / 3){
+      const overWidth = (width / 4 - height / 3) * 4;
+      const canvasWidth = canvasTag.nativeElement.width = width - overWidth;
+      const canvasHeight = canvasTag.nativeElement.height = height;
+      canvasTag.nativeElement.getContext('2d').drawImage(
+        videoTag.nativeElement,
+        overWidth / 2, 0, canvasWidth, canvasHeight,
+        0, 0, canvasWidth, canvasHeight,
+      );
+    }
+    else if (width / 4 < height / 3){
+      const overHeight = (width / 4 - height / 3) * (-3);
+      const canvasWidth = canvasTag.nativeElement.width = width;
+      const canvasHeight = canvasTag.nativeElement.height = height - overHeight;
+      canvasTag.nativeElement.getContext('2d').drawImage(
+        videoTag.nativeElement,
+        0, overHeight / 2, canvasWidth, canvasHeight,
+        0, 0, canvasWidth, canvasHeight,
+      );
+    }
+    else {
+      const canvasWidth = canvasTag.nativeElement.width = isHorizontal ? width : height;
+      const canvasHeight = canvasTag.nativeElement.height = isHorizontal ? height : height * 3 / 4;
+      canvasTag.nativeElement.getContext('2d').drawImage(videoTag.nativeElement,
+        0, 0, canvasWidth, canvasHeight
+      );
     }
   }
 
