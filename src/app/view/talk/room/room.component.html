@@ -46,6 +46,7 @@
     playsinline
   ></video>
   <div
+    *ngIf="isInRoom"
     id="videos"
     #videos
     [class.horizontal]="isHorizontalVideo"
@@ -62,7 +63,6 @@
         #localCanvas
       ></canvas>
       <video
-        *ngIf="isInRoom"
         id="canvasVideo"
         #canvasVideo
         [class.horizontal]="isHorizontalVideo"
@@ -71,16 +71,11 @@
       >
       </video>
       <span
-        *ngIf="isInRoom"
         class="container"
         [class.horizontal]="isHorizontalVideo"
         [class.full-screen-zoom]="isFullScreen"
-        (click)="isShowingLocalControl=!isShowingLocalControl"
-        (mouseenter)="isShowingLocalControl=true"
-        (mouseleave)="isShowingLocalControl=false"
       >
         <div
-          *ngIf="isShowingLocalControl"
           class="video-button-group"
           [class.video-button-group-min]="isVideoButtonGroupHeightMininum"
         >
@@ -115,7 +110,6 @@
       [class.horizontal]="isHorizontalVideo"
     >
       <video
-        *ngIf="isInRoom"
         id="remoteVideo"
         #remoteVideo
         autoplay
@@ -125,7 +119,6 @@
       >
       </video>
       <span
-        *ngIf="isInRoom"
         class="container"
         [class.horizontal]="isHorizontalVideo"
         [class.full-screen-zoom]="isFullScreen"

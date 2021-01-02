@@ -4,10 +4,10 @@
   </div>
   <div class="room-list-top-row">
     <span class="col-6 room-list-top-col">Join Room</span>
-    <div class="col-3 room-list-top-col d-flex">
+    <div class="col-2 room-list-top-col d-flex">
       <span>Status</span>
     </div>
-    <div class="col-2 room-list-top-col d-flex">
+    <div class="col-3 room-list-top-col d-flex">
       <span class="ml-auto">Created</span>
     </div>
   </div>
@@ -25,7 +25,7 @@
           (click)="goToRoom(roomContent.id)"
         >{{roomContent.id}}</button>
       </div>
-      <div class="room-list-col col-3 d-flex">
+      <div class="room-list-col col-2 d-flex">
         <span
           *ngIf="!roomContent.answer && !roomContent.offer"
           class="badge badge-light user-in-room my-auto"
@@ -42,7 +42,7 @@
           class="badge badge-secondary user-in-room my-auto"
         >Full</span>
       </div>
-      <div class="room-list-col col-2 d-flex my-auto">
+      <div class="room-list-col col-3 d-flex my-auto">
         <span
           class="ml-auto"
         >{{dataTransferHelper.numberToDateString(roomContent.createdAt||0)}}</span>
