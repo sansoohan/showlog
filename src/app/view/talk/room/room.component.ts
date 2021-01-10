@@ -199,6 +199,9 @@ export class RoomComponent implements OnInit, OnDestroy {
       if (this.canvasStream) {
         this.setMediaStatus(this.canvasStream, 'Video', this.isLocalVideoOn);
       }
+      if (this.isMobileDevice && this.localStream) {
+        this.setMediaStatus(this.localStream, 'Video', this.isLocalVideoOn);
+      }
     }
   }
 
@@ -560,6 +563,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   onResizeWindow() {
+    if(this.isFullScreen) {
+      return;
+    }
+
     if (this.videos) {
       const width = this.videos.nativeElement.offsetWidth;
       const height = this.videos.nativeElement.offsetHeight;
@@ -577,10 +584,20 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.localCanvasZoom =
         this.remoteVideo.nativeElement.offsetWidth / this.localCanvas.nativeElement.width;
     }
+
+    const videoButtons = (document.getElementsByClassName('video-button') as any);
+    const buttonSize = this.remoteVideo.nativeElement.offsetWidth / 15;
+    for(const buttonElement of videoButtons){
+      buttonElement.style.padding = '0';
+      buttonElement.style.fontSize = `${buttonSize * 3 / 4}px`;
+      buttonElement.style.height = `${buttonSize}px`;
+      buttonElement.style.width = `${buttonSize}px`;
+      buttonElement.style.borderRadius = `${buttonSize}px`;
+      buttonElement.style.margin = `0 0 ${buttonSize / 3}px ${buttonSize / 2}px`;
+    }
   }
 
   drawContext(videoTag: ElementRef, canvasTag: ElementRef) {
-
     if (!videoTag?.nativeElement) {
       return;
     }
@@ -588,7 +605,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     const isHorizontal = this.deviceRotation === 90 || this.deviceRotation === -90;
     const width = videoTag.nativeElement.videoWidth;
     const height = videoTag.nativeElement.videoHeight;
-    if (width / 4 > height / 3){
+    if (width / 4 > height / 3) {
       const overWidth = (width / 4 - height / 3) * 4;
       const canvasWidth = canvasTag.nativeElement.width = width - overWidth;
       const canvasHeight = canvasTag.nativeElement.height = height;

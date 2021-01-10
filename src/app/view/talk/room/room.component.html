@@ -74,12 +74,8 @@
         class="container"
         [class.horizontal]="isHorizontalVideo"
         [class.full-screen-zoom]="isFullScreen"
-        (click)="isShowingLocalControl=!isShowingLocalControl"
-        (mouseenter)="isShowingLocalControl=true"
-        (mouseleave)="isShowingLocalControl=false"
       >
         <div
-          *ngIf="isShowingLocalControl"
           class="video-button-group"
           [class.video-button-group-min]="isVideoButtonGroupHeightMininum"
         >
