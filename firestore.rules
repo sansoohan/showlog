@@ -1,0 +1,90 @@
+// rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    allow update;
+    function isOwner() {
+      return resource.data.ownerId == request.auth.uid;
+    }
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    match /rooms/{roomId} {
+      allow read;
+      allow create;
+      allow update;
+      allow delete;
+      match /callerCandidates/{callerCandidatesId} {
+        allow read;
+        allow create;
+        allow update;
+        allow delete;
+      }
+      match /calleeCandidates/{calleeCandidatesId} {
+        allow read;
+        allow create;
+        allow update;
+        allow delete;
+      }
+    }
+    match /talks/{talkId}{
+      allow read;
+    	allow create: if isSignedIn();
+      allow update: if isOwner();
+      allow delete: if isOwner();
+      match /rooms/{roomId} {
+        allow read;
+        allow create;
+        allow update;
+        allow delete;
+        match /callerCandidates/{callerCandidatesId} {
+          allow read;
+          allow create;
+          allow update;
+          allow delete;
+        }
+        match /calleeCandidates/{calleeCandidatesId} {
+          allow read;
+          allow create;
+          allow update;
+          allow delete;
+        }
+      }
+    }
+    match /profiles/{profileId} {
+      allow read;
+    	allow create: if isSignedIn();
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+    match /blogs/{blogId} {
+      allow read;
+    	allow create: if isSignedIn();
+      allow update: if isOwner();
+      allow delete: if isOwner();
+			function isOwner() {
+      	return resource.data.ownerId == request.auth.uid;
+			}
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      match /posts/{postId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+      }
+      match /categories/{categoryId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+      }
+    	match /comments/{commentId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+      }
+    }
+  }
+}
