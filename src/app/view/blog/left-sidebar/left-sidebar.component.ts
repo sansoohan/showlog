@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormGroup, AbstractControl } from '@angular/forms';
 import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
@@ -24,6 +24,7 @@ export class LeftSidebarComponent implements OnInit {
   @Input() categoryContentsForm: FormGroup;
   @Input() categoryContents: Array<CategoryContent>;
   @Input() blogContents: Array<BlogContent>;
+  @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
 
   paramSub: Subscription;
   params: any;
@@ -243,6 +244,10 @@ export class LeftSidebarComponent implements OnInit {
     .catch(e => {
       this.toastHelper.showWarning('Category Update Failed.', e);
     });
+  }
+
+  handleClickStartUploadPostImageSrc() {
+    this.clickStartUploadPostImageSrc.emit();
   }
 
   ngOnInit(): void {

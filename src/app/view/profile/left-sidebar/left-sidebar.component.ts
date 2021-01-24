@@ -98,7 +98,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   }
 
   handleClickStartUploadProfileImageSrc() {
-    this.toastHelper.uploadImage('Select Your Profile Image').then(async (data) => {
+    this.toastHelper.uploadImage('Select Your Profile Image', true).then(async (data) => {
       if (data.value) {
         this.profileService.uploadProfileImage(data.value, this.profileContent);
       }

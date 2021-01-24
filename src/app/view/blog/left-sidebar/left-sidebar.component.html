@@ -15,6 +15,15 @@
   </div>
 
   <div class="collapse navbar-collapse" id="navbarSideCollapse">
+    <ul class="navbar-nav blog-navbar" *ngIf="isEditingPost">
+      <div class="nav-item">
+        <Button
+          class="btn btn-sm btn-dark mr-2 mb-2"
+          *ngIf="authService.isSignedIn() && !isEditingCategory && !isAddingCategory"
+          (click)="handleClickStartUploadPostImageSrc()"
+        >Add Image</Button>
+      </div>
+    </ul>
     <ul class="navbar-nav blog-navbar" *ngIf="!isEditingPost">
       <div class="nav-item">
         <Button

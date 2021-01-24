@@ -66,12 +66,12 @@ export class ToastHelper {
     });
   }
 
-  async uploadImage(title: string) {
+  async uploadImage(title: string, showCancelButton: boolean) {
     return await Swal.fire({
       title,
       input: 'file',
       showConfirmButton: true,
-      showCancelButton: true,
+      showCancelButton,
       showCloseButton: true,
       confirmButtonText: 'Update Image',
       cancelButtonText: 'Remove Image',

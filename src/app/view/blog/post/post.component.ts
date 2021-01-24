@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { PostContent } from './post.content';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -19,8 +19,9 @@ import Swal from 'sweetalert2';
   styleUrls: ['../blog.component.css', './post.component.css']
 })
 export class PostComponent implements OnInit, OnDestroy {
+  @ViewChild ('postTextArea') public postTextArea: ElementRef;
   @Output() goToPost: EventEmitter<string> = new EventEmitter();
-  @Output() goToCategory: EventEmitter<string> = new EventEmitter();
+  @Output() goToCategory: EventEmitter<string> = new EventEmitter();  
   @Input() isEditingPost;
   @Input() isCreatingPost;
 
@@ -114,6 +115,43 @@ export class PostComponent implements OnInit, OnDestroy {
   }
   // tslint:disable-next-line: variable-name
   private _blogContents: Array<BlogContent>;
+
+  handleClickStartUploadPostImageSrc() {
+    this.toastHelper.uploadImage('Select Your Post Image', false).then(async (data) => {
+      if (data.value) {
+        const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
+        console.log(path)
+        const { postImageUrl } = await this.blogService.addImageOnPost(
+          data.value, path, {}
+        );
+        var startPosition = this.postTextArea.nativeElement.selectionStart;
+        var endPosition = this.postTextArea.nativeElement.selectionEnd;
+        // Check if you've selected text
+        if(startPosition == endPosition) {
+          const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
+            + `<img src="${postImageUrl}" alt="PostImage" style="max-width:100%;"/>`
+            + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
+          this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
+        }            
+      }
+      else if (data.dismiss === Swal.DismissReason.cancel) {
+        // this.toastHelper.askYesNo('Remove Profile Image', 'Are you sure?').then(result => {
+        //   if (result.value) {
+        //     this.profileService.removeProfileImage(this.profileContent)
+        //     .then(() => {
+        //       this.toastHelper.showSuccess('Profile Image Remove', 'Success!');
+        //     })
+        //     .catch(e => {
+        //       this.toastHelper.showWarning('Profile Image Remove Failed.', e);
+        //     });
+        //   }
+        //   else if (result.dismiss === Swal.DismissReason.cancel){
+
+        //   }
+        // });
+      }
+    });
+  }
 
   getCategoryTitle(categoryId: string): string {
     const category = this.categoryContentsForm?.controls.categoryContents.controls.find((categoryContent) =>
