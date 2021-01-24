@@ -50,7 +50,7 @@ export class ProfileService {
     }
   }
 
-  getUserEmailCollisionObserver(userEmail: string){
+  getUserEmailCollisionObserver(userEmail: string): Observable<ProfileContent[]> {
     let userEmailCollisionObserver: Observable<ProfileContent[]>;
     userEmailCollisionObserver = this.firestore
     .collection<ProfileContent>('profiles', ref => ref
@@ -59,7 +59,7 @@ export class ProfileService {
     return userEmailCollisionObserver;
   }
 
-  getUserNameCollisionObserver(userName: string){
+  getUserNameCollisionObserver(userName: string): Observable<ProfileContent[]> {
     let userNameCollisionObserver: Observable<ProfileContent[]>;
     userNameCollisionObserver = this.firestore
     .collection<ProfileContent>('profiles', ref => ref
@@ -87,8 +87,8 @@ export class ProfileService {
     return profileContentsObserver;
   }
 
-  async uploadProfileImage(file: File, profileContent: ProfileContent) {
-    const filePath = `profile/${JSON.parse(localStorage.currentUser).uid}/profileImage/${file.name}`;
+  async uploadProfileImage(file: File, profileContent: ProfileContent): Promise<void> {
+    const filePath = `profiles/${JSON.parse(localStorage.currentUser).uid}/profileImage/${file.name}`;
     const MB = 1024 * 1024;
     if (file.size > 4 * MB) {
       this.toastHelper.showError('Profile Image', 'Please Upload under 4MB');
@@ -108,8 +108,8 @@ export class ProfileService {
     });
   }
 
-  async removeProfileImage(profileContent: ProfileContent) {
-    const dirPath = `profile/${JSON.parse(localStorage.currentUser).uid}/profileImage`;
+  async removeProfileImage(profileContent: ProfileContent): Promise<void> {
+    const dirPath = `profiles/${JSON.parse(localStorage.currentUser).uid}/profileImage`;
     const dirRef = this.storage.ref(dirPath);
     const dirRefSubscribe = dirRef.listAll().subscribe(dir => {
       dir.items.forEach(item => item.delete());

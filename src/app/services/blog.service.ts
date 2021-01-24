@@ -8,6 +8,8 @@ import { CommentContent } from '../view/blog/post/comment/comment.content';
 import { AuthService } from './auth.service';
 import { FormGroup, FormArray } from '@angular/forms';
 import { FormHelper } from 'src/app/helper/form.helper';
+import { ToastHelper } from '../helper/toast.helper';
+import { AngularFireStorage } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,40 @@ export class BlogService {
     private firestore: AngularFirestore,
     private authService: AuthService,
     private formHelper: FormHelper,
+    private toastHelper: ToastHelper,
+    private storage: AngularFireStorage,
   ) { }
+
+  async addImageOnPost(file: File, path: string, content: any): Promise<any> {
+    if (!this.authService.isSignedIn()) {
+      return null;
+    }
+
+    const filePath = `blogs/${JSON.parse(localStorage.currentUser).uid}/postImages/${file.name}`;
+    const MB = 1024 * 1024;
+    if (file.size > 10 * MB) {
+      this.toastHelper.showError('Profile Image', 'Please Upload under 10MB');
+      return;
+    }
+
+    const fileRef = this.storage.ref(filePath);
+    await this.storage.upload(filePath, file);
+    const updatedContent = await new Promise((resolve, reject) => {
+      const fileRefSubscribe = fileRef.getDownloadURL().subscribe(imageUrl => {
+        content.postImageUrl = imageUrl;
+        this.create(path, content)
+        .then(() => {
+          this.toastHelper.showSuccess('Post Image', 'Your Post Image is uploaded!');
+          fileRefSubscribe.unsubscribe();
+          resolve(content)
+        }).catch((error) => {
+          fileRefSubscribe.unsubscribe();
+          reject(error);
+        })
+      });
+    });
+    return updatedContent;
+  }
 
   getBlogContentsObserver({params = null}): Observable<BlogContent[]> {
     if (!this.blogContentsObserver){
@@ -176,7 +211,7 @@ export class BlogService {
     return this.firestore.collection(path).add(content)
     .then(async (collection) => {
       content.id = collection.id;
-      collection.update(content);
+      return collection.update(content);
     });
   }
 

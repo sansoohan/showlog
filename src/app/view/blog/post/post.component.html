@@ -11,6 +11,7 @@
     [categoryContents]="categoryContents"
     [categoryContentsForm]="categoryContentsForm"
     [blogContents]="blogContents"
+    (clickStartUploadPostImageSrc)="handleClickStartUploadPostImageSrc()"
   ></app-blog-left-sidebar>
   <div class="blog-post">
     <form *ngIf="postContentsForm" [formGroup]="postContentsForm">
@@ -108,6 +109,8 @@
               placeholder="Title"
             />
             <textarea
+              id="postTextArea"
+              #postTextArea
               class="form-control post-editarea"
               rows="{{getPostMarkdownLines()}}"
               formControlName="postMarkdown"
