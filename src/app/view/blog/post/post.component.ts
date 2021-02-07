@@ -5,6 +5,7 @@ import { Observable, Subscription } from 'rxjs';
 import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
+import { PostImageContent } from './post-image.content';
 import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
@@ -30,6 +31,10 @@ export class PostComponent implements OnInit, OnDestroy {
   categoryContentsSub: Subscription;
   categoryContentsForm: any;
   isEditingCategory: boolean;
+
+  postImageContentsObserver: Observable<PostImageContent[]>;
+  postImageContents: PostImageContent[];
+  postImageContentsSub: Subscription;
 
   postContentsObserver: Observable<PostContent[]>;
   postContents: PostContent[];
@@ -78,6 +83,10 @@ export class PostComponent implements OnInit, OnDestroy {
     }
     this._blogContents = blogContents;
     this.blogId = blogContents[0].id;
+    this.postImageContentsObserver = this.blogService.getPostImageContentsObserver(blogContents[0].id, this.params.postId)
+    this.postImageContentsSub = this.postImageContentsObserver.subscribe(postImageContents => {
+      this.postImageContents = postImageContents;
+    });
 
     this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
     this.categoryContentsSub = this.categoryContentsObserver.subscribe(categoryContents => {
@@ -117,22 +126,28 @@ export class PostComponent implements OnInit, OnDestroy {
   private _blogContents: Array<BlogContent>;
 
   handleClickStartUploadPostImageSrc() {
-    this.toastHelper.uploadImage('Select Your Post Image', false).then(async (data) => {
+    this.toastHelper.uploadImage('Select Your Post Image', false).then((data) => {
       if (data.value) {
-        const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
-        console.log(path)
-        const { postImageUrl } = await this.blogService.addImageOnPost(
-          data.value, path, {}
-        );
-        var startPosition = this.postTextArea.nativeElement.selectionStart;
-        var endPosition = this.postTextArea.nativeElement.selectionEnd;
-        // Check if you've selected text
-        if(startPosition == endPosition) {
-          const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
-            + `<img src="${postImageUrl}" alt="PostImage" style="max-width:100%;"/>`
-            + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
-          this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
-        }            
+        const _URL = window.URL || window.webkitURL;
+        const img = new Image();
+        const objectUrl = _URL.createObjectURL(data.value);
+        img.onload = async () => {
+          const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
+          const { postImageUrl } = await this.blogService.addImageOnPost(
+            data.value, path, {width: img.width, height: img.height}
+          );
+          _URL.revokeObjectURL(objectUrl);
+          const startPosition = this.postTextArea.nativeElement.selectionStart;
+          const endPosition = this.postTextArea.nativeElement.selectionEnd;
+          // Check if you've selected text
+          if (startPosition === endPosition) {
+            const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
+              + `<img src="${postImageUrl}" alt="PostImage" style="max-width:100%;"/>`
+              + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
+            this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
+          }
+        };
+        img.src = objectUrl;
       }
       else if (data.dismiss === Swal.DismissReason.cancel) {
         // this.toastHelper.askYesNo('Remove Profile Image', 'Are you sure?').then(result => {
@@ -277,5 +292,6 @@ export class PostComponent implements OnInit, OnDestroy {
     this.paramSub?.unsubscribe();
     this.postContentsSub?.unsubscribe();
     this.categoryContentsSub?.unsubscribe();
+    this.postImageContentsSub?.unsubscribe();
   }
 }

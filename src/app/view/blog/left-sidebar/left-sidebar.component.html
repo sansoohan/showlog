@@ -11,7 +11,7 @@
       aria-label="Toggle navigation"
     >
       <span class="navbar-toggler-icon"></span>
-    </button>  
+    </button>
   </div>
 
   <div class="collapse navbar-collapse" id="navbarSideCollapse">
@@ -22,6 +22,18 @@
           *ngIf="authService.isSignedIn() && !isEditingCategory && !isAddingCategory"
           (click)="handleClickStartUploadPostImageSrc()"
         >Add Image</Button>
+      </div>
+      <div class="nav-item d-flex flex-wrap">
+        <span *ngFor="let postImageContent of postImageContents; let i=index">
+          <div class="thumbnail">
+            <img
+              [id]="postImageContent.id"
+              [src]="postImageContent.postImageUrl"
+              [class.portrait]="postImageContent.width < postImageContent.height"
+              alt="Image"
+            />
+          </div>
+        </span>
       </div>
     </ul>
     <ul class="navbar-nav blog-navbar" *ngIf="!isEditingPost">
