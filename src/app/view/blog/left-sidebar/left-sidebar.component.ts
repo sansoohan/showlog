@@ -11,6 +11,7 @@ import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import { PostContent } from '../post/post.content';
+import { PostImageContent } from '../post/post-image.content';
 
 @Component({
   selector: 'app-blog-left-sidebar',
@@ -22,6 +23,7 @@ export class LeftSidebarComponent implements OnInit {
   @Input() isEditingCategory: boolean;
   @Input() isAddingCategory: boolean;
   @Input() categoryContentsForm: FormGroup;
+  @Input() postImageContents: Array<PostImageContent>;
   @Input() categoryContents: Array<CategoryContent>;
   @Input() blogContents: Array<BlogContent>;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
@@ -47,6 +49,13 @@ export class LeftSidebarComponent implements OnInit {
       this.params = params;
     });
   }
+
+  // isPortraitImage(imageId: string): boolean {
+  //   const image = document.getElementById(imageId);
+  //   const imageWidth = image?.offsetWidth || 0;
+  //   const imageHeight = image?.offsetHeight || 0;
+  //   return imageWidth < imageHeight;
+  // }
 
   addCategory(
     blogContents: Array<BlogContent>,

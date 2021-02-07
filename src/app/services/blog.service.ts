@@ -59,6 +59,19 @@ export class BlogService {
     return updatedContent;
   }
 
+  // const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
+  getPostImageContentsObserver(blogId: string, postId: string): Observable<any[]> {
+    if (!blogId){
+      return;
+    }
+    const postImageContentsObserver = this.firestore
+    .collection<BlogContent>('blogs').doc(blogId)
+    .collection<PostContent>('posts').doc(postId)
+    .collection<CategoryContent>('images')
+    .valueChanges();
+    return postImageContentsObserver;
+  }
+
   getBlogContentsObserver({params = null}): Observable<BlogContent[]> {
     if (!this.blogContentsObserver){
       const currentUser = JSON.parse(localStorage.currentUser || null);
@@ -214,7 +227,6 @@ export class BlogService {
       return collection.update(content);
     });
   }
-
   async update(path: string, updated: any): Promise<void> {
     return this.firestore.doc(path).update(updated);
   }
