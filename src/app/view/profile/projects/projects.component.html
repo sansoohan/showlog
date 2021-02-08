@@ -3,7 +3,7 @@
     <h2 class="mb-5">Projects</h2>
     <div *ngIf="!isEditing">
       <div *ngFor="let project of projectsContent.projects" class="profile-item d-flex flex-column flex-md-row mb-5">
-        <div class="profile-content mr-auto">
+        <div class="profile-content me-auto">
           <h3 class="mb-0">{{project.organization}}</h3>
           <div class="subheading mb-3 mt-3">{{project.projectName}}</div>
           <div>Members: {{project.memberNum}}</div>

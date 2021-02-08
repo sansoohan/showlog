@@ -8,7 +8,7 @@
       <span>Status</span>
     </div>
     <div class="col-3 room-list-top-col d-flex">
-      <span class="ml-auto">Created</span>
+      <span class="ms-auto">Created</span>
     </div>
   </div>
   <div *ngFor="let roomContent of roomContents; index as i">
@@ -28,27 +28,27 @@
       <div class="room-list-col col-2 d-flex">
         <span
           *ngIf="!roomContent.answer && !roomContent.offer"
-          class="badge badge-light user-in-room my-auto"
+          class="badge bg-light text-dark user-in-room my-auto"
         >Empty</span>
         <span
           *ngIf="
             (!roomContent.answer && roomContent.offer) ||
             (roomContent.answer && !roomContent.offer)
           "
-          class="badge badge-success user-in-room my-auto"
+          class="badge bg-success user-in-room my-auto"
         >Waiting</span>
         <span
           *ngIf="roomContent.answer && roomContent.offer"
-          class="badge badge-secondary user-in-room my-auto"
+          class="badge bg-secondary user-in-room my-auto"
         >Full</span>
       </div>
       <div class="room-list-col col-3 d-flex my-auto">
         <span
-          class="ml-auto"
+          class="ms-auto"
         >{{dataTransferHelper.numberToDateString(roomContent.createdAt||0)}}</span>
       </div>
       <div class="room-list-col col-1 d-flex my-auto">
-        <span class="ml-auto">
+        <span class="ms-auto">
           <button
             class="btn btn-sm btn-danger user-in-room"
             (click)="handleClickRemoveRoom(roomContent.id)"

@@ -30,13 +30,13 @@
         <div formArrayName="postList">
           <section class="container category-section">
             <div class="row category-title-row">
-              <span class="col-8 category-title-col">
+              <span class="col-6 category-title-col">
                 {{selectedCategory.value.categoryTitle}}
                 ({{selectedCategory.value.postCreatedAtList.length + countChildPost()}})
               </span>
-              <div style="margin-left:auto;">
+              <div class="col-6 d-flex">
                 <span
-                  class="btn btn-sm btn-warning"
+                  class="btn btn-warning ms-auto"
                   *ngIf="authService.isSignedIn() && !isEditingPost"
                   (click)="routerHelper.goToBlogCategoryNewPost(params,params.categoryId)"
                 >Create New Post</span>

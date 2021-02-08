@@ -133,16 +133,21 @@ export class PostComponent implements OnInit, OnDestroy {
         const objectUrl = _URL.createObjectURL(data.value);
         img.onload = async () => {
           const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
-          const { postImageUrl } = await this.blogService.addImageOnPost(
-            data.value, path, {width: img.width, height: img.height}
+          let postImageContent = new PostImageContent();
+          postImageContent.width = img.width;
+          postImageContent.height = img.height;
+          postImageContent = await this.blogService.addImageOnPost(
+            data.value, path, postImageContent
           );
+
+          console.log(postImageContent.id);
           _URL.revokeObjectURL(objectUrl);
           const startPosition = this.postTextArea.nativeElement.selectionStart;
           const endPosition = this.postTextArea.nativeElement.selectionEnd;
           // Check if you've selected text
           if (startPosition === endPosition) {
             const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
-              + `<img src="${postImageUrl}" alt="PostImage" style="max-width:100%;"/>`
+              + `<img src="${postImageContent.postImageUrl}" alt="PostImage" style="max-width:100%;"/>`
               + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
             this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
           }

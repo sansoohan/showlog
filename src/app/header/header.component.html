@@ -3,7 +3,7 @@
 <nav
   class="header-navbar navbar navbar-expand-lg selected-header"
 >
-  <div class="collapse navbar-collapse">
+  <div class="container-fluid collapse navbar-collapse">
     <a
       *ngIf="router.url.includes('/profile')"
       class="navbar-brand selected-header-link"
@@ -33,7 +33,7 @@
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <div class="collapse navbar-collapse" id="navbarTopCollapse">
+  <div class="container-fluid collapse navbar-collapse" id="navbarTopCollapse">
     <a
       *ngIf="!router.url.includes('/profile')"
       class="navbar-brand header-link"
