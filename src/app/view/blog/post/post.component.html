@@ -19,49 +19,50 @@
       <section class="post-section">
         <div *ngIf="isCreatingPost">
           <Button
-            class="btn btn-sm btn-outline-light mr-2"
+            class="btn btn-sm btn-outline-light me-2"
             *ngIf="authService.isSignedIn() && isEditingPost"
             (click)="handleClickEditPostCreateUpdate()"
           >Update</Button>
           <Button
-            class="btn btn-sm btn-outline-light mr-2"
+            class="btn btn-sm btn-outline-light me-2"
             *ngIf="authService.isSignedIn() && isEditingPost"
             (click)="handleClickEditPostCreateCancel()"
           >Cancel</Button>
         </div>
 
         <div *ngIf="!isCreatingPost" class="row">
-          <div class="col-8">
+          <div class="col-6">
             <Button
-              class="btn btn-sm btn-warning mr-2"
+              class="btn btn-sm btn-warning me-2"
               *ngIf="authService.isSignedIn() && !isEditingPost"
               (click)="clickPostEdit()"
             >Edit Post</Button>
             <Button
-              class="btn btn-sm btn-outline-light mr-2"
+              class="btn btn-sm btn-outline-light me-2"
               *ngIf="authService.isSignedIn() && isEditingPost"
               (click)="handleClickEditPostUpdate()"
             >Update</Button>
             <Button
-              class="btn btn-sm btn-outline-light mr-2"
+              class="btn btn-sm btn-outline-light me-2"
               *ngIf="authService.isSignedIn() && isEditingPost"
               (click)="handleClickEditPostDelete()"
             >Remove</Button>
             <Button
-              class="btn btn-sm btn-outline-light mr-2"
+              class="btn btn-sm btn-outline-light me-2"
               *ngIf="authService.isSignedIn() && isEditingPost"
               (click)="clickPostEditCancel()"
             >Cancel</Button>
           </div>
-          <Button
-            class="btn btn-sm btn-warning"
-            style="margin-left:auto;"
-            *ngIf="authService.isSignedIn() && !isEditingPost"
-            (click)="routerHelper.goToBlogCategoryNewPost(params,postContentsForm.value.categoryId)"
-          >Create New Post</Button>
+          <div class="col-6 d-flex">
+            <Button
+              class="btn btn-sm btn-warning ms-auto"
+              *ngIf="authService.isSignedIn() && !isEditingPost"
+              (click)="routerHelper.goToBlogCategoryNewPost(params,postContentsForm.value.categoryId)"
+            >Create New Post</Button>
+          </div>
         </div>
         <div *ngIf="!isEditingPost">
-          <div class="form-row">
+          <div class="row">
             <div class="col-9">
               <span
                 class="post-show-title-col blog-link"

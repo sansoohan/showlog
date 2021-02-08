@@ -3,7 +3,7 @@
     <h2 class="mb-5">Education</h2>
 
     <div *ngFor="let educationContent of educationsContent.educations; index as i" class="profile-item d-flex flex-column flex-md-row mb-5">
-      <div *ngIf="!isEditing" class="profile-content mr-auto">
+      <div *ngIf="!isEditing" class="profile-content me-auto">
         <h3 class="mb-0">{{educationContent.organization}}</h3>
         <div class="subheading mb-3 mt-3">{{educationContent.degree}}</div>
         <div *ngFor="let description of educationContent.descriptions">

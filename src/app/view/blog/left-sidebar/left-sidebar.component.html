@@ -27,7 +27,6 @@
         <span *ngFor="let postImageContent of postImageContents; let i=index">
           <div class="thumbnail">
             <img
-              [id]="postImageContent.id"
               [src]="postImageContent.postImageUrl"
               [class.portrait]="postImageContent.width < postImageContent.height"
               alt="Image"
@@ -73,7 +72,7 @@
               class="nav-item"
               [formGroupName]="i"
             >
-              <div class="form-row">
+              <div class="row g-0">
                 <div
                   *ngFor="let n of dataTransferHelper.numberToArray(
                     blogService.getCategoryDeepCount(

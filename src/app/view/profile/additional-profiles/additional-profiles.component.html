@@ -5,7 +5,7 @@
         <h2 class="mb-5">{{additaionProfileContent.title}}</h2>
 
         <div *ngFor="let largeGroup of additaionProfileContent.largeGroups" class="profile-item d-flex flex-column flex-md-row mb-5">
-          <div class="profile-content mr-auto">
+          <div class="profile-content me-auto">
             <h3 class="mb-0">{{largeGroup.largeGroupName}}</h3>
             <div *ngFor="let smallGroup of largeGroup.smallGroups">
               <div class="subheading mb-3 mt-3">{{smallGroup.smallGroupName}}</div>
