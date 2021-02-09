@@ -17,6 +17,7 @@
 
 .selected-header-link {
   color: white;
+  margin-left: 16px;
 }
 
 .selected-header-link:hover {
@@ -26,6 +27,7 @@
 
 
 .header-link {
+  margin-left: 16px;
   opacity: 0.5;
 }
 
@@ -104,10 +106,17 @@
 
 .search-input {
   max-width: 15rem;
+  height: 30px;
+  border-radius: 0px;
 }
 
 .search-drop-down {
   left: unset;
   right: 0;
   max-width: calc(100vw - 2rem);
+}
+
+.nav-collapse-button {
+  margin: 0px 12px;
+  width: 56px; 
 }

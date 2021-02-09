@@ -3,7 +3,7 @@
 <nav
   class="header-navbar navbar navbar-expand-lg selected-header"
 >
-  <div class="container-fluid collapse navbar-collapse">
+  <div class="collapse navbar-collapse">
     <a
       *ngIf="router.url.includes('/profile')"
       class="navbar-brand selected-header-link"
@@ -29,11 +29,11 @@
   [class.blog-header]="router.url.includes('/blog')"
   [class.profile-header]="router.url.includes('/profile')"
 >
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle navigation">
+  <button class="navbar-toggler nav-collapse-button" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <div class="container-fluid collapse navbar-collapse" id="navbarTopCollapse">
+  <div class="collapse navbar-collapse" id="navbarTopCollapse">
     <a
       *ngIf="!router.url.includes('/profile')"
       class="navbar-brand header-link"
@@ -49,19 +49,14 @@
       class="navbar-brand header-link"
       (click)="routerHelper.goToTalk(params)"
     >Talk</a>
-    <ngx-auth-firebaseui-avatar
-      *ngIf="authService.isSignedIn()"
-      (onSignOut)="authService.onSignOut()"
-      [canEditAccount]="true"
-    ></ngx-auth-firebaseui-avatar>
 
     <!-- Right Side -->
-    <div style="margin-left:auto">
+    <div style="margin-left:auto;margin-right:12px">
       <div class="input-group">
         <input
           [value]="searchValue"
           (keyup)="changeSearch($event)"
-          class="search-input form-control mr-2"
+          class="search-input form-control ms-2"
           type="search"
           list="staticUserIds"
           placeholder="Search"
@@ -74,7 +69,7 @@
         >
           <div
             *ngFor="let result of searchResults | async"
-            class="d-flex mr-2"
+            class="d-flex ms-2"
             (click)="setSearchValue(result.aboutContent.userName)"
           >
             <img class="rounded-circle search-profile" [src]="getSearchProfileImage(result)">
@@ -110,6 +105,12 @@
         </div>
       </div>
     </div>
+    <ngx-auth-firebaseui-avatar
+      class="mx-2"
+      *ngIf="authService.isSignedIn()"
+      (onSignOut)="authService.onSignOut()"
+      [canEditAccount]="true"
+    ></ngx-auth-firebaseui-avatar>
     <button
       *ngIf="!authService.isSignedIn()"
       routerLink="/sign-in"
