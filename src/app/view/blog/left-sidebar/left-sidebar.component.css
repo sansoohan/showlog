@@ -132,8 +132,8 @@
 
 .thumbnail {
   position: relative;
-  width: 5rem;
-  height: 5rem;
+  width: 4.8rem;
+  height: 4.8rem;
   overflow: hidden;
   border: black solid 0.2rem;
 }
