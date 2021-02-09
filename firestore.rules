@@ -1,89 +1,35 @@
 // rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    allow update;
+  match /databases/{database}/documents {  
+    // Default Collection Functions (can be overrided)
     function isOwner() {
       return resource.data.ownerId == request.auth.uid;
     }
     function isSignedIn() {
       return request.auth != null;
     }
-    match /rooms/{roomId} {
+    // Default All Collection Rull
+    match /{document=**} {
       allow read;
-      allow create;
-      allow update;
-      allow delete;
-      match /callerCandidates/{callerCandidatesId} {
-        allow read;
-        allow create;
-        allow update;
-        allow delete;
+      allow create: if isSignedIn();
+      allow update: if isOwner();
+	    allow delete: if isOwner();
+    }
+    match /profiles/{profileId} {function cascaded(){return null}}
+    match /blogs/{blogId} {
+      match /posts/{postId} {
+        match /images/{imageId} {function cascaded(){return null}}
       }
-      match /calleeCandidates/{calleeCandidatesId} {
-        allow read;
-        allow create;
-        allow update;
-        allow delete;
-      }
+      match /categories/{categoryId} {function cascaded(){return null}}
+    	match /comments/{commentId} {function cascaded(){return null}}
     }
     match /talks/{talkId}{
-      allow read;
-    	allow create: if isSignedIn();
-      allow update: if isOwner();
-      allow delete: if isOwner();
-      match /rooms/{roomId} {
-        allow read;
-        allow create;
-        allow update;
-        allow delete;
-        match /callerCandidates/{callerCandidatesId} {
-          allow read;
-          allow create;
-          allow update;
-          allow delete;
-        }
-        match /calleeCandidates/{calleeCandidatesId} {
-          allow read;
-          allow create;
-          allow update;
-          allow delete;
-        }
-      }
-    }
-    match /profiles/{profileId} {
-      allow read;
-    	allow create: if isSignedIn();
-      allow update: if isOwner();
-      allow delete: if isOwner();
-    }
-    match /blogs/{blogId} {
-      allow read;
-    	allow create: if isSignedIn();
-      allow update: if isOwner();
-      allow delete: if isOwner();
-			function isOwner() {
-      	return resource.data.ownerId == request.auth.uid;
+    	match /{document=**} {
+      	allow create, read, update, delete;
 			}
-      function isSignedIn() {
-        return request.auth != null;
-      }
-      match /posts/{postId} {
-        allow read;
-        allow create: if isSignedIn();
-        allow update: if isOwner();
-        allow delete: if isOwner();
-      }
-      match /categories/{categoryId} {
-        allow read;
-        allow create: if isSignedIn();
-        allow update: if isOwner();
-        allow delete: if isOwner();
-      }
-    	match /comments/{commentId} {
-        allow read;
-        allow create: if isSignedIn();
-        allow update: if isOwner();
-        allow delete: if isOwner();
+      match /rooms/{roomId} {
+        match /callerCandidates/{callerCandidatesId} {function cascaded(){return null}}
+        match /calleeCandidates/{calleeCandidatesId} {function cascaded(){return null}}      
       }
     }
   }
