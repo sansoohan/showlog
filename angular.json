@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "TestAngular": {
+    "developers": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/TestAngular",
+            "outputPath": "dist/developers",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -70,18 +70,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "TestAngular:build"
+            "browserTarget": "developers:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "TestAngular:build:production"
+              "browserTarget": "developers:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "TestAngular:build"
+            "browserTarget": "developers:build"
           }
         },
         "test": {
@@ -129,7 +129,7 @@
         }
       }
     },
-    "TestAngular-e2e": {
+    "developers-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "architect": {
@@ -137,11 +137,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "TestAngular:serve"
+            "devServerTarget": "developers:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "TestAngular:serve:production"
+              "devServerTarget": "developers:serve:production"
             }
           }
         },
@@ -157,7 +157,7 @@
       }
     }
   },
-  "defaultProject": "TestAngular",
+  "defaultProject": "developers",
   "cli": {
     "analytics": "fb6154bc-e9da-49cf-8467-ba44f8a43f07"
   }
