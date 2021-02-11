@@ -6,19 +6,19 @@
   <div class="collapse navbar-collapse">
     <a
       *ngIf="router.url.includes('/profile')"
-      class="navbar-brand selected-header-link"
+      class="navbar-brand selected-header-link d-flex"
       (click)="routerHelper.goToProfile(params)"
-    >Profile</a>
+    ><span class="mx-auto">Profile</span></a>
     <a
       *ngIf="router.url.includes('/blog')"
-      class="navbar-brand selected-header-link"
+      class="navbar-brand selected-header-link d-flex"
       (click)="routerHelper.goToBlogPrologue(params)"
-    >Blog</a>
+    ><span class="mx-auto">Blog</span></a>
     <a
       *ngIf="router.url.includes('/talk')"
-      class="navbar-brand selected-header-link"
+      class="navbar-brand selected-header-link d-flex"
       (click)="routerHelper.goToTalk(params)"
-    >Talk</a>
+    ><span class="mx-auto">Talk</span></a>
   </div>
 </nav>
 

@@ -16,8 +16,8 @@
 }
 
 .selected-header-link {
+  width: 110px;
   color: white;
-  margin-left: 16px;
 }
 
 .selected-header-link:hover {
@@ -73,16 +73,16 @@
     margin-left: 0px;
   }
   .header-navbar.talk-header {
-    margin-left: 80px;
-    width: calc(100vw - 80px);
+    margin-left: 110px;
+    width: calc(100vw - 110px);
   }
   .header-navbar.blog-header {
-    margin-left: 80px;
-    width: calc(100vw - 80px);
+    margin-left: 110px;
+    width: calc(100vw - 110px);
   }
   .header-navbar.profile-header {
-    margin-left: 80px;
-    width: calc(100vw - 80px);
+    margin-left: 110px;
+    width: calc(100vw - 110px);
   }  
 }
 

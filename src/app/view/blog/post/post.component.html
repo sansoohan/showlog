@@ -140,7 +140,7 @@
     </form>
   </div>
   <app-comment
-    *ngIf="params.postId"
+    *ngIf="params?.postId"
     [isEditingPost]="isEditingPost"
     [blogContents]="blogContents"
   ></app-comment>
