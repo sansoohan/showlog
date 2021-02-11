@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfileService } from 'src/app/services/profile.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -9,6 +9,7 @@ import { AdditaionProfileContent } from './additional-profiles/additional-profil
 import { FormHelper } from 'src/app/helper/form.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { ToastHelper } from 'src/app/helper/toast.helper';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-profile',
@@ -27,8 +28,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userEmail: string;
   validateUserName: string;
   validateUserEmail: string;
-  paramSub: any;
-  profileSub: any;
+  paramSub: Subscription;
+  profileSub: Subscription;
   params: any;
   profileForm: any;
   public newAdditaionProfileContent: AdditaionProfileContent = new AdditaionProfileContent();
@@ -40,6 +41,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private formHelper: FormHelper,
     public routerHelper: RouterHelper,
+    private firestore: AngularFirestore,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.isLoading = true;
@@ -131,7 +133,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.paramSub.unsubscribe();
-    this.profileSub.unsubscribe();
+    this.paramSub?.unsubscribe();
+    this.profileSub?.unsubscribe();
   }
 }

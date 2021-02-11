@@ -122,9 +122,10 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
   }
 
-  ngOnDestroy() {
-    this.paramSub.unsubscribe();
+  ngOnDestroy(): void {
+    this.paramSub?.unsubscribe();
   }
 }

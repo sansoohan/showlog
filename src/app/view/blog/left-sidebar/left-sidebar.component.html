@@ -18,7 +18,7 @@
     <ul class="navbar-nav blog-navbar" *ngIf="isEditingPost">
       <div class="nav-item">
         <Button
-          class="btn btn-sm btn-dark mr-2 mb-2"
+          class="btn btn-sm btn-dark ms-2 mb-2"
           *ngIf="authService.isSignedIn() && !isEditingCategory && !isAddingCategory"
           (click)="handleClickStartUploadPostImageSrc()"
         >Add Image</Button>
@@ -29,6 +29,7 @@
             <img
               [src]="postImageContent.postImageUrl"
               [class.portrait]="postImageContent.width < postImageContent.height"
+              (click)="handleClickRemovePostImage(postImageContent)"
               alt="Image"
             />
           </div>
@@ -38,12 +39,21 @@
     <ul class="navbar-nav blog-navbar" *ngIf="!isEditingPost">
       <div class="nav-item">
         <Button
-          class="btn btn-sm btn-dark mr-2 mb-2"
+          class="btn btn-sm btn-dark ms-2 mb-2"
           *ngIf="authService.isSignedIn() && !isEditingCategory && !isAddingCategory"
           (click)="clickCategoryEdit()"
         >Edit Category</Button>
         <Button
-          class="btn btn-sm btn-outline-light mr-2 mb-2"
+          class="btn btn-sm btn-outline-light ms-2 mb-2"
+          *ngIf="authService.isSignedIn() && isEditingCategory"
+          (click)="clickCategoryEditUpdate(
+            blogContents,
+            categoryContents,
+            categoryContentsForm.controls.categoryContents
+          )"
+        >Create</Button>
+        <Button
+          class="btn btn-sm btn-outline-light ms-2 mb-2"
           *ngIf="authService.isSignedIn() && isEditingCategory"
           (click)="clickCategoryEditUpdate(
             blogContents,
@@ -52,7 +62,7 @@
           )"
         >Update</Button>
         <Button
-          class="btn btn-sm btn-outline-light mr-2 mb-2"
+          class="btn btn-sm btn-outline-light ms-2 mb-2"
           *ngIf="authService.isSignedIn() && isEditingCategory"
           (click)="clickCategoryEditCancel()"
         >Cancel</Button>

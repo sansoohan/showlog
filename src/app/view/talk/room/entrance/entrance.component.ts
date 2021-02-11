@@ -51,5 +51,6 @@ export class EntranceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
+    this.talkRoomsSub?.unsubscribe();
   }
 }

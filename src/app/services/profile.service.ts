@@ -7,18 +7,22 @@ import { ProfileContent } from '../view/profile/profile.content';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
+import { first } from 'rxjs/operators';
+import { CommonService } from './common.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProfileService {
+export class ProfileService extends CommonService {
   profileUpdateState: string = null;
 
   constructor(
-    private firestore: AngularFirestore,
+    public firestore: AngularFirestore,
     private toastHelper: ToastHelper,
     private storage: AngularFireStorage,
-  ) { }
+  ) {
+    super(firestore);
+  }
 
   createNewProfile(): void {
     if (this.profileUpdateState !== 'deleteProfile'){
@@ -121,12 +125,5 @@ export class ProfileService {
       this.toastHelper.showInfo('Profile Image', 'Your Profile Image is removed!');
       dirRefSubscribe.unsubscribe();
     });
-  }
-
-  async update(path: string, updated: any): Promise<void> {
-    return this.firestore.doc(path).update(updated);
-  }
-  async delete(path: string): Promise<void> {
-    return this.firestore.doc(path).delete();
   }
 }

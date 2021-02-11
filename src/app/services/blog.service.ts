@@ -10,53 +10,58 @@ import { FormGroup, FormArray } from '@angular/forms';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireStorage } from '@angular/fire/storage';
+import { PostImageContent } from '../view/blog/post/post-image.content';
+import { first } from 'rxjs/operators';
+import { CommonService } from './common.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class BlogService {
+export class BlogService extends CommonService {
   blogContentsObserver: Observable<BlogContent[]> = null;
   postContentsObserver: Observable<PostContent[]> = null;
   profileUpdateState: string = null;
   userName: string = null;
 
   constructor(
-    private firestore: AngularFirestore,
+    public firestore: AngularFirestore,
     private authService: AuthService,
     private formHelper: FormHelper,
     private toastHelper: ToastHelper,
     private storage: AngularFireStorage,
-  ) { }
+  ) {
+    super(firestore);
+  }
 
-  async addImageOnPost(file: File, path: string, content: any): Promise<any> {
+  async addImageOnPost(file: File, path: string, content: PostImageContent): Promise<any> {
     if (!this.authService.isSignedIn()) {
-      return null;
+      return;
     }
 
-    const filePath = `blogs/${JSON.parse(localStorage.currentUser).uid}/postImages/${file.name}`;
     const MB = 1024 * 1024;
     if (file.size > 10 * MB) {
       this.toastHelper.showError('Profile Image', 'Please Upload under 10MB');
       return;
     }
 
-    const fileRef = this.storage.ref(filePath);
-    await this.storage.upload(filePath, file);
-    const updatedContent = await new Promise((resolve, reject) => {
-      const fileRefSubscribe = fileRef.getDownloadURL().subscribe(imageUrl => {
-        content.postImageUrl = imageUrl;
-        this.create(path, content)
-        .then(() => {
+    content.ownerId = JSON.parse(localStorage.currentUser).uid;
+    return this.firestore.collection<PostImageContent>(path)
+    .add(Object.assign({}, content))
+    .then(async (collection) => {
+      content.id = collection.id;
+      const filePath = `users/${content.ownerId}/${path}/${collection.id}`;
+      await this.storage.upload(filePath, file);
+      return await new Promise((resolve, reject) => {
+        const fileRefSubscribe = this.storage.ref(filePath)
+        .getDownloadURL().subscribe(postImageUrl => {
+          content.postImageUrl = postImageUrl;
+          collection.update(Object.assign({}, content));
           this.toastHelper.showSuccess('Post Image', 'Your Post Image is uploaded!');
           fileRefSubscribe.unsubscribe();
-          resolve(content)
-        }).catch((error) => {
-          fileRefSubscribe.unsubscribe();
-          reject(error);
-        })
+          resolve(content);
+        });
       });
     });
-    return updatedContent;
   }
 
   // const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
@@ -214,23 +219,5 @@ export class BlogService {
       ...targetPostPromises,
       ...targetCategoryPromises,
     ]);
-  }
-
-  async create(path: string, content: any): Promise<void> {
-    if (!this.authService.isSignedIn()) {
-      return null;
-    }
-    content.ownerId = JSON.parse(localStorage.currentUser).uid;
-    return this.firestore.collection(path).add(content)
-    .then(async (collection) => {
-      content.id = collection.id;
-      return collection.update(content);
-    });
-  }
-  async update(path: string, updated: any): Promise<void> {
-    return this.firestore.doc(path).update(updated);
-  }
-  async delete(path: string): Promise<void> {
-    return this.firestore.doc(path).delete();
   }
 }

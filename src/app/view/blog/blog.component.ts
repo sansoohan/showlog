@@ -11,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-blog',
@@ -61,6 +62,7 @@ export class BlogComponent implements OnInit, OnDestroy {
     public routerHelper: RouterHelper,
     private blogService: BlogService,
     public authService: AuthService,
+    private firestore: AngularFirestore,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.isPage = true;
@@ -174,7 +176,10 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.paramSub?.unsubscribe();
     this.blogContensSub?.unsubscribe();
+    this.categoryContentsSub?.unsubscribe();
+    this.postContentsSub?.unsubscribe();
+    this.postListSub?.unsubscribe();
+    this.paramSub?.unsubscribe();
   }
 }

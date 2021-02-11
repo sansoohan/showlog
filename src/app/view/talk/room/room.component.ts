@@ -643,9 +643,10 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.leaveRoom(this.params.roomId);
     }
     clearInterval(this.localCanvasInterval);
+    this.paramSub?.unsubscribe();
     this.talkSub?.unsubscribe();
     this.roomSub?.unsubscribe();
-    this.paramSub?.unsubscribe();
+    this.selectedRoomSub?.unsubscribe();
     window.removeEventListener('resize', this.onResizeWindow);
   }
 }

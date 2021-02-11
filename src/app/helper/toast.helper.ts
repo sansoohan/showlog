@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import Swal, { SweetAlertResult } from 'sweetalert2';
+import { PostImageContent } from '../view/blog/post/post-image.content';
 
 @Injectable({
   providedIn: 'root'
@@ -52,7 +53,7 @@ export class ToastHelper {
     return Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
-        cancelButton: 'btn btn-danger mr-2'
+        cancelButton: 'btn btn-danger me-2'
       },
       buttonsStyling: false
     }).fire({
@@ -66,7 +67,7 @@ export class ToastHelper {
     });
   }
 
-  async uploadImage(title: string, showCancelButton: boolean) {
+  async uploadImage(title: string, showCancelButton: boolean): Promise<SweetAlertResult> {
     return await Swal.fire({
       title,
       input: 'file',
@@ -81,6 +82,50 @@ export class ToastHelper {
         'accept': 'image/*',
         'aria-label': 'Upload your profile picture'
       }
+    });
+  }
+
+  async editImage(
+    title,
+    postImageContent: PostImageContent
+  ): Promise<SweetAlertResult> {
+    return Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger me-2',
+        closeButton: 'btn btn-secondary me-2',
+      },
+      buttonsStyling: false
+    }).fire({
+      title,
+      html: `
+        <div class="d-flex">
+          <img src="${postImageContent.postImageUrl}" style="width:300px;">
+          <div class="my-auto">
+            <div class="d-flex mb-2">
+              <p style="width:70px;" class="my-auto">Width</p>
+              <input id="swal-input1" type="text" class="form-control" style="width:70px;" value="${postImageContent.width}"></input>
+            </div>
+            <div class="d-flex">
+              <p style="width:70px;" class="my-auto">Height</p>
+              <input id="swal-input2" type="text" class="form-control" style="width:70px;" value="${postImageContent.height}"></input>
+            </div>
+          </div>
+        </div>
+      `,
+      preConfirm: () => {
+        return new Promise((resolve) => {
+          resolve({
+            width: (document.getElementById('swal-input1') as HTMLInputElement).value,
+            height: (document.getElementById('swal-input2') as HTMLInputElement).value,
+          });
+        });
+      },
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Update',
+      cancelButtonText: 'Delete',
+      reverseButtons: true,
     });
   }
 }

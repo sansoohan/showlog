@@ -3,6 +3,9 @@ import { Router } from '@angular/router';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { ProfileService } from './profile.service';
+import { first } from 'rxjs/operators';
+import { CommonService } from './common.service';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,12 +34,7 @@ export class AuthService {
   }
 
   isSignedIn(): any {
-    if (localStorage.getItem('currentUser')){
-      return true;
-    }
-    else{
-      return false;
-    }
+    return this.afAuth.authState.pipe(first()).toPromise();
   }
 
   signInSuccess(event): void {

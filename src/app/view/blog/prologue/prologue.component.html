@@ -5,6 +5,9 @@
   <div *ngIf="isLoading">
     <app-modules-page-loading style="color:'white'"></app-modules-page-loading>
   </div>
+  <div *ngIf="isEmptyBlog">
+    <app-blog-empty></app-blog-empty>
+  </div>
   <app-blog-left-sidebar
     [isEditingPost]="isEditingPost"
     [isEditingCategory]="isEditingCategory"

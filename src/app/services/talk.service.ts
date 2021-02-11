@@ -5,15 +5,18 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { TalkContent } from '../view/talk/talk.content';
 import { RoomContent } from '../view/talk/room/room.content';
+import { first } from 'rxjs/operators';
+import { CommonService } from './common.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TalkService {
-
+export class TalkService extends CommonService {
   constructor(
-    private firestore: AngularFirestore,
-  ) { }
+    public firestore: AngularFirestore,
+  ) {
+    super(firestore);
+  }
 
   getTalkContentsObserver({params = null}): Observable<TalkContent[]> {
     const currentUser = JSON.parse(localStorage.currentUser || null);
@@ -30,9 +33,5 @@ export class TalkService {
     return this.firestore
     .collection<TalkContent>('talks').doc(talkId)
     .collection<RoomContent>('rooms').valueChanges();
-  }
-
-  async delete(path: string): Promise<void> {
-    return this.firestore.doc(path).delete();
   }
 }
