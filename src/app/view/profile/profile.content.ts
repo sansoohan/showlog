@@ -8,9 +8,8 @@ import { EducationsContent } from './education/educations.content';
 export class ProfileContent {
   id: string;
   ownerId: string;
-  userName?: string;
-  roles: any;
-  profileImageSrc?: string;
+  userName: string;
+  profileImageSrc: string;
   profileTitle: string;
   aboutContent: AboutContent;
   educationsContent: EducationsContent;
@@ -18,4 +17,29 @@ export class ProfileContent {
   projectsContent: ProjectsContent;
   skillsContent: SkillsContent;
   additaionProfilesContent: Array<AdditaionProfileContent>;
+  constructor(
+    id: string = '',
+    ownerId: string = '',
+    userName: string = '',
+    profileImageSrc: string = '',
+    profileTitle: string = '',
+    aboutContent: AboutContent = new AboutContent(),
+    educationsContent: EducationsContent = new EducationsContent(),
+    interestsContent: InterestsContent = new InterestsContent(),
+    projectsContent: ProjectsContent = new ProjectsContent(),
+    skillsContent: SkillsContent = new SkillsContent(),
+    additaionProfilesContent: Array<AdditaionProfileContent> = [new AdditaionProfileContent()],
+  ) {
+    this.id = id;
+    this.ownerId = ownerId;
+    this.userName = userName;
+    this.profileImageSrc = profileImageSrc;
+    this.profileTitle = profileTitle;
+    this.aboutContent = aboutContent;
+    this.educationsContent = educationsContent;
+    this.interestsContent = interestsContent;
+    this.projectsContent = projectsContent;
+    this.skillsContent = skillsContent;
+    this.additaionProfilesContent = additaionProfilesContent;
+  }
 }

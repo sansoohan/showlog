@@ -1,3 +1,9 @@
-<div>
-  <app-talk-room></app-talk-room>
+<div *ngIf=!isPage>
+  <app-modules-not-found></app-modules-not-found>
+</div>
+<div *ngIf=isPage>
+  <div *ngIf="isLoading">
+    <app-modules-page-loading></app-modules-page-loading>
+  </div>
+  <app-talk-room [talkContents]="talkContents"></app-talk-room>
 </div>

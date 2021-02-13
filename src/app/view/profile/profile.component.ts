@@ -9,7 +9,6 @@ import { AdditaionProfileContent } from './additional-profiles/additional-profil
 import { FormHelper } from 'src/app/helper/form.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { ToastHelper } from 'src/app/helper/toast.helper';
-import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-profile',
@@ -41,7 +40,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private formHelper: FormHelper,
     public routerHelper: RouterHelper,
-    private firestore: AngularFirestore,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.isLoading = true;
@@ -51,14 +49,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.hasUserEmailCollision = false;
       this.params = params;
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
-      this.profileSub = this.profileContentsObserver.subscribe(profileContents => {
+      this.profileSub = this.profileContentsObserver.subscribe(async (profileContents) => {
         this.profileContents = profileContents;
-        if (this.profileContents.length === 0 || !this.profileContents){
-          this.isPage = false;
-          return;
+        if (this.profileContents.length === 0){
+          const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
+          const isOwner = await this.authService.isOwner();
+          if (!isOwner) {
+            this.isPage = false;
+            return;
+          }
+          this.profileService.set(`profiles/${userUid}`, new ProfileContent());
         }
 
-        const userName = this.profileContents[0].aboutContent.userName;
+        const userName = this.profileContents[0].userName;
         const currentUser = JSON.parse(localStorage.currentUser || null);
         if (currentUser){
           currentUser.userName = userName;

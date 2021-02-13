@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, ɵCodegenComponentFactoryResolver } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, ɵCodegenComponentFactoryResolver, Input } from '@angular/core';
 import { AngularFirestore, DocumentReference, AngularFirestoreDocument } from '@angular/fire/firestore';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import { Subscription, Observable } from 'rxjs';
@@ -45,8 +45,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   isPage: boolean;
   isLoading: boolean;
   isCopiedToClipboard: boolean;
-  talkContentsObserver: Observable<TalkContent[]>;
-  talkContents: Array<TalkContent>;
+
   roomsObserver: Observable<RoomContent[]>;
   roomContents: Array<RoomContent>;
   isHorizontalVideo: boolean;
@@ -78,6 +77,16 @@ export class RoomComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private routerHelper: RouterHelper,
   ) {
+    this.paramSub?.unsubscribe();
+    this.paramSub = this.route.params.subscribe(params => {
+      this.params = params;
+    });
+  }
+
+  @Input()
+  get talkContents(): Array<TalkContent> { return this._talkContents; }
+  set talkContents(talkContents: Array<TalkContent>) {
+    this._talkContents = talkContents;
     this.isPage = true;
     this.isLoading = true;
     this.isLocalVideoOn = true;
@@ -134,46 +143,48 @@ export class RoomComponent implements OnInit, OnDestroy {
       // tslint:disable-next-line: deprecation
       this.deviceRotation = Number(window.orientation);
     });
-    this.paramSub = this.route.params.subscribe((params) => {
-      this.params = params;
-      this.talkContentsObserver = this.talkService.getTalkContentsObserver({params});
-      this.talkSub = this.talkContentsObserver.subscribe((talkContents) => {
-        this.talkContents = talkContents;
-        this.roomsObserver = this.talkService.getRoomsObserver(this.talkContents[0].id);
-        this.roomSub = this.roomsObserver.subscribe(async (roomContents) => {
-          this.roomContents = roomContents;
 
-          // Run on First Rendering
-          if (params.roomId && !this.roomId) {
-            this.roomId = params.roomId;
-            this.isInRoom = true;
-            await this.openUserMedia();
-            const videoFps = this.mediaContraints.video.frameRate.ideal;
-            this.localCanvasInterval = setInterval(this.drawContext.bind(
-              this, this.localVideo, this.localCanvas
-            ), 1000 / videoFps);
-            window.addEventListener('resize', this.onResizeWindow.bind(this));
-            const currentRoom = this.roomContents.find(
-              (roomContent) => roomContent.id === params.roomId
-            );
-            if (
-              !currentRoom ||
-              (currentRoom.answer && currentRoom.offer)
-            ) {
-              const paramss = Object.assign({}, this.params);
-              delete paramss.roomId;
-              this.routerHelper.goToTalk(paramss);
-              return;
-            }
-            const isCaller = !currentRoom.offer;
-            this.joinRoomById(params.roomId, isCaller);
-            this.isLoading = false;
-            this.onResizeWindow();
+    this.paramSub = this.route.params.subscribe(params => {
+      if (!talkContents || talkContents.length === 0) {
+        this.isPage = false;
+        return;
+      }
+
+      this.roomsObserver = this.talkService.getRoomsObserver(talkContents[0].id);
+      this.roomSub = this.roomsObserver.subscribe(async (roomContents) => {
+        this.roomContents = roomContents;
+
+        // Run on First Rendering
+        if (params.roomId && !this.roomId) {
+          this.roomId = params.roomId;
+          this.isInRoom = true;
+          await this.openUserMedia();
+          const videoFps = this.mediaContraints.video.frameRate.ideal;
+          this.localCanvasInterval = setInterval(this.drawContext.bind(
+            this, this.localVideo, this.localCanvas
+          ), 1000 / videoFps);
+          window.addEventListener('resize', this.onResizeWindow.bind(this));
+          const currentRoom = this.roomContents.find(
+            (roomContent) => roomContent.id === params.roomId
+          );
+          if (
+            !currentRoom ||
+            (currentRoom.answer && currentRoom.offer)
+          ) {
+            const paramss = Object.assign({}, this.params);
+            delete paramss.roomId;
+            this.routerHelper.goToTalk(paramss);
             return;
           }
+          const isCaller = !currentRoom.offer;
+          this.joinRoomById(params.roomId, isCaller);
           this.isLoading = false;
-        });
+          this.onResizeWindow();
+          return;
+        }
+        this.isLoading = false;
       });
+
       document.addEventListener('fullscreenchange', (event) => {
         setTimeout(() => this.onResizeWindow(), 300);
         if (document.fullscreenElement) {
@@ -184,6 +195,8 @@ export class RoomComponent implements OnInit, OnDestroy {
       });
     });
   }
+  // tslint:disable-next-line: variable-name
+  _talkContents: Array<TalkContent>;
 
   setMediaStatus(stream: MediaStream, mediaType: string, status: boolean) {
     stream[`get${mediaType}Tracks`]().forEach((track) => track.enabled = status);
@@ -563,7 +576,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   onResizeWindow() {
-    if(this.isFullScreen) {
+    if (this.isFullScreen) {
       return;
     }
 
@@ -587,7 +600,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
     const videoButtons = (document.getElementsByClassName('video-button') as any);
     const buttonSize = this.remoteVideo.nativeElement.offsetWidth / 15;
-    for(const buttonElement of videoButtons){
+    for (const buttonElement of videoButtons) {
       buttonElement.style.padding = '0';
       buttonElement.style.fontSize = `${buttonSize * 3 / 4}px`;
       buttonElement.style.height = `${buttonSize}px`;

@@ -52,6 +52,7 @@ export class PrologueComponent implements OnInit, OnDestroy {
   selectedCategoryId: string;
   selectedChildCategoryIds: Array<string>;
 
+
   constructor(
     private route: ActivatedRoute,
     private blogService: BlogService,
@@ -77,11 +78,6 @@ export class PrologueComponent implements OnInit, OnDestroy {
   set blogContents(blogContents: Array<BlogContent>) {
     this.isEmptyBlog = false;
     if (!blogContents || blogContents.length === 0) {
-      const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
-      this.blogService.set(`blogs/${userUid}`, new BlogContent());
-
-      if (this.authService.isSignedIn()) {
-      }
       this.isEmptyBlog = true;
       this.isLoading = false;
       return;

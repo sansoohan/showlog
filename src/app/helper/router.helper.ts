@@ -25,7 +25,7 @@ export class RouterHelper {
     this.router.navigate([
       '/talk', queryUser, params.roomId ? 'room' : null, params.roomId,
     ].filter(Boolean)).finally(() => {
-      this.router.onSameUrlNavigation = 'ignore'; // Restore config after navigation completes
+      // this.router.onSameUrlNavigation = 'ignore'; // Restore config after navigation completes
     });
   }
 
