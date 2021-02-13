@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfileService } from 'src/app/services/profile.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -27,8 +27,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userEmail: string;
   validateUserName: string;
   validateUserEmail: string;
-  paramSub: any;
-  profileSub: any;
+  paramSub: Subscription;
+  profileSub: Subscription;
   params: any;
   profileForm: any;
   public newAdditaionProfileContent: AdditaionProfileContent = new AdditaionProfileContent();
@@ -49,14 +49,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.hasUserEmailCollision = false;
       this.params = params;
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
-      this.profileSub = this.profileContentsObserver.subscribe(profileContents => {
+      this.profileSub = this.profileContentsObserver.subscribe(async (profileContents) => {
         this.profileContents = profileContents;
-        if (this.profileContents.length === 0 || !this.profileContents){
-          this.isPage = false;
-          return;
+        if (this.profileContents.length === 0){
+          const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
+          const isOwner = await this.authService.isOwner();
+          if (!isOwner) {
+            this.isPage = false;
+            return;
+          }
+          this.profileService.set(`profiles/${userUid}`, new ProfileContent());
         }
 
-        const userName = this.profileContents[0].aboutContent.userName;
+        const userName = this.profileContents[0].userName;
         const currentUser = JSON.parse(localStorage.currentUser || null);
         if (currentUser){
           currentUser.userName = userName;
@@ -131,7 +136,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.paramSub.unsubscribe();
-    this.profileSub.unsubscribe();
+    this.paramSub?.unsubscribe();
+    this.profileSub?.unsubscribe();
   }
 }

@@ -11,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-blog',
@@ -61,6 +62,7 @@ export class BlogComponent implements OnInit, OnDestroy {
     public routerHelper: RouterHelper,
     private blogService: BlogService,
     public authService: AuthService,
+    private firestore: AngularFirestore,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.isPage = true;
@@ -72,13 +74,24 @@ export class BlogComponent implements OnInit, OnDestroy {
       this.selectedCategoryId = params.categoryId;
 
       this.blogContentsObserver = this.blogService.getBlogContentsObserver({params});
-      this.blogContensSub = this.blogContentsObserver.subscribe(blogContents => {
+      this.blogContensSub = this.blogContentsObserver.subscribe(async (blogContents) => {
         this.blogContents = blogContents;
-        this.blogId = this.blogContents[0].id;
-        if (this.blogContents.length === 0 || !this.blogContents){
-          this.isPage = false;
-          return;
+        if (this.blogContents.length === 0){
+          const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
+          const isOwner = await this.authService.isOwner();
+          if (!isOwner) {
+            this.isPage = false;
+            return;
+          }
+          const newCategoryContent = new CategoryContent();
+          newCategoryContent.blogId = userUid;
+          await this.blogService.create(`blogs/${userUid}/categories`, newCategoryContent);
+          const newBlogContent = new BlogContent();
+          newBlogContent.categoryOrder.push(newCategoryContent.id);
+          await this.blogService.set(`blogs/${userUid}`, newBlogContent);
         }
+
+        this.blogId = this.blogContents[0].id;
       });
     });
   }
@@ -174,7 +187,10 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.paramSub?.unsubscribe();
     this.blogContensSub?.unsubscribe();
+    this.categoryContentsSub?.unsubscribe();
+    this.postContentsSub?.unsubscribe();
+    this.postListSub?.unsubscribe();
+    this.paramSub?.unsubscribe();
   }
 }

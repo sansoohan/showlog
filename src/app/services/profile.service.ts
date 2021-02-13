@@ -1,60 +1,32 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { profileDefault } from '../view/profile/profile.default';
 import { ToastHelper } from '../helper/toast.helper';
 import { ProfileContent } from '../view/profile/profile.content';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
+import { CommonService } from './common.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProfileService {
+export class ProfileService extends CommonService {
   profileUpdateState: string = null;
 
   constructor(
-    private firestore: AngularFirestore,
+    public firestore: AngularFirestore,
     private toastHelper: ToastHelper,
     private storage: AngularFireStorage,
-  ) { }
-
-  createNewProfile(): void {
-    if (this.profileUpdateState !== 'deleteProfile'){
-      const userId = JSON.parse(localStorage.currentUser).uid;
-      const userEmail = JSON.parse(localStorage.currentUser).email;
-      const userPhoneNumber = JSON.parse(localStorage.currentUser).phoneNumber;
-      const userPhoneUrl = JSON.parse(localStorage.currentUser).photoURL;
-      const userFirstName = JSON.parse(localStorage.currentUser).displayName.split(' ')[0];
-      const userLastName = JSON.parse(localStorage.currentUser).displayName.split(' ')[1];
-      profileDefault.roles[userId] = 'owner';
-      profileDefault.ownerId = userId;
-      profileDefault.profileTitle = `${userId}'s Title`;
-      profileDefault.aboutContent.userName = userId;
-      profileDefault.aboutContent.firstName = userFirstName;
-      profileDefault.aboutContent.lastName = userLastName;
-      profileDefault.aboutContent.email = userEmail;
-      profileDefault.aboutContent.phoneNumber = userPhoneNumber;
-      profileDefault.profileImageSrc = userPhoneUrl ? userPhoneUrl : '';
-
-      this.getProfileContentsObserver({}).subscribe(profileContents => {
-        if (localStorage.currentUser && profileContents.length === 0){
-          this.firestore.collection<ProfileContent>('profiles').add(profileDefault)
-          .then(doc => {
-            profileDefault.id = doc.id;
-            doc.update(profileDefault);
-          });
-        }
-      });
-    }
+  ) {
+    super(firestore);
   }
 
   getUserEmailCollisionObserver(userEmail: string): Observable<ProfileContent[]> {
     let userEmailCollisionObserver: Observable<ProfileContent[]>;
     userEmailCollisionObserver = this.firestore
     .collection<ProfileContent>('profiles', ref => ref
-    .where(new FieldPath('aboutContent', 'email'), '==', userEmail))
+    .where(new FieldPath('email'), '==', userEmail))
     .valueChanges();
     return userEmailCollisionObserver;
   }
@@ -63,7 +35,7 @@ export class ProfileService {
     let userNameCollisionObserver: Observable<ProfileContent[]>;
     userNameCollisionObserver = this.firestore
     .collection<ProfileContent>('profiles', ref => ref
-    .where(new FieldPath('aboutContent', 'userName'), '==', userName))
+    .where(new FieldPath('userName'), '==', userName))
     .valueChanges();
     return userNameCollisionObserver;
   }
@@ -75,7 +47,7 @@ export class ProfileService {
     if (queryUserName){
       profileContentsObserver = this.firestore
       .collection<ProfileContent>('profiles', ref => ref
-      .where(new FieldPath('aboutContent', 'userName'), '==', queryUserName))
+      .where(new FieldPath('userName'), '==', queryUserName))
       .valueChanges();
     }
     else if (currentUser?.uid){
@@ -121,12 +93,5 @@ export class ProfileService {
       this.toastHelper.showInfo('Profile Image', 'Your Profile Image is removed!');
       dirRefSubscribe.unsubscribe();
     });
-  }
-
-  async update(path: string, updated: any): Promise<void> {
-    return this.firestore.doc(path).update(updated);
-  }
-  async delete(path: string): Promise<void> {
-    return this.firestore.doc(path).delete();
   }
 }

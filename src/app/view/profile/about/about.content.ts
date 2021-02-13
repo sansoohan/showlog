@@ -1,23 +1,29 @@
 export class AboutContent {
-  firstName?: string;
-  lastName?: string;
-  userName: string;
+  firstName: string;
+  lastName: string;
   address: string;
-  phoneNumber?: string;
-  email?: string;
+  phoneNumber: string;
+  email: string;
   social: Array<AboutSocial>;
   constructor(
-    firstName: string = '',
-    lastName: string = '',
-    userName: string = '',
-    address: string = '',
-    phoneNumber: string = '',
-    email: string = '',
-    social: Array<AboutSocial> = [new AboutSocial()]
+    firstName: string = 'First Name',
+    lastName: string = 'Last Name',
+    address: string = 'Address',
+    phoneNumber: string = '+00 00-0000-0000',
+    email: string = 'your-email@gmail.com',
+    social: Array<AboutSocial> = [
+      new AboutSocial(
+        'https://kr.linkedin.com/in/sansoo-han-29a40216a',
+        'fa fa-linkedin',
+      ),
+      new AboutSocial(
+        'https://github.com/sansoohan',
+        'fa fa-github',
+      ),
+    ],
   ){
     this.firstName = firstName;
     this.lastName = lastName;
-    this.userName = userName;
     this.address = address;
     this.phoneNumber = phoneNumber;
     this.email = email;

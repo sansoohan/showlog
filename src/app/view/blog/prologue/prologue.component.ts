@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { PostContent } from '../post/post.content';
 import { ActivatedRoute } from '@angular/router';
@@ -17,7 +17,7 @@ import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
   templateUrl: './prologue.component.html',
   styleUrls: ['../blog.component.css', './prologue.component.css']
 })
-export class PrologueComponent implements OnInit {
+export class PrologueComponent implements OnInit, OnDestroy {
   categoryContentsObserver: Observable<CategoryContent[]>;
   categoryContents: CategoryContent[];
   categoryContentsSub: Subscription;
@@ -38,6 +38,7 @@ export class PrologueComponent implements OnInit {
   blogId: string;
   isPage: boolean;
   isLoading: boolean;
+  isEmptyBlog: boolean;
   updateOk: boolean;
   newDescription: '';
 
@@ -50,6 +51,7 @@ export class PrologueComponent implements OnInit {
   selectedChildCategories: Array<FormGroup>;
   selectedCategoryId: string;
   selectedChildCategoryIds: Array<string>;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -74,7 +76,10 @@ export class PrologueComponent implements OnInit {
   @Input()
   get blogContents(): Array<BlogContent> { return this._blogContents; }
   set blogContents(blogContents: Array<BlogContent>) {
-    if (!blogContents || blogContents.length === 0){
+    this.isEmptyBlog = false;
+    if (!blogContents || blogContents.length === 0) {
+      this.isEmptyBlog = true;
+      this.isLoading = false;
       return;
     }
     this._blogContents = blogContents;
@@ -83,12 +88,15 @@ export class PrologueComponent implements OnInit {
     this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
     this.categoryContentsSub = this.categoryContentsObserver.subscribe(categoryContents => {
       if (!categoryContents || categoryContents.length === 0){
+        this.isEmptyBlog = true;
+        this.isLoading = false;
         return;
       }
 
       this.categoryContents = categoryContents.map((categoryContent) => {
         categoryContent.categoryNumber = blogContents[0].categoryOrder
         .findIndex(categoryId => categoryId === categoryContent.id);
+        // this.isLoading = false;
         return categoryContent;
       });
 
@@ -124,14 +132,14 @@ export class PrologueComponent implements OnInit {
     return category.value.categoryTitle;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
 
   }
 
-  OnDestroy() {
+  ngOnDestroy(): void {
+    this.categoryContentsSub?.unsubscribe();
+    this.postListSub?.unsubscribe();
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
-    this.postListSub?.unsubscribe();
-    this.categoryContentsSub?.unsubscribe();
   }
 }

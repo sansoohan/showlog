@@ -1,7 +1,22 @@
 export class EducationsContent {
   educations: Array<EducationContent>;
   constructor(
-    educations: Array<EducationContent> = [new EducationContent()]
+    educations: Array<EducationContent> = [
+      new EducationContent(
+        'University of Dankook',
+        'Bachelor of Computer Science',
+        ['Software Enginneering', 'GPA: 3.02'],
+        null,
+        null
+      ),
+      new EducationContent(
+        'BulGok High School',
+        'Math/Science',
+        [],
+        null,
+        null
+      )
+    ]
   ){
     this.educations = educations;
   }

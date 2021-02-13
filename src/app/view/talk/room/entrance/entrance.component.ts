@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { TalkContent } from '../../talk.content';
@@ -15,7 +15,6 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 })
 export class EntranceComponent implements OnInit, OnDestroy {
   @Output() clickRemoveRoom: EventEmitter<string> = new EventEmitter();
-
   @Input() roomContents: Array<RoomContent>;
 
   params: any;
@@ -24,8 +23,8 @@ export class EntranceComponent implements OnInit, OnDestroy {
   talkRoomsSub: Subscription;
 
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
-    private routerHelper: RouterHelper,
     public dataTransferHelper: DataTransferHelper,
   ) {
     this.paramSub = this.route.params.subscribe((params) => {
@@ -41,9 +40,7 @@ export class EntranceComponent implements OnInit, OnDestroy {
     if (!roomId) {
       return;
     }
-    this.routerHelper.goToUrl(
-      `${window.location.origin}/#/talk/${this.params.userName}/room/${roomId}`
-    );
+    this.router.navigate(['/talk', this.params.userName, 'room', roomId]);
   }
 
   ngOnInit(): void {
@@ -51,5 +48,6 @@ export class EntranceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
+    this.talkRoomsSub?.unsubscribe();
   }
 }

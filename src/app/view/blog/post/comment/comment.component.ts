@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { Subscription, Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { CommentContent } from './comment.content';
@@ -17,7 +17,7 @@ import { AuthService } from 'src/app/services/auth.service';
   templateUrl: './comment.component.html',
   styleUrls: ['../../blog.component.css', './comment.component.css']
 })
-export class CommentComponent implements OnInit {
+export class CommentComponent implements OnInit, OnDestroy {
   isPage: boolean;
   isEditingCommentIds: Array<string>;
   isCreatingComment: boolean;
@@ -193,6 +193,12 @@ export class CommentComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+
+  }
+
+  ngOnDestroy(): void {
+    this.commentContentsSub?.unsubscribe();
+    this.paramSub?.unsubscribe();
   }
 }

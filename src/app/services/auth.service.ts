@@ -3,10 +3,13 @@ import { Router } from '@angular/router';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { ProfileService } from './profile.service';
+import { Observable, Subscription } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  userSub: Subscription;
+
   constructor(
     private router: Router,
     private toastHelper: ToastHelper,
@@ -39,6 +42,25 @@ export class AuthService {
     }
   }
 
+  getUserObserver(): Observable<firebase.User> {
+    return this.afAuth.authState;
+  }
+
+  async isOwner(): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.userSub?.unsubscribe();
+      this.userSub = this.getUserObserver().subscribe((user) => {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        this.userSub?.unsubscribe();
+        resolve(
+          currentUser.uid
+          && user.uid
+          && currentUser.uid === user.uid
+        );
+      });
+    });
+  }
+
   signInSuccess(event): void {
     const currentUser = {
       providerData: event.providerData,
@@ -51,7 +73,6 @@ export class AuthService {
     };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     this.toastHelper.showSuccess(`Hello ${currentUser.displayName ? currentUser.displayName : currentUser.email}`, null);
-    this.profileService.createNewProfile();
     this.router.navigate(['/profile']);
   }
 

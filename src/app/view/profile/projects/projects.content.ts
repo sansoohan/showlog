@@ -1,7 +1,20 @@
 export class ProjectsContent {
   projects: Array<ProjectDescription>;
   constructor(
-    projects: Array<ProjectDescription> = [new ProjectDescription()]
+    projects: Array<ProjectDescription> = [
+      new ProjectDescription(
+        'Company',
+        'ProjectName',
+        2,
+        'PM/PL/PG/SE/QA',
+        null,
+        null,
+        [
+          'Task Flow 1',
+          'Task Flow 2'
+        ]
+      ),
+    ]
   ){
     this.projects = projects;
   }

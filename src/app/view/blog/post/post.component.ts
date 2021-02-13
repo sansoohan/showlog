@@ -170,6 +170,22 @@ export class PostComponent implements OnInit, OnDestroy {
     });
   }
 
+  handleClickRemovePostImage(postImageContent: PostImageContent): void {
+    console.log(postImageContent);
+    this.toastHelper.editImage('Edit Image', postImageContent)
+    .then((result) => {
+      if (result.value) {
+        console.log(result.value);
+        postImageContent = Object.assign(postImageContent, result.value);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // const firestorePath = `blogs/${this.blogId}/posts/${this.params.postId}/images/${}`;
+        // const storagePath = `blogs/${this.blogId}/postImages/${postImageContent}`;
+      }
+    }).catch(e => {
+      this.toastHelper.showWarning('Edit Image Failed.', e);
+    });
+  }
+
   getCategoryTitle(categoryId: string): string {
     const category = this.categoryContentsForm?.controls.categoryContents.controls.find((categoryContent) =>
       categoryContent.value.id === categoryId);
@@ -252,6 +268,7 @@ export class PostComponent implements OnInit, OnDestroy {
   async handleClickEditPostDelete() {
     this.toastHelper.askYesNo('Remove Post', 'Are you sure?').then((result) => {
       if (result.value) {
+        this.isLoading = true;
         const targetCreatedAt = this.postContentsForm.value.createdAt;
 
         const selectedCategory: CategoryContent = this.categoryContents.find((categoryContent) =>

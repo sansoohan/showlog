@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormGroup, AbstractControl } from '@angular/forms';
 import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
@@ -10,7 +10,6 @@ import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
 import { ToastHelper } from 'src/app/helper/toast.helper';
-import { PostContent } from '../post/post.content';
 import { PostImageContent } from '../post/post-image.content';
 
 @Component({
@@ -18,7 +17,7 @@ import { PostImageContent } from '../post/post-image.content';
   templateUrl: './left-sidebar.component.html',
   styleUrls: ['../blog.component.css', './left-sidebar.component.css']
 })
-export class LeftSidebarComponent implements OnInit {
+export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Input() isEditingPost: boolean;
   @Input() isEditingCategory: boolean;
   @Input() isAddingCategory: boolean;
@@ -27,6 +26,7 @@ export class LeftSidebarComponent implements OnInit {
   @Input() categoryContents: Array<CategoryContent>;
   @Input() blogContents: Array<BlogContent>;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
+  @Output() clickRemovePostImage: EventEmitter<PostImageContent> = new EventEmitter();
 
   paramSub: Subscription;
   params: any;
@@ -255,10 +255,19 @@ export class LeftSidebarComponent implements OnInit {
     });
   }
 
-  handleClickStartUploadPostImageSrc() {
+  handleClickStartUploadPostImageSrc(): void {
     this.clickStartUploadPostImageSrc.emit();
   }
 
+  handleClickRemovePostImage(postImageContent: PostImageContent): void {
+    this.clickRemovePostImage.emit(postImageContent);
+  }
+
   ngOnInit(): void {
+
+  }
+
+  ngOnDestroy(): void {
+    this.paramSub?.unsubscribe();
   }
 }
