@@ -4,7 +4,7 @@
       <div class="my-auto">
         <h2 class="mb-5">{{additaionProfileContent.title}}</h2>
 
-        <div *ngFor="let largeGroup of additaionProfileContent.largeGroups" class="profile-item d-flex flex-column flex-md-row mb-5">
+        <div *ngFor="let largeGroup of additaionProfileContent.largeGroups" class="profile-item d-flex flex-column flex-md-row mb-1 mb-5">
           <div class="profile-content me-auto">
             <h3 class="mb-0">{{largeGroup.largeGroupName}}</h3>
             <div *ngFor="let smallGroup of largeGroup.smallGroups">
@@ -30,7 +30,7 @@
             <h2 class="mb-5">{{additaionProfile.value.title}}</h2>
 
             <div class="container">
-              <div class="row">
+              <div class="row mb-1">
                 <div class="col-12">Large Group Name</div>
                 <div class="col-1"></div>
                 <div class="col-11">Small Group Name</div>
@@ -43,7 +43,7 @@
             <div class="container" formArrayName='largeGroups'>
 
               <div *ngIf="additaionProfile.controls.largeGroups.controls.length === 0">
-                <div class="row">
+                <div class="row mb-1">
                   <div class="col-11"></div>
                   <div class="col-1" style="padding: 0;">
                     <app-modules-user-form-input-add-remove
@@ -56,8 +56,10 @@
 
               <div *ngFor="let largeGroup of additaionProfile.controls.largeGroups.controls; let j=index">
                 <div [formGroupName]="j">
-                  <div class="row">
-                    <input type="text" class="form-control col-11" placeholder="Large Group Name" formControlName="largeGroupName">
+                  <div class="row mb-1">
+                    <div class="col-11">
+                      <input type="text" class="form-control form-control-sm" placeholder="Large Group Name" formControlName="largeGroupName">
+                    </div>
                     <div class="col-1" style="padding: 0;">
                       <app-modules-user-form-input-add-remove
                         [targetArrayForm]="additaionProfile.controls.largeGroups"
@@ -68,7 +70,7 @@
                   <div formArrayName='smallGroups'>
 
                     <div *ngIf="largeGroup.controls.smallGroups.controls.length === 0">
-                      <div class="row">
+                      <div class="row mb-1">
                         <div class="col-11"></div>
                         <div class="col-1" style="padding: 0;">
                           <app-modules-user-form-input-add-remove
@@ -81,9 +83,11 @@
 
                     <div *ngFor="let smallGroup of largeGroup.controls.smallGroups.controls; let k=index">
                       <div [formGroupName]="k">
-                        <div class="row">
+                        <div class="row mb-1">
                           <div class="col-1"></div>
-                          <input class="form-control col-10" placeholder="Small Group Name" formControlName="smallGroupName">
+                          <div class="col-10">
+                            <input class="form-control form-control-sm" placeholder="Small Group Name" formControlName="smallGroupName">
+                          </div>
                           <div class="col-1" style="padding: 0;">
                             <app-modules-user-form-input-add-remove
                               [targetArrayForm]="largeGroup.controls.smallGroups"
@@ -94,7 +98,7 @@
                         <div formArrayName='descriptions'>
 
                           <div *ngIf="smallGroup.controls.descriptions.controls.length === 0">
-                            <div class="row">
+                            <div class="row mb-1">
                               <div class="col-11"></div>
                               <div class="col-1" style="padding: 0;">
                                 <app-modules-user-form-input-add-remove
@@ -106,10 +110,14 @@
                           </div>
 
                           <div *ngFor="let description of smallGroup.controls.descriptions.controls; let l=index">
-                            <div class="row" [formGroupName]="l">
+                            <div class="row mb-1" [formGroupName]="l">
                               <div class="col-2"></div>
-                              <input type="text" class="form-control col-3" placeholder="Description Icon" formControlName="faIcon">
-                              <input type="text" class="form-control col-6" placeholder="Description" formControlName="descriptionDetail">
+                              <div class="col-3">
+                                <input type="text" class="form-control form-control-sm" placeholder="Description Icon" formControlName="faIcon">
+                              </div>
+                              <div class="col-6">
+                                <input type="text" class="form-control form-control-sm" placeholder="Description" formControlName="descriptionDetail">
+                              </div>
                               <div class="col-1" style="padding: 0;">
                                 <app-modules-user-form-input-add-remove
                                   [targetArrayForm]="smallGroup.controls.descriptions"

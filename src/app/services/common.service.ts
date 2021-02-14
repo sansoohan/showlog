@@ -18,7 +18,6 @@ export class CommonService {
     this.authService = authService;
     this.firestore = firestore;
   }
-
   async update(path: string, content: any): Promise<void> {
     return this.firestore.doc(path).update(JSON.parse(JSON.stringify(content)));
   }

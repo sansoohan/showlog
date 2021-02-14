@@ -24,34 +24,32 @@
 
 <section *ngIf="isEditing" class="profile-section p-3 p-lg-5 d-flex d-column" id="about" [formGroup]="profileForm">
   <div class="my-auto container" formGroupName="aboutContent">
-    <div class="row">
-      <div class="col-4">First Name</div>
-      <div class="col-4">Last Name</div>
-      <div
-        class="col-4"
-        [class.text-danger]="hasUserNameCollision"
-      >User Name {{hasUserNameCollision?'(There is a User Name already registered.)':''}}</div>
-      <input type="text" class="form-control col-4" placeholder="First Name" formControlName="firstName">
-      <input type="text" class="form-control col-4" placeholder="Last Name" formControlName="lastName">
-      <input
-        formControlName="userName"
-        (keyup)="handleKeyupUserName($event)"
-        type="text"
-        class="form-control col-4"
-        [class.text-danger]="hasUserNameCollision"
-        placeholder="User Name"
-      >
+    <div class="row mb-3">
+      <div class="col-6">First Name</div>
+      <div class="col-6">Last Name</div>
+      <div class="col-6">
+        <input type="text" class="form-control form-control-sm" placeholder="First Name" formControlName="firstName">
+      </div>
+      <div class="col-6">
+        <input type="text" class="form-control form-control-sm" placeholder="Last Name" formControlName="lastName">
+      </div>
     </div>
 
-    <div class="row">
+    <div class="row mb-3">
       <div class="col-12">Address</div>
-      <input value="{{aboutContent.address}}" type="text" class="form-control col-12" placeholder="Address" formControlName="address">
+      <div class="col-12">
+        <input value="{{aboutContent.address}}" type="text" class="form-control form-control-sm col-12" placeholder="Address" formControlName="address">
+      </div>
     </div>
-    <div class="row">
+    <div class="row mb-3">
       <div class="col-6">Phone Number</div>
       <div class="col-6">Email</div>
-      <input type="text" class="form-control col-6" placeholder="Phone Number" formControlName="phoneNumber">
-      <input type="text" class="form-control col-6" placeholder="Email" formControlName="email">
+      <div class="col-6">
+        <input type="text" class="form-control form-control-sm col-6" placeholder="Phone Number" formControlName="phoneNumber">
+      </div>
+      <div class="col-6">
+        <input type="text" class="form-control form-control-sm col-6" placeholder="Email" formControlName="email">
+      </div>
     </div>
     <div class="row">
       <div class="col-4">Font AwsomeIcon</div>
@@ -59,9 +57,13 @@
     </div>
     <div formArrayName='social'>
       <div *ngFor="let socialElement of profileForm.controls.aboutContent.controls.social.controls; let i=index">
-        <div [formGroupName]="i" class="row">
-          <input type="text" class="form-control col-4" placeholder="Icon" formControlName="faIcon">
-          <input type="text" class="form-control col-7" placeholder="Url" formControlName="socialUrl">
+        <div [formGroupName]="i" class="row mb-1">
+          <div class="col-4">
+            <input type="text" class="form-control form-control-sm" placeholder="Icon" formControlName="faIcon">
+          </div>
+          <div class="col-7">
+            <input type="text" class="form-control form-control-sm" placeholder="Url" formControlName="socialUrl">
+          </div>
           <div class="col-1" style="padding: 0;">
             <app-modules-user-form-input-add-remove
               [targetArrayForm]="profileForm.controls.aboutContent.controls.social"
@@ -71,12 +73,13 @@
           </div>
         </div>
       </div>
-      <div class="row" *ngIf="profileForm.controls.aboutContent.controls.social.length === 0">
+      <div class="row mb-1" *ngIf="profileForm.controls.aboutContent.controls.social.length === 0">
         <div class="col-11"></div>
         <div class="col-1" style="padding: 0;">
           <app-modules-user-form-input-add-remove
             [targetArrayForm]="profileForm.controls.aboutContent.controls.social" 
-            newObject]="newAboutSocial"></app-modules-user-form-input-add-remove>
+            [newObject]="newAboutSocial"
+          ></app-modules-user-form-input-add-remove>
         </div>
       </div>
     </div>

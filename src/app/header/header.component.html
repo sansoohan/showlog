@@ -105,17 +105,17 @@
         </div>
       </div>
     </div>
-    <ngx-auth-firebaseui-avatar
-      class="mx-2"
+
+    <button
       *ngIf="authService.isSignedIn()"
-      (onSignOut)="authService.onSignOut()"
-      [canEditAccount]="true"
-    ></ngx-auth-firebaseui-avatar>
+      class="btn btn-secondary sign-in-out-button"
+      (click)="authService.onSignOut()"
+    >Sign Out</button>
     <button
       *ngIf="!authService.isSignedIn()"
       routerLink="/sign-in"
       routerLinkActive="active"
-      class="btn btn-secondary sign-in-button"
+      class="btn btn-secondary sign-in-out-button"
     >Sign In</button>
   </div>
 </nav>
