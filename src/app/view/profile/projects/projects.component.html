@@ -2,7 +2,7 @@
   <div class="my-auto">
     <h2 class="mb-5">Projects</h2>
     <div *ngIf="!isEditing">
-      <div *ngFor="let project of projectsContent.projects" class="profile-item d-flex flex-column flex-md-row mb-5">
+      <div *ngFor="let project of projectsContent.projects" class="profile-item d-flex flex-column flex-md-row mb-3 mb-5">
         <div class="profile-content me-auto">
           <h3 class="mb-0">{{project.organization}}</h3>
           <div class="subheading mb-3 mt-3">{{project.projectName}}</div>
@@ -25,7 +25,7 @@
         <div formArrayName='projects'>
 
           <div *ngIf="profileForm.controls.projectsContent.controls.projects.controls.length === 0">
-            <div class="row">
+            <div class="row mb-3">
               <div class="col-11"></div>
               <div class="col-1" style="padding: 0;">
                 <app-modules-user-form-input-add-remove
@@ -39,9 +39,16 @@
           <div *ngFor="let project of profileForm.controls.projectsContent.controls.projects.controls; let i=index">
             <div [formGroupName]="i">
               <div class="container mb-5">
-                <div class="row">
+                <div class="row mb-3">
                   <div class="col-12">Organization Name</div>
-                  <input type="text" class="form-control col-11" placeholder="Organization Name" formControlName="organization">
+                  <div class="col-11">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Organization Name"
+                      formControlName="organization"
+                    >
+                  </div>
                   <div class="col-1" style="padding: 0;">
                     <app-modules-user-form-input-add-remove
                       [targetArrayForm]="profileForm.controls.projectsContent.controls.projects"
@@ -49,17 +56,40 @@
                       [newObject]="newProjectDescription"
                     ></app-modules-user-form-input-add-remove>
                   </div>
-      
+                </div>
+                <div class="row mb-3">
                   <div class="col-12">Project Name</div>
-                  <input type="text" class="form-control col-12" placeholder="Project Name" formControlName="projectName">
-      
+                  <div class="col-12">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Project Name"
+                      formControlName="projectName"
+                    >
+                  </div>
+                </div>
+                <div class="row mb-3">
                   <div class="col-6">Member Number</div>
                   <div class="col-6">Your Positioin</div>
-                  <input type="text" class="form-control col-6" placeholder="Member Number" formControlName="memberNum">
-                  <input type="text" class="form-control col-6" placeholder="Your Positioin" formControlName="position">
+                  <div class="col-6">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Member Number"
+                      formControlName="memberNum"
+                    >
+                  </div>
+                  <div class="col-6">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Your Positioin"
+                      formControlName="position"
+                    >
+                  </div>
                 </div>
 
-                <div class="row">
+                <div class="row mb-3">
                   <div class="col-6">Started At</div>
                   <div class="col-6">Finished At</div>
                   <div class="col-6">
@@ -74,14 +104,13 @@
                   </div>
                 </div>
 
-                <div class="row">
+                <div class="row mb-1">
                   <div class="col-1"></div>
                   <div class="col-11">Task Descriptions</div>
                 </div>
                 <div formArrayName='taskDescriptions'>
-
                   <div *ngIf="project.controls.taskDescriptions.controls.length === 0">
-                    <div class="row">
+                    <div class="row mb-3">
                       <div class="col-11"></div>
                       <div class="col-1" style="padding: 0;">
                         <app-modules-user-form-input-add-remove
@@ -93,9 +122,16 @@
                   </div>
 
                   <div *ngFor="let description of project.controls.taskDescriptions.controls; let j=index">
-                    <div class="row">
+                    <div class="row mb-1">
                       <div class="col-1"></div>
-                      <input type="text" class="form-control col-10" placeholder="Description" [formControlName]="j">
+                      <div class="col-10">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          placeholder="Description"
+                          [formControlName]="j"
+                        >
+                      </div>
                       <div class="col-1" style="padding: 0;">
                         <app-modules-user-form-input-add-remove
                           [targetArrayForm]="project.controls.taskDescriptions"
