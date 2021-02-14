@@ -13,10 +13,12 @@ const appRoutes: Routes = [
   { path: '', component: MainComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'profile/:userName', component: ProfileComponent },
+  { path: 'blog', component: BlogComponent }, // PrologueComponent
   { path: 'blog/:userName', component: BlogComponent }, // PrologueComponent
   { path: 'blog/:userName/post/:postId', component: BlogComponent }, // PostComponent
   { path: 'blog/:userName/category/:categoryId', component: BlogComponent }, // CategoryComponent
   { path: 'blog/:userName/category/:categoryId/new-post', component: BlogComponent }, // PostComponent
+  { path: 'talk', component: TalkComponent }, // TalkComponent
   { path: 'talk/:userName', component: TalkComponent }, // TalkComponent
   { path: 'talk/:userName/room/:roomId', component: TalkComponent }, // TalkComponent
   { path: 'sign-in', component: SignInComponent },

@@ -8,6 +8,7 @@ import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
 import { CommonService } from './common.service';
 import { AuthService } from './auth.service';
+import { RouterHelper } from '../helper/router.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -43,20 +44,13 @@ export class ProfileService extends CommonService {
 
   getProfileContentsObserver({params = null}): Observable<ProfileContent[]> {
     let profileContentsObserver: Observable<ProfileContent[]>;
-    const currentUser = this.authService.getCurrentUser();
-    const queryUserName = currentUser?.userName || params?.userName;
+    const queryUserName = params?.userName;
     if (queryUserName){
       profileContentsObserver = this.firestore
       .collection<ProfileContent>('profiles', ref => ref
       .where(new FieldPath('userName'), '==', queryUserName))
       .valueChanges();
     }
-    else if (currentUser?.uid){
-      profileContentsObserver = this.firestore
-      .collection<ProfileContent>('profiles', ref => ref.where('ownerId', '==', currentUser?.uid))
-      .valueChanges();
-    }
-
     return profileContentsObserver;
   }
 

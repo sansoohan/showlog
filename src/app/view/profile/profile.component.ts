@@ -49,22 +49,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.hasUserEmailCollision = false;
       this.params = params;
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
-      this.profileSub = this.profileContentsObserver.subscribe(async (profileContents) => {
+      this.profileSub = this.profileContentsObserver?.subscribe(async (profileContents) => {
         this.profileContents = profileContents;
-        const currentUser = this.authService.getCurrentUser();
-        if (this.profileContents.length === 0){
-          const userUid = currentUser?.uid;
-          const isOwner = await this.authService.isOwner();
-          if (!isOwner) {
-            this.isPage = false;
-            return;
+        if (this.profileContents.length === 0) {
+          const authUser = await this.authService.getAuthUser();
+          const isExists = await this.profileService.isExists(`profiles/${authUser.uid}`);
+          if (!isExists) {
+            await this.profileService.set(`profiles/${authUser.uid}`, new ProfileContent());
           }
-          this.profileService.set(`profiles/${userUid}`, new ProfileContent());
+          const currentUser = this.authService.getCurrentUser();
+          this.routerHelper.goToProfile({userName: currentUser?.userName || 'sansoohan'});
         }
-        this.authService.setUsernameFromContent(this.profileContents[0]);
         this.profileForm = this.formHelper.buildFormRecursively(this.profileContents[0]);
         this.isLoading = false;
       });
+      if (!this.profileSub) {
+        const currentUser = this.authService.getCurrentUser();
+        this.routerHelper.goToProfile({userName: currentUser?.userName || 'sansoohan'});
+      }
     });
   }
 

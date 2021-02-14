@@ -6,13 +6,14 @@ import { PostContent } from '../view/blog/post/post.content';
 import { CategoryContent } from '../view/blog/category/category.content';
 import { CommentContent } from '../view/blog/post/comment/comment.content';
 import { AuthService } from './auth.service';
-import { FormGroup, FormArray } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { PostImageContent } from '../view/blog/post/post-image.content';
-import { first } from 'rxjs/operators';
 import { CommonService } from './common.service';
+import * as firebase from 'firebase/app';
+import FieldPath = firebase.firestore.FieldPath;
 
 @Injectable({
   providedIn: 'root'
@@ -78,14 +79,15 @@ export class BlogService extends CommonService {
   }
 
   getBlogContentsObserver({params = null}): Observable<BlogContent[]> {
-    if (!this.blogContentsObserver) {
-      const currentUser = this.authService.getCurrentUser();
-      const queryUserName = currentUser?.userName || params?.userName;
-      this.blogContentsObserver = this.firestore
-      .collection<BlogContent>('blogs', ref => ref.where('userName', '==', queryUserName))
+    let blogContentsObserver: Observable<BlogContent[]>;
+    const queryUserName = params?.userName;
+    if (queryUserName) {
+      blogContentsObserver = this.firestore
+      .collection<BlogContent>('blogs', ref => ref
+      .where(new FieldPath('userName'), '==', queryUserName))
       .valueChanges();
     }
-    return this.blogContentsObserver;
+    return blogContentsObserver;
   }
   getPostContentsObserver({params = null}, blogId: string): Observable<PostContent[]> {
     const postId = params?.postId;

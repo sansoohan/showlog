@@ -3,6 +3,11 @@ import { Router } from '@angular/router';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable, Subscription } from 'rxjs';
+import { CommonService } from './common.service';
+import { ProfileService } from './profile.service';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { first } from 'rxjs/operators';
+import { ProfileContent } from '../view/profile/profile.content';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,6 +17,7 @@ export class AuthService {
   constructor(
     private router: Router,
     private toastHelper: ToastHelper,
+    private firestore: AngularFirestore,
     private afAuth: AngularFireAuth
   ) { }
 
@@ -61,7 +67,8 @@ export class AuthService {
     });
   }
 
-  signInSuccess(event): void {
+  async signInSuccess(event): Promise<void> {
+    const profile: any = await this.firestore.doc(`profiles/${event.uid}`).get().toPromise();
     const currentUser = {
       providerData: event.providerData,
       email: event.email,
@@ -69,19 +76,12 @@ export class AuthService {
       phoneNumber: event.phoneNumber,
       photoURL: event.photoURL,
       displayName: event.displayName,
-      uid: event.uid
+      uid: event.uid,
+      userName: profile.data()?.userName || event.uid,
     };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    this.toastHelper.showSuccess(`Hello ${currentUser.displayName || currentUser.email}`, null);
-    this.router.navigate(['/profile']);
-  }
-
-  setUsernameFromContent(content: any): void {
-    const currentUser = this.getCurrentUser();
-    if (currentUser) {
-      currentUser.userName = content?.userName;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    }
+    this.toastHelper.showSuccess(`Hello ${currentUser.userName}`, null);
+    this.router.navigate(['/profile', currentUser.userName]);
   }
 
   getCurrentUser(): any {
