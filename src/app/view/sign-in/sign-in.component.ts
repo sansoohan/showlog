@@ -14,8 +14,9 @@ export class SignInComponent implements OnInit {
     private router: Router,
     public authService: AuthService
   ) {
-    if (this.authService.isSignedIn()){
-      this.router.navigate(['/profile']);
+    if (this.authService.isSignedIn()) {
+      const {uid, userName} = this.authService.getCurrentUser();
+      this.router.navigate(['/profile', userName || uid]);
     }
   }
 

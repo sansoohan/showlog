@@ -35,10 +35,6 @@ export class HeaderComponent {
   ) {
     this.searchValue = '';
     this.isSearchValueSelected = false;
-    this.paramSub = this.route.params.subscribe(params => {
-      this.isPage = true;
-      this.params = params;
-    });
   }
 
   closeSearchListDropDown() {

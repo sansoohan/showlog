@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
 import { TalkContent } from './talk.content';
 import { AuthService } from 'src/app/services/auth.service';
+import { RouterHelper } from 'src/app/helper/router.helper';
 
 @Component({
   selector: 'app-talk',
@@ -24,6 +25,7 @@ export class TalkComponent implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
+    public routerHelper: RouterHelper,
     private talkService: TalkService,
     private route: ActivatedRoute,
   ) {
@@ -32,19 +34,23 @@ export class TalkComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.params = params;
       this.talkContentsObserver = this.talkService.getTalkContentsObserver({params});
-      this.talkSub = this.talkContentsObserver.subscribe(async (talkContents) => {
+      this.talkSub = this.talkContentsObserver?.subscribe(async (talkContents) => {
         this.talkContents = talkContents;
-        if (this.talkContents.length === 0){
-          const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
-          const isOwner = await this.authService.isOwner();
-          if (!isOwner) {
-            this.isPage = false;
-            return;
+        if (this.talkContents.length === 0) {
+          const authUser = await this.authService.getAuthUser();
+          const isExists = await this.talkService.isExists(`talks/${authUser.uid}`);
+          if (!isExists) {
+            await this.talkService.set(`talks/${authUser.uid}`, new TalkContent());
           }
-          this.talkService.set(`talks/${userUid}`, new TalkContent());
+          const currentUser = this.authService.getCurrentUser();
+          this.routerHelper.goToTalk({userName: currentUser?.userName || 'sansoohan'});
         }
         this.isLoading = false;
       });
+      if (!this.talkSub) {
+        const currentUser = this.authService.getCurrentUser();
+        this.routerHelper.goToTalk({userName: currentUser?.userName || 'sansoohan'});
+      }
     });
   }
 

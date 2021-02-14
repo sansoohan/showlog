@@ -7,17 +7,20 @@
     <a
       *ngIf="router.url.includes('/profile')"
       class="navbar-brand selected-header-link d-flex"
-      (click)="routerHelper.goToProfile(params)"
+      routerLink="/profile"
+      routerLinkActive="active"
     ><span class="mx-auto">Profile</span></a>
     <a
       *ngIf="router.url.includes('/blog')"
       class="navbar-brand selected-header-link d-flex"
-      (click)="routerHelper.goToBlogPrologue(params)"
+      routerLink="/blog"
+      routerLinkActive="active"
     ><span class="mx-auto">Blog</span></a>
     <a
       *ngIf="router.url.includes('/talk')"
       class="navbar-brand selected-header-link d-flex"
-      (click)="routerHelper.goToTalk(params)"
+      routerLink="/talk"
+      routerLinkActive="active"
     ><span class="mx-auto">Talk</span></a>
   </div>
 </nav>
@@ -37,17 +40,20 @@
     <a
       *ngIf="!router.url.includes('/profile')"
       class="navbar-brand header-link"
-      (click)="routerHelper.goToProfile(params)"
+      routerLink="/profile"
+      routerLinkActive="active"
     >Profile</a>
     <a
       *ngIf="!router.url.includes('/blog')"
       class="navbar-brand header-link"
-      (click)="routerHelper.goToBlogPrologue(params)"
+      routerLink="/blog"
+      routerLinkActive="active"
     >Blog</a>
     <a
       *ngIf="!router.url.includes('/talk')"
       class="navbar-brand header-link"
-      (click)="routerHelper.goToTalk(params)"
+      routerLink="/talk"
+      routerLinkActive="active"
     >Talk</a>
 
     <!-- Right Side -->
@@ -108,14 +114,14 @@
 
     <button
       *ngIf="authService.isSignedIn()"
-      class="btn btn-secondary sign-in-out-button"
+      class="btn btn-secondary sign-in-button"
       (click)="authService.onSignOut()"
     >Sign Out</button>
     <button
       *ngIf="!authService.isSignedIn()"
       routerLink="/sign-in"
       routerLinkActive="active"
-      class="btn btn-secondary sign-in-out-button"
+      class="btn btn-secondary sign-in-button"
     >Sign In</button>
   </div>
 </nav>

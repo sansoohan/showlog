@@ -1,7 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { ToastHelper } from '../helper/toast.helper';
-import { first } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 
@@ -39,7 +36,10 @@ export class CommonService {
     content.userName = userName || uid;
     return await this.firestore.doc(path).set(JSON.parse(JSON.stringify(content)));
   }
-  async isOwner() {
-    const {uid} = this.authService.getCurrentUser() || {};
+  async isExists(path: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const content = await this.firestore.doc(path).get().toPromise();
+      resolve(content.exists);
+    });
   }
 }
