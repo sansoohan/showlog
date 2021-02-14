@@ -24,6 +24,8 @@ import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 import { AngularFireStorageModule } from '@angular/fire/storage';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { NgxAuthFirebaseUIModule } from 'ngx-auth-firebaseui';
+import { AngularFirePerformanceModule, AngularFirePerformance } from '@angular/fire/performance';
+// import { PerformanceMonitoringService } from '@angular/fire/performance';
 import { environment } from 'src/environments/environment';
 
 // ngx module
@@ -44,6 +46,7 @@ import { SignUpComponent } from 'src/app/view/sign-up/sign-up.component';
 // Moudles
 import { EmbededGooglemapModule } from 'src/app/modules/embeded-googlemap/embeded-googlemap.module';
 import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
+import { AngularFireModule } from '@angular/fire';
 
 @NgModule({
   declarations: [
@@ -94,10 +97,13 @@ import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
     ProfileModule,
     BlogModule,
     TalkModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirePerformanceModule,
     AngularFireAnalyticsModule,
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireStorageModule,
+    AngularFirePerformanceModule,
     AppRoutingModule,
     MatPasswordStrengthModule,
     MatInputModule,
@@ -108,7 +114,12 @@ import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
     NotFoundModule,
   ],
   providers: [
-    {provide: APP_BASE_HREF, useValue: '/'}
+    AngularFirePerformance,
+    // PerformanceMonitoringService,
+    {
+      provide: APP_BASE_HREF,
+      useValue: '/',
+    }
   ],
   bootstrap: [AppComponent]
 })
