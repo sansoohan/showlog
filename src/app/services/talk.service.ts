@@ -14,12 +14,13 @@ import { CommonService } from './common.service';
 export class TalkService extends CommonService {
   constructor(
     public firestore: AngularFirestore,
+    public authService: AuthService,
   ) {
-    super(firestore);
+    super(authService, firestore);
   }
 
   getTalkContentsObserver({params = null}): Observable<TalkContent[]> {
-    const currentUser = JSON.parse(localStorage.currentUser || null);
+    const currentUser = this.authService.getCurrentUser();
     const queryUserName = currentUser?.userName || params?.userName;
     return this.firestore
     .collection<TalkContent>('talks', ref => ref.where('userName', '==', queryUserName))

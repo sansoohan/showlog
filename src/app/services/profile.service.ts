@@ -7,19 +7,20 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
 import { CommonService } from './common.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService extends CommonService {
   profileUpdateState: string = null;
-
   constructor(
     public firestore: AngularFirestore,
+    public authService: AuthService,
     private toastHelper: ToastHelper,
     private storage: AngularFireStorage,
   ) {
-    super(firestore);
+    super(authService, firestore);
   }
 
   getUserEmailCollisionObserver(userEmail: string): Observable<ProfileContent[]> {
@@ -42,7 +43,7 @@ export class ProfileService extends CommonService {
 
   getProfileContentsObserver({params = null}): Observable<ProfileContent[]> {
     let profileContentsObserver: Observable<ProfileContent[]>;
-    const currentUser = JSON.parse(localStorage.currentUser || null);
+    const currentUser = this.authService.getCurrentUser();
     const queryUserName = currentUser?.userName || params?.userName;
     if (queryUserName){
       profileContentsObserver = this.firestore

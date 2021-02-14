@@ -91,7 +91,7 @@ export class CommentComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    return commentOwnerId === JSON.parse(localStorage.currentUser).uid;
+    return commentOwnerId === this.authService.getCurrentUser()?.uid;
   }
 
   getCommentMarkdownLines(commentContent){
@@ -114,7 +114,7 @@ export class CommentComponent implements OnInit, OnDestroy {
   clickCommentNewUpdate() {
     const newComment = this.creatingCommentForm.value;
     newComment.postId = this.params.postId;
-    newComment.userName = JSON.parse(localStorage.currentUser).userName;
+    newComment.userName = this.authService.getCurrentUser()?.userName;
     const parentComment = this.commentContents
     .find((commentContent) => commentContent.id === this.creatingCommentParentId);
 

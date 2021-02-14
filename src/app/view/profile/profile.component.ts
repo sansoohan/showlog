@@ -51,8 +51,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
       this.profileSub = this.profileContentsObserver.subscribe(async (profileContents) => {
         this.profileContents = profileContents;
+        const currentUser = this.authService.getCurrentUser();
         if (this.profileContents.length === 0){
-          const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
+          const userUid = currentUser?.uid;
           const isOwner = await this.authService.isOwner();
           if (!isOwner) {
             this.isPage = false;
@@ -60,14 +61,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
           this.profileService.set(`profiles/${userUid}`, new ProfileContent());
         }
-
-        const userName = this.profileContents[0].userName;
-        const currentUser = JSON.parse(localStorage.currentUser || null);
-        if (currentUser){
-          currentUser.userName = userName;
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        }
-
+        this.authService.setUsernameFromContent(this.profileContents[0]);
         this.profileForm = this.formHelper.buildFormRecursively(this.profileContents[0]);
         this.isLoading = false;
       });
