@@ -3,15 +3,19 @@ import { Router } from '@angular/router';
 import { ToastHelper } from '../helper/toast.helper';
 import { first } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommonService {
+  authService: AuthService;
   firestore: AngularFirestore;
   constructor(
+    authService: AuthService,
     firestore: AngularFirestore,
   ) {
+    this.authService = authService;
     this.firestore = firestore;
   }
 
@@ -22,7 +26,7 @@ export class CommonService {
     return this.firestore.doc(path).delete();
   }
   async create(path: string, content: any): Promise<void> {
-    content.ownerId = JSON.parse(localStorage.currentUser).uid;
+    content.ownerId = this.authService.getCurrentUser()?.uid;
     return this.firestore.collection(path).add(JSON.parse(JSON.stringify(content)))
     .then(async (collection) => {
       content.id = collection.id;
@@ -30,10 +34,13 @@ export class CommonService {
     });
   }
   async set(path: string, content: any): Promise<void> {
-    const {uid, userName} = JSON.parse(localStorage.currentUser);
+    const {uid, userName} = this.authService.getCurrentUser() || {};
     content.id = uid;
     content.ownerId = uid;
     content.userName = userName || uid;
     return await this.firestore.doc(path).set(JSON.parse(JSON.stringify(content)));
+  }
+  async isOwner() {
+    const {uid} = this.authService.getCurrentUser() || {};
   }
 }

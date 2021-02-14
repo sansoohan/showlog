@@ -25,12 +25,12 @@ export class BlogService extends CommonService {
 
   constructor(
     public firestore: AngularFirestore,
-    private authService: AuthService,
+    public authService: AuthService,
     private formHelper: FormHelper,
     private toastHelper: ToastHelper,
     private storage: AngularFireStorage,
   ) {
-    super(firestore);
+    super(authService, firestore);
   }
 
   async addImageOnPost(file: File, path: string, content: PostImageContent): Promise<any> {
@@ -44,7 +44,7 @@ export class BlogService extends CommonService {
       return;
     }
 
-    content.ownerId = JSON.parse(localStorage.currentUser).uid;
+    content.ownerId = this.authService.getCurrentUser()?.uid;
     return this.firestore.collection<PostImageContent>(path)
     .add(Object.assign({}, content))
     .then(async (collection) => {
@@ -78,8 +78,8 @@ export class BlogService extends CommonService {
   }
 
   getBlogContentsObserver({params = null}): Observable<BlogContent[]> {
-    if (!this.blogContentsObserver){
-      const currentUser = JSON.parse(localStorage.currentUser || null);
+    if (!this.blogContentsObserver) {
+      const currentUser = this.authService.getCurrentUser();
       const queryUserName = currentUser?.userName || params?.userName;
       this.blogContentsObserver = this.firestore
       .collection<BlogContent>('blogs', ref => ref.where('userName', '==', queryUserName))

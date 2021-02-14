@@ -77,7 +77,7 @@ export class BlogComponent implements OnInit, OnDestroy {
       this.blogContensSub = this.blogContentsObserver.subscribe(async (blogContents) => {
         this.blogContents = blogContents;
         if (this.blogContents.length === 0){
-          const userUid = JSON.parse(localStorage.currentUser || null)?.uid;
+          const userUid = this.authService.getCurrentUser()?.uid;
           const isOwner = await this.authService.isOwner();
           if (!isOwner) {
             this.isPage = false;
