@@ -82,8 +82,8 @@ export class AuthService {
       uid: event.uid,
       userName: profile.data()?.userName || event.uid,
     };
-    await this.makeCollectionIfNotExist(event.uid);
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    await this.makeCollectionIfNotExist(event.uid);
     this.toastHelper.showSuccess(`Hello ${currentUser.userName}`, null);
     this.router.navigate(['/profile', currentUser.userName]);
   }
