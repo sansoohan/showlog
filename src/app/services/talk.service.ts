@@ -4,7 +4,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { TalkContent } from '../view/talk/talk.content';
 import { RoomContent } from '../view/talk/room/room.content';
-import { CommonService } from './common.service';
+import { CommonService } from './abstract/common.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
 

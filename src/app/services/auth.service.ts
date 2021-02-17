@@ -2,29 +2,23 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Observable, Subscription } from 'rxjs';
-import { CommonService } from './common.service';
-import { ProfileService } from './profile.service';
+import { Observable } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { first } from 'rxjs/operators';
 import { ProfileContent } from '../view/profile/profile.content';
+import { BlogContent } from '../view/blog/blog.content';
+import { TalkContent } from '../view/talk/talk.content';
+import { CategoryContent } from '../view/blog/category/category.content';
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  userSub: Subscription;
-
   constructor(
+    public firestore: AngularFirestore,
     private router: Router,
     private toastHelper: ToastHelper,
-    private firestore: AngularFirestore,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
   ) { }
 
-  /**
-   * Initiate the password reset process for this user
-   * @param email email of the user
-   */
   resetPassword(): void {
     this.toastHelper.showPrompt('Reset Password', 'Please Enter your email').then(email => {
       this.afAuth.sendPasswordResetEmail(`${email}`, { url: `${window.location.origin}/sign-in` })
@@ -54,17 +48,26 @@ export class AuthService {
     return this.afAuth.currentUser;
   }
 
-  async isOwner(): Promise<boolean> {
-    return new Promise(async (resolve) => {
-      if (!this.isSignedIn()) {
-        return resolve(false);
-      }
-
-      this.userSub?.unsubscribe();
+  async makeCollectionIfNotExist(uid: string): Promise<void> {
+    const isExists = await this.isExists(`profiles/${uid}`);
+    if (!isExists) {
       const authUser = await this.getAuthUser();
-      const currentUser = this.getCurrentUser();
-      resolve(currentUser?.uid === authUser?.uid);
-    });
+
+      // Init Profile Data
+      await this.set(`profiles/${authUser.uid}`, new ProfileContent());
+
+      // Init Profile Data
+      await this.set(`talks/${authUser.uid}`, new TalkContent());
+
+      // Init Blog Data
+      await this.set(`blogs/${authUser.uid}`, new BlogContent());
+      const newCategoryContent = new CategoryContent();
+      newCategoryContent.blogId = authUser.uid;
+      await this.create(`blogs/${authUser.uid}/categories`, newCategoryContent);
+      const newBlogContent = new BlogContent();
+      newBlogContent.categoryOrder.push(newCategoryContent.id);
+      await this.set(`blogs/${authUser.uid}`, newBlogContent);
+    }
   }
 
   async signInSuccess(event): Promise<void> {
@@ -79,6 +82,7 @@ export class AuthService {
       uid: event.uid,
       userName: profile.data()?.userName || event.uid,
     };
+    await this.makeCollectionIfNotExist(event.uid);
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     this.toastHelper.showSuccess(`Hello ${currentUser.userName}`, null);
     this.router.navigate(['/profile', currentUser.userName]);
@@ -110,6 +114,30 @@ export class AuthService {
     this.afAuth.signOut().then(() => {
       localStorage.removeItem('currentUser');
       this.router.navigate(['/sign-in']);
+    });
+  }
+
+  async create(path: string, content: any): Promise<void> {
+    content.ownerId = this.getCurrentUser()?.uid;
+    return this.firestore.collection(path).add(JSON.parse(JSON.stringify(content)))
+    .then(async (collection) => {
+      content.id = collection.id;
+      return collection.update(JSON.parse(JSON.stringify(content)));
+    });
+  }
+
+  async set(path: string, content: any): Promise<void> {
+    const {uid, userName} = this.getCurrentUser() || {};
+    content.id = uid;
+    content.ownerId = uid;
+    content.userName = userName || uid;
+    return await this.firestore.doc(path).set(JSON.parse(JSON.stringify(content)));
+  }
+
+  async isExists(path: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const content = await this.firestore.doc(path).get().toPromise();
+      resolve(content.exists);
     });
   }
 }

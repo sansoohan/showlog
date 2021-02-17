@@ -11,7 +11,7 @@ import { FormHelper } from 'src/app/helper/form.helper';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { PostImageContent } from '../view/blog/post/post-image.content';
-import { CommonService } from './common.service';
+import { CommonService } from './abstract/common.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
 

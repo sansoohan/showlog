@@ -62,7 +62,6 @@ export class BlogComponent implements OnInit, OnDestroy {
     public routerHelper: RouterHelper,
     private blogService: BlogService,
     public authService: AuthService,
-    private firestore: AngularFirestore,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.isPage = true;
@@ -78,16 +77,6 @@ export class BlogComponent implements OnInit, OnDestroy {
         this.blogContents = blogContents;
         this.blogContents = blogContents;
         if (this.blogContents.length === 0) {
-          const authUser = await this.authService.getAuthUser();
-          const isExists = await this.blogService.isExists(`blogs/${authUser.uid}`);
-          if (!isExists) {
-            const newCategoryContent = new CategoryContent();
-            newCategoryContent.blogId = authUser.uid;
-            await this.blogService.create(`blogs/${authUser.uid}/categories`, newCategoryContent);
-            const newBlogContent = new BlogContent();
-            newBlogContent.categoryOrder.push(newCategoryContent.id);
-            await this.blogService.set(`blogs/${authUser.uid}`, newBlogContent);
-          }
           const currentUser = this.authService.getCurrentUser();
           this.routerHelper.goToBlogPrologue({userName: currentUser?.userName || 'sansoohan'});
         }
