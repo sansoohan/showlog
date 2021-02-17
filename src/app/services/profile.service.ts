@@ -6,7 +6,7 @@ import { ProfileContent } from '../view/profile/profile.content';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
-import { CommonService } from './common.service';
+import { CommonService } from './abstract/common.service';
 import { AuthService } from './auth.service';
 import { RouterHelper } from '../helper/router.helper';
 

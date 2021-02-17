@@ -37,11 +37,6 @@ export class TalkComponent implements OnInit, OnDestroy {
       this.talkSub = this.talkContentsObserver?.subscribe(async (talkContents) => {
         this.talkContents = talkContents;
         if (this.talkContents.length === 0) {
-          const authUser = await this.authService.getAuthUser();
-          const isExists = await this.talkService.isExists(`talks/${authUser.uid}`);
-          if (!isExists) {
-            await this.talkService.set(`talks/${authUser.uid}`, new TalkContent());
-          }
           const currentUser = this.authService.getCurrentUser();
           this.routerHelper.goToTalk({userName: currentUser?.userName || 'sansoohan'});
         }

@@ -52,11 +52,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.profileSub = this.profileContentsObserver?.subscribe(async (profileContents) => {
         this.profileContents = profileContents;
         if (this.profileContents.length === 0) {
-          const authUser = await this.authService.getAuthUser();
-          const isExists = await this.profileService.isExists(`profiles/${authUser.uid}`);
-          if (!isExists) {
-            await this.profileService.set(`profiles/${authUser.uid}`, new ProfileContent());
-          }
           const currentUser = this.authService.getCurrentUser();
           this.routerHelper.goToProfile({userName: currentUser?.userName || 'sansoohan'});
         }
