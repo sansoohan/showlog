@@ -27,8 +27,8 @@
         <span *ngFor="let postImageContent of postImageContents; let i=index">
           <div class="thumbnail">
             <img
-              [src]="postImageContent.postImageUrl"
-              [class.portrait]="postImageContent.width < postImageContent.height"
+              [src]="postImageContent.attributes.src"
+              [class.portrait]="dataTransferHelper.isPortraitImage(postImageContent)"
               (click)="handleClickRemovePostImage(postImageContent)"
               alt="Image"
             />

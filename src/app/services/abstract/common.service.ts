@@ -29,11 +29,17 @@ export abstract class CommonService {
       return collection.update(JSON.parse(JSON.stringify(content)));
     });
   }
+  newId(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let autoId = '';
+    for (let i = 0; i < 20; i++) {
+      autoId += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return autoId;
+  }
   async set(path: string, content: any): Promise<void> {
-    const {uid, userName} = this.authService.getCurrentUser() || {};
-    content.id = uid;
+    const {uid} = this.authService.getCurrentUser() || {};
     content.ownerId = uid;
-    content.userName = userName || uid;
     return await this.firestore.doc(path).set(JSON.parse(JSON.stringify(content)));
   }
   async isExists(path: string): Promise<boolean> {

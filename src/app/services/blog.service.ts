@@ -6,7 +6,7 @@ import { PostContent } from '../view/blog/post/post.content';
 import { CategoryContent } from '../view/blog/category/category.content';
 import { CommentContent } from '../view/blog/post/comment/comment.content';
 import { AuthService } from './auth.service';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormControl } from '@angular/forms';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireStorage } from '@angular/fire/storage';
@@ -14,6 +14,7 @@ import { PostImageContent } from '../view/blog/post/post-image.content';
 import { CommonService } from './abstract/common.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
+import { DataTransferHelper } from '../helper/data-transefer.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,7 @@ export class BlogService extends CommonService {
     private formHelper: FormHelper,
     private toastHelper: ToastHelper,
     private storage: AngularFireStorage,
+    private dataTransferHelper: DataTransferHelper,
   ) {
     super(authService, firestore);
   }
@@ -55,7 +57,7 @@ export class BlogService extends CommonService {
       return await new Promise((resolve, reject) => {
         const fileRefSubscribe = this.storage.ref(filePath)
         .getDownloadURL().subscribe(postImageUrl => {
-          content.postImageUrl = postImageUrl;
+          content.attributes.src = postImageUrl;
           collection.update(Object.assign({}, content));
           this.toastHelper.showSuccess('Post Image', 'Your Post Image is uploaded!');
           fileRefSubscribe.unsubscribe();

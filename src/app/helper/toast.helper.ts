@@ -100,15 +100,15 @@ export class ToastHelper {
       title,
       html: `
         <div class="d-flex">
-          <img src="${postImageContent.postImageUrl}" style="width:300px;">
+          <img src="${postImageContent.attributes?.src}" style="width:300px;">
           <div class="my-auto">
             <div class="d-flex mb-2">
               <p style="width:70px;" class="my-auto">Width</p>
-              <input id="swal-input1" type="text" class="form-control" style="width:70px;" value="${postImageContent.width}"></input>
+              <input id="swal-input1" type="text" class="form-control" style="width:70px;" value="${postImageContent.attributes?.width}"></input>
             </div>
             <div class="d-flex">
               <p style="width:70px;" class="my-auto">Height</p>
-              <input id="swal-input2" type="text" class="form-control" style="width:70px;" value="${postImageContent.height}"></input>
+              <input id="swal-input2" type="text" class="form-control" style="width:70px;" value="${postImageContent.attributes?.height}"></input>
             </div>
           </div>
         </div>

@@ -114,14 +114,14 @@
 
     <button
       *ngIf="authService.isSignedIn()"
-      class="btn btn-secondary sign-in-button"
+      class="btn btn-secondary sign-in-out-button"
       (click)="authService.onSignOut()"
     >Sign Out</button>
     <button
       *ngIf="!authService.isSignedIn()"
       routerLink="/sign-in"
       routerLinkActive="active"
-      class="btn btn-secondary sign-in-button"
+      class="btn btn-secondary sign-in-out-button"
     >Sign In</button>
   </div>
 </nav>
