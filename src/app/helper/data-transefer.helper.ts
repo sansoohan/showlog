@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as firebase from 'firebase/app';
+import { PostImageContent } from '../view/blog/post/post-image.content';
 
 @Injectable({
   providedIn: 'root'
@@ -221,7 +222,29 @@ export class DataTransferHelper {
     }
     return inputString;
   }
+  getImageString(postImageContent: PostImageContent): string {
+    const attributeNames: Array<string> = Object.keys(postImageContent.attributes);
+    return [
+      '<img',
+      ...attributeNames.map((attributeName) => {
+        return `${attributeName}="${postImageContent.attributes[attributeName]}"`;
+      }),
+      '/>',
+    ].join(' ');
+  }
+  isPortraitImage(postImageContent: PostImageContent): boolean {
+    const {width, height} = this.getImageStyle(postImageContent);
+    return Number(width) < Number(height);
+  }
 
+  getImageStyle(postImageContent: PostImageContent): any {
+    const postImageContentStyle = {};
+    postImageContent.attributes?.style.split(';').forEach((s: string) => {
+      const [key, value] = s.split(':');
+      postImageContentStyle[key] = value;
+    });
+    return postImageContentStyle;
+  }
   numberToDateString(input: number): string {
     const SECOND = 1000;
     const MINUTE = 60 * SECOND;

@@ -1,20 +1,14 @@
 export class PostImageContent {
   id: string;
-  postImageUrl: string;
   ownerId: string;
-  width: number;
-  height: number;
+  attributes: any;
   constructor(
     id: string = '',
-    postImageUrl: string = '',
     ownerId: string = '',
-    width: number = 0,
-    height: number = 0,
+    attributes: any = {},
   ) {
     this.id = id;
-    this.postImageUrl = postImageUrl;
     this.ownerId = ownerId;
-    this.width = width;
-    this.height = height;
+    this.attributes = attributes;
   }
 }

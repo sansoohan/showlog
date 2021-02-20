@@ -75,6 +75,7 @@ export class PostComponent implements OnInit, OnDestroy {
     }
     this.paramSub = this.route.params.subscribe(params => {
       this.postContents = [new PostContent()];
+      this.postContents[0].id = this.blogService.newId();
       this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
       this.postImageContents = [];
 
@@ -136,6 +137,41 @@ export class PostComponent implements OnInit, OnDestroy {
   // tslint:disable-next-line: variable-name
   private _blogContents: Array<BlogContent>;
 
+  async updateRemovedImage(postId: string) {
+    const inputString = this.postContentsForm.controls.postMarkdown.value;
+    for (const postImageContent of this.postImageContents) {
+      // tslint:disable-next-line: no-string-literal
+      const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
+      const imageTagAttributes = imageTagAttributesList.map((tagAttribute) => {
+        const imageTagAttribute: PostImageContent = new PostImageContent();
+        tagAttribute[2].split(' ').filter(Boolean).forEach((a) => {
+          const [key, value] = a.split('=\"');
+          imageTagAttribute.attributes[key] = value.replace(/\"/g, '');
+        });
+        return imageTagAttribute;
+      });
+
+      const path = [
+        `blogs/${this.blogId}`,
+        `posts/${postId}`,
+        `images/${postImageContent.id}`,
+      ].join('/');
+
+      let isImage: boolean = false;
+      for (const tagAttribute of imageTagAttributes) {
+        isImage = tagAttribute?.attributes.id === postImageContent.id;
+        if (isImage) {
+          tagAttribute.id = postImageContent.attributes.id;
+          tagAttribute.ownerId = postImageContent.attributes.ownerId;
+          await this.blogService.update(path, tagAttribute);
+        }
+      }
+      if (!isImage) {
+        await this.blogService.delete(path);
+      }
+    }
+  }
+
   handleClickStartUploadPostImageSrc() {
     this.toastHelper.uploadImage('Select Your Post Image', false).then((data) => {
       if (data.value) {
@@ -143,21 +179,27 @@ export class PostComponent implements OnInit, OnDestroy {
         const img = new Image();
         const objectUrl = _URL.createObjectURL(data.value);
         img.onload = async () => {
-          const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
+          const postId = this.params.postId || this.postContents[0].id;
+          console.log(postId);
+          const path = `blogs/${this.blogId}/posts/${postId}/images`;
           let postImageContent = new PostImageContent();
-          postImageContent.width = img.width;
-          postImageContent.height = img.height;
+          postImageContent.attributes.style = [
+            `width:${img.width}`,
+            `height:${img.height}`,
+            `max-width:100%`,
+            `object-fit:contain`,
+          ].join(';');
           postImageContent = await this.blogService.addImageOnPost(
             data.value, path, postImageContent
           );
-
+          postImageContent.attributes.id = postImageContent.id;
           _URL.revokeObjectURL(objectUrl);
           const startPosition = this.postTextArea.nativeElement.selectionStart;
           const endPosition = this.postTextArea.nativeElement.selectionEnd;
           // Check if you've selected text
           if (startPosition === endPosition) {
             const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
-              + `<img src="${postImageContent.postImageUrl}" alt="PostImage" style="max-width:100%;"/>`
+              + this.dataTransferHelper.getImageString(postImageContent)
               + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
             this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
           }
@@ -204,7 +246,7 @@ export class PostComponent implements OnInit, OnDestroy {
     return this.postContentsForm?.controls?.postMarkdown?.value?.match(/\n/g)?.length + 2 || 3;
   }
 
-  handleClickEditPostCreateUpdate() {
+  async handleClickEditPostCreateUpdate() {
     if (this.isEditingPost){
       this.hasNullPostTitleError = false;
       if (!this.postContentsForm.value.postTitle){
@@ -226,16 +268,11 @@ export class PostComponent implements OnInit, OnDestroy {
         this.blogService.update(
           `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
           selectedCategory
-        ).then(() => {
-          this.blogService
-          .create(`blogs/${this.blogContents[0].id}/posts`, newPost)
-          .then(() => {
-            this.toastHelper.showSuccess('Post Update', 'Success!');
-            this.routerHelper.goToBlogPost(this.params, this.postContentsForm.value.id);
-          })
-          .catch(e => {
-            this.toastHelper.showWarning('Post Update Failed.', e);
-          });
+        ).then(async () => {
+          await this.blogService.set(`blogs/${this.blogContents[0].id}/posts/${newPost.id}`, newPost);
+          await this.updateRemovedImage(newPost.id);
+          this.toastHelper.showSuccess('Post Update', 'Success!');
+          this.routerHelper.goToBlogPost(this.params, newPost.id);
         })
         .catch(e => {
           this.toastHelper.showWarning('Post Update Failed.', e);
@@ -250,6 +287,8 @@ export class PostComponent implements OnInit, OnDestroy {
 
   async handleClickEditPostUpdate() {
     if (this.isEditingPost){
+      await this.updateRemovedImage(this.postContentsForm.value.id);
+
       this.blogService
       .update(
         `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`,
