@@ -36,6 +36,10 @@ export class BlogService extends CommonService {
     super(authService, firestore);
   }
 
+  removeImageOnPost(path: string): Promise<void> {
+    return this.storage.storage.ref(path).delete();
+  }
+
   async addImageOnPost(file: File, path: string, content: PostImageContent): Promise<any> {
     if (!this.authService.isSignedIn()) {
       return;
@@ -52,7 +56,7 @@ export class BlogService extends CommonService {
     .add(Object.assign({}, content))
     .then(async (collection) => {
       content.id = collection.id;
-      const filePath = `users/${content.ownerId}/${path}/${collection.id}`;
+      const filePath = `${path}/${collection.id}`;
       await this.storage.upload(filePath, file);
       return await new Promise((resolve, reject) => {
         const fileRefSubscribe = this.storage.ref(filePath)

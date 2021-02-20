@@ -41,6 +41,7 @@ export class PostComponent implements OnInit, OnDestroy {
   postContentsSub: Subscription;
   postContentsForm: any;
   hasNullPostTitleError: boolean;
+  postId: string;
 
   postListObserver: Observable<PostContent[]>;
   postList: PostContent[];
@@ -51,7 +52,9 @@ export class PostComponent implements OnInit, OnDestroy {
   isLoading: boolean;
   updateOk: boolean;
 
+  queryParamSub: Subscription;
   paramSub: Subscription;
+  queryParams: any;
   params: any;
 
   constructor(
@@ -74,63 +77,71 @@ export class PostComponent implements OnInit, OnDestroy {
       return;
     }
     this.paramSub = this.route.params.subscribe(params => {
-      this.postContents = [new PostContent()];
-      this.postContents[0].id = this.blogService.newId();
-      this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
-      this.postImageContents = [];
+      this.queryParamSub = this.route.queryParams.subscribe(queryParams => {
+        this.queryParams = queryParams;
+        this.isCreatingPost = !!queryParams.isCreatingPost;
 
-      this.hasNullPostTitleError = false;
-      this.isEditingCategory = false;
-      this.params = params;
+        this.params = params;
+        this.postContents = [new PostContent()];
+        this.postContents[0].id = this.blogService.newId();
+        this.postId = this.params.postId || this.postContents[0].id;
+        this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
+        this.postImageContents = [];
 
-      this.isPage = true;
-      this.isLoading = true;
-      this._blogContents = blogContents;
-      this.blogId = blogContents[0].id;
+        this.hasNullPostTitleError = false;
+        this.isEditingCategory = false;
 
-      if (this.params?.postId) {
+        this.isPage = true;
+        this.isLoading = true;
+        this._blogContents = blogContents;
+        this.blogId = blogContents[0].id;
+
         this.postImageContentsObserver = this.blogService.getPostImageContentsObserver(
-          blogContents[0].id, this.params.postId
+          blogContents[0].id, this.postId
         );
         this.postImageContentsSub = this.postImageContentsObserver.subscribe(postImageContents => {
           this.postImageContents = postImageContents;
         });
-      }
 
-      this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
-      this.categoryContentsSub = this.categoryContentsObserver.subscribe(categoryContents => {
-        if (!categoryContents || categoryContents.length === 0){
-          this.isPage = false;
-          return;
-        }
+        this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
+        this.categoryContentsSub = this.categoryContentsObserver.subscribe(categoryContents => {
+          if (!categoryContents || categoryContents.length === 0){
+            this.isPage = false;
+            return;
+          }
 
-        this.categoryContents = categoryContents.map((categoryContent) => {
-          categoryContent.categoryNumber = blogContents[0].categoryOrder
-          .findIndex(categoryId => categoryId === categoryContent.id);
-          return categoryContent;
-        });
-
-        this.categoryContents.sort((categoryA: CategoryContent, categoryB: CategoryContent) =>
-        categoryA.categoryNumber - categoryB.categoryNumber);
-
-        this.categoryContentsForm =
-          this.formHelper.buildFormRecursively({categoryContents: this.categoryContents});
-
-        if (this.params?.postId) {
-          this.postContentsObserver = this.blogService.getPostContentsObserver(
-            {params: this.params}, this.blogId
-          );
-          this.postContentsSub = this.postContentsObserver.subscribe(postContents => {
-            this.postContents = postContents;
-            if (this.postContents.length === 0 || !this.postContents) {
-              this.isPage = false;
-              return;
-            }
-            this.postContents[0].postMarkdown = this.postContents[0].postMarkdown.replace(/\\n/g, '\n');
-            this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
+          this.categoryContents = categoryContents.map((categoryContent) => {
+            categoryContent.categoryNumber = blogContents[0].categoryOrder
+            .findIndex(categoryId => categoryId === categoryContent.id);
+            return categoryContent;
           });
-        }
-        this.isLoading = false;
+
+          this.categoryContents.sort((categoryA: CategoryContent, categoryB: CategoryContent) =>
+          categoryA.categoryNumber - categoryB.categoryNumber);
+
+          this.categoryContentsForm =
+            this.formHelper.buildFormRecursively({categoryContents: this.categoryContents});
+
+          if (!this.isCreatingPost) {
+            this.postContentsObserver = this.blogService.getPostContentsObserver({
+              params: {
+                postId: this.postId,
+                blogId: this.blogId,
+              }
+            }, this.blogId);
+            this.postContentsSub = this.postContentsObserver.subscribe(postContents => {
+              this.postContents = postContents;
+              if (postContents.length === 0) {
+                this.isPage = false;
+                return;
+              }
+              this.postContents[0].postMarkdown = this.postContents[0]?.postMarkdown.replace(/\\n/g, '\n');
+              this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
+            });
+          }
+
+          this.isLoading = false;
+        });
       });
     });
   }
@@ -157,6 +168,7 @@ export class PostComponent implements OnInit, OnDestroy {
         `images/${postImageContent.id}`,
       ].join('/');
 
+      // tslint:disable-next-line: no-inferrable-types
       let isImage: boolean = false;
       for (const tagAttribute of imageTagAttributes) {
         isImage = tagAttribute?.attributes.id === postImageContent.id;
@@ -167,6 +179,7 @@ export class PostComponent implements OnInit, OnDestroy {
         }
       }
       if (!isImage) {
+        await this.blogService.removeImageOnPost(path);
         await this.blogService.delete(path);
       }
     }
@@ -179,9 +192,7 @@ export class PostComponent implements OnInit, OnDestroy {
         const img = new Image();
         const objectUrl = _URL.createObjectURL(data.value);
         img.onload = async () => {
-          const postId = this.params.postId || this.postContents[0].id;
-          console.log(postId);
-          const path = `blogs/${this.blogId}/posts/${postId}/images`;
+          const path = `blogs/${this.blogId}/posts/${this.postId}/images`;
           let postImageContent = new PostImageContent();
           postImageContent.attributes.style = [
             `width:${img.width}`,
@@ -348,6 +359,7 @@ export class PostComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.paramSub?.unsubscribe();
+    this.queryParamSub?.unsubscribe();
     this.postContentsSub?.unsubscribe();
     this.categoryContentsSub?.unsubscribe();
     this.postImageContentsSub?.unsubscribe();
