@@ -239,10 +239,11 @@ export class DataTransferHelper {
 
   getImageStyle(postImageContent: PostImageContent): any {
     const postImageContentStyle = {};
-    postImageContent.attributes?.style.split(';').forEach((s: string) => {
-      const [key, value] = s.split(':');
+    const splitedStyle = postImageContent.attributes.style.split(/;/g);
+    for (const s of splitedStyle) {
+      const [key, value] = s.split(/:/g);
       postImageContentStyle[key] = value;
-    });
+    }
     return postImageContentStyle;
   }
   numberToDateString(input: number): string {

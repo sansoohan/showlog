@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { PostImageContent } from '../view/blog/post/post-image.content';
+import { DataTransferHelper } from './data-transefer.helper';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class ToastHelper {
-  constructor() { }
+  constructor(
+    private dataTransferHelper: DataTransferHelper,
+  ) { }
 
   showError(title: string, text: string) {
     Swal.fire({ title, text, icon: 'error' });
@@ -89,6 +92,9 @@ export class ToastHelper {
     title,
     postImageContent: PostImageContent
   ): Promise<SweetAlertResult> {
+    const imageStyle = this.dataTransferHelper.getImageStyle(postImageContent);
+    console.log(imageStyle);
+
     return Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
@@ -100,15 +106,27 @@ export class ToastHelper {
       title,
       html: `
         <div class="d-flex">
-          <img src="${postImageContent.attributes?.src}" style="width:300px;">
+          ${this.dataTransferHelper.getImageString(postImageContent)}
           <div class="my-auto">
             <div class="d-flex mb-2">
               <p style="width:70px;" class="my-auto">Width</p>
-              <input id="swal-input1" type="text" class="form-control" style="width:70px;" value="${postImageContent.attributes?.width}"></input>
+              <input
+                id="swal-input1"
+                type="text"
+                class="form-control"
+                style="width:70px;"
+                value="${imageStyle?.width || '100%'}"
+              />
             </div>
             <div class="d-flex">
               <p style="width:70px;" class="my-auto">Height</p>
-              <input id="swal-input2" type="text" class="form-control" style="width:70px;" value="${postImageContent.attributes?.height}"></input>
+              <input
+                id="swal-input2"
+                type="text"
+                class="form-control"
+                style="width:70px;"
+                value="${imageStyle?.height || ''}"
+              />
             </div>
           </div>
         </div>
