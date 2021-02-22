@@ -13,7 +13,7 @@
     [blogContents]="blogContents"
     [postImageContents]="postImageContents"
     (clickStartUploadPostImageSrc)="handleClickStartUploadPostImageSrc()"
-    (clickRemovePostImage)="handleClickRemovePostImage($event)"
+    (clickEditPostImage)="handleClickEditPostImage($event)"
   ></app-blog-left-sidebar>
   <div class="blog-post">
     <form *ngIf="postContentsForm" [formGroup]="postContentsForm">

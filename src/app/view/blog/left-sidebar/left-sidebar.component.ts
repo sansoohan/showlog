@@ -26,7 +26,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Input() categoryContents: Array<CategoryContent>;
   @Input() blogContents: Array<BlogContent>;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
-  @Output() clickRemovePostImage: EventEmitter<PostImageContent> = new EventEmitter();
+  @Output() clickEditPostImage: EventEmitter<PostImageContent> = new EventEmitter();
 
   paramSub: Subscription;
   params: any;
@@ -259,8 +259,8 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     this.clickStartUploadPostImageSrc.emit();
   }
 
-  handleClickRemovePostImage(postImageContent: PostImageContent): void {
-    this.clickRemovePostImage.emit(postImageContent);
+  handleClickEditPostImage(postImageContent: PostImageContent): void {
+    this.clickEditPostImage.emit(postImageContent);
   }
 
   ngOnInit(): void {

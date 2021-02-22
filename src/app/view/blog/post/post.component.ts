@@ -57,6 +57,8 @@ export class PostComponent implements OnInit, OnDestroy {
   queryParams: any;
   params: any;
 
+  removeImageTag: string;
+
   constructor(
     public profileService: ProfileService,
     private toastHelper: ToastHelper,
@@ -148,7 +150,7 @@ export class PostComponent implements OnInit, OnDestroy {
   // tslint:disable-next-line: variable-name
   private _blogContents: Array<BlogContent>;
 
-  async updateRemovedImage(postId: string) {
+  async updateRemovedImage() {
     const inputString = this.postContentsForm.controls.postMarkdown.value;
     for (const postImageContent of this.postImageContents) {
       // tslint:disable-next-line: no-string-literal
@@ -164,7 +166,7 @@ export class PostComponent implements OnInit, OnDestroy {
 
       const path = [
         `blogs/${this.blogId}`,
-        `posts/${postId}`,
+        `posts/${this.postId}`,
         `images/${postImageContent.id}`,
       ].join('/');
 
@@ -195,8 +197,8 @@ export class PostComponent implements OnInit, OnDestroy {
           const path = `blogs/${this.blogId}/posts/${this.postId}/images`;
           let postImageContent = new PostImageContent();
           postImageContent.attributes.style = [
-            `width:${img.width}`,
-            `height:${img.height}`,
+            `width:${img.width}px`,
+            `height:${img.height}px`,
             `max-width:100%`,
             `object-fit:contain`,
           ].join(';');
@@ -223,20 +225,46 @@ export class PostComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleClickRemovePostImage(postImageContent: PostImageContent): void {
-    console.log(postImageContent);
-    this.toastHelper.editImage('Edit Image', postImageContent)
-    .then((result) => {
-      if (result.value) {
-        console.log(result.value);
-        postImageContent = Object.assign(postImageContent, result.value);
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // const firestorePath = `blogs/${this.blogId}/posts/${this.params.postId}/images/${}`;
-        // const storagePath = `blogs/${this.blogId}/postImages/${postImageContent}`;
-      }
-    }).catch(e => {
-      this.toastHelper.showWarning('Edit Image Failed.', e);
+  async handleClickEditPostImage(postImageContent: PostImageContent): Promise<void> {
+    const path = [
+      `blogs/${this.blogId}`,
+      `posts/${this.postId}`,
+      `images/${postImageContent.id}`,
+    ].join('/');
+    let inputString = this.postContentsForm.controls.postMarkdown.value;
+    // tslint:disable-next-line: no-string-literal
+    const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
+    const imageTag = imageTagAttributesList.find((tagAttribute) => {
+      const imageTagAttribute: PostImageContent = new PostImageContent();
+      tagAttribute[2].split(' ').filter(Boolean).forEach((a) => {
+        const [key, value] = a.split('=\"');
+        imageTagAttribute.attributes[key] = value.replace(/\"/g, '');
+      });
+      return imageTagAttribute.attributes.id === postImageContent.id;
     });
+
+    const result = await this.toastHelper.editImage('Edit Image', postImageContent);
+    const [imageTagString] = imageTag;
+    if (result.value) {
+      let imageStyle = this.dataTransferHelper.getImageStyle(postImageContent);
+      imageStyle = Object.assign(imageStyle, result.value);
+      const imageStyleNames = Object.keys(imageStyle);
+      const imageStyleString = imageStyleNames.map((imageStyleName) => {
+        return [imageStyleName, imageStyle[imageStyleName]].join(':');
+      }).join(';');
+      postImageContent.attributes.style = imageStyleString;
+      inputString = inputString.replace(
+        imageTagString,
+        this.dataTransferHelper.getImageString(postImageContent),
+      );
+      this.postContentsForm.controls.postMarkdown.setValue(inputString);
+      await this.blogService.update(path, postImageContent);
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      inputString = inputString.replace(imageTagString, '');
+      this.postContentsForm.controls.postMarkdown.setValue(inputString);
+      await this.blogService.removeImageOnPost(path);
+      await this.blogService.delete(path);
+    }
   }
 
   getCategoryTitle(categoryId: string): string {
@@ -245,19 +273,19 @@ export class PostComponent implements OnInit, OnDestroy {
     return category?.value.categoryTitle;
   }
 
-  clickPostEdit() {
+  clickPostEdit(): void {
     this.isEditingPost = true;
   }
 
-  clickPostEditCancel(){
+  clickPostEditCancel(): void {
     this.isEditingPost = false;
   }
 
-  getPostMarkdownLines(){
+  getPostMarkdownLines(): number {
     return this.postContentsForm?.controls?.postMarkdown?.value?.match(/\n/g)?.length + 2 || 3;
   }
 
-  async handleClickEditPostCreateUpdate() {
+  async handleClickEditPostCreateUpdate(): Promise<void> {
     if (this.isEditingPost){
       this.hasNullPostTitleError = false;
       if (!this.postContentsForm.value.postTitle){
@@ -281,7 +309,7 @@ export class PostComponent implements OnInit, OnDestroy {
           selectedCategory
         ).then(async () => {
           await this.blogService.set(`blogs/${this.blogContents[0].id}/posts/${newPost.id}`, newPost);
-          await this.updateRemovedImage(newPost.id);
+          await this.updateRemovedImage();
           this.toastHelper.showSuccess('Post Update', 'Success!');
           this.routerHelper.goToBlogPost(this.params, newPost.id);
         })
@@ -292,13 +320,13 @@ export class PostComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleClickEditPostCreateCancel() {
+  handleClickEditPostCreateCancel(): void {
     this.routerHelper.goToBlogCategory(this.params, this.params.categoryId);
   }
 
-  async handleClickEditPostUpdate() {
+  async handleClickEditPostUpdate(): Promise<void> {
     if (this.isEditingPost){
-      await this.updateRemovedImage(this.postContentsForm.value.id);
+      await this.updateRemovedImage();
 
       this.blogService
       .update(
@@ -315,7 +343,7 @@ export class PostComponent implements OnInit, OnDestroy {
     this.isEditingPost = false;
   }
 
-  async handleClickEditPostDelete() {
+  async handleClickEditPostDelete(): Promise<void> {
     this.toastHelper.askYesNo('Remove Post', 'Are you sure?').then((result) => {
       if (result.value) {
         this.isLoading = true;
@@ -353,11 +381,11 @@ export class PostComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
 
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
     this.postContentsSub?.unsubscribe();
