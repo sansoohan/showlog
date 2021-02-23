@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormGroup, AbstractControl } from '@angular/forms';
-import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { Subscription } from 'rxjs';
@@ -10,7 +10,7 @@ import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
 import { ToastHelper } from 'src/app/helper/toast.helper';
-import { PostImageContent } from '../post/post-image.content';
+import { ImageContent, ImageHelper } from 'src/app/helper/image.helper';
 
 @Component({
   selector: 'app-blog-left-sidebar',
@@ -22,11 +22,11 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Input() isEditingCategory: boolean;
   @Input() isAddingCategory: boolean;
   @Input() categoryContentsForm: FormGroup;
-  @Input() postImageContents: Array<PostImageContent>;
+  @Input() imageContents: Array<ImageContent>;
   @Input() categoryContents: Array<CategoryContent>;
   @Input() blogContents: Array<BlogContent>;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
-  @Output() clickEditPostImage: EventEmitter<PostImageContent> = new EventEmitter();
+  @Output() clickEditPostImage: EventEmitter<ImageContent> = new EventEmitter();
 
   paramSub: Subscription;
   params: any;
@@ -38,6 +38,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     public blogService: BlogService,
     public dataTransferHelper: DataTransferHelper,
+    public imageHelper: ImageHelper,
     public routerHelper: RouterHelper,
     public formHelper: FormHelper,
     private toastHelper: ToastHelper,
@@ -49,13 +50,6 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       this.params = params;
     });
   }
-
-  // isPortraitImage(imageId: string): boolean {
-  //   const image = document.getElementById(imageId);
-  //   const imageWidth = image?.offsetWidth || 0;
-  //   const imageHeight = image?.offsetHeight || 0;
-  //   return imageWidth < imageHeight;
-  // }
 
   addCategory(
     blogContents: Array<BlogContent>,
@@ -259,8 +253,8 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     this.clickStartUploadPostImageSrc.emit();
   }
 
-  handleClickEditPostImage(postImageContent: PostImageContent): void {
-    this.clickEditPostImage.emit(postImageContent);
+  handleClickEditPostImage(imageContent: ImageContent): void {
+    this.clickEditPostImage.emit(imageContent);
   }
 
   ngOnInit(): void {

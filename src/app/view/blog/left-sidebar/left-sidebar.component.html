@@ -24,12 +24,12 @@
         >Add Image</Button>
       </div>
       <div class="nav-item d-flex flex-wrap">
-        <span *ngFor="let postImageContent of postImageContents; let i=index">
+        <span *ngFor="let imageContent of imageContents; let i=index">
           <div class="thumbnail">
             <img
-              [src]="postImageContent.attributes.src"
-              [class.portrait]="dataTransferHelper.isPortraitImage(postImageContent)"
-              (click)="handleClickEditPostImage(postImageContent)"
+              [src]="imageContent.attributes.src"
+              [class.portrait]="imageHelper.isPortraitImage(imageContent)"
+              (click)="handleClickEditPostImage(imageContent)"
               alt="Image"
             />
           </div>

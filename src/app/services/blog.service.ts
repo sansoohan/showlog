@@ -10,11 +10,11 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { PostImageContent } from '../view/blog/post/post-image.content';
+import { ImageContent } from '../helper/image.helper';
 import { CommonService } from './abstract/common.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
-import { DataTransferHelper } from '../helper/data-transefer.helper';
+import { DataTransferHelper } from '../helper/data-transfer.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -34,54 +34,6 @@ export class BlogService extends CommonService {
     private dataTransferHelper: DataTransferHelper,
   ) {
     super(authService, firestore);
-  }
-
-  removeImageOnPost(path: string): Promise<void> {
-    return this.storage.storage.ref(path).delete();
-  }
-
-  async addImageOnPost(file: File, path: string, content: PostImageContent): Promise<any> {
-    if (!this.authService.isSignedIn()) {
-      return;
-    }
-
-    const MB = 1024 * 1024;
-    if (file.size > 10 * MB) {
-      this.toastHelper.showError('Profile Image', 'Please Upload under 10MB');
-      return;
-    }
-
-    content.ownerId = this.authService.getCurrentUser()?.uid;
-    return this.firestore.collection<PostImageContent>(path)
-    .add(Object.assign({}, content))
-    .then(async (collection) => {
-      content.id = collection.id;
-      const filePath = `${path}/${collection.id}`;
-      await this.storage.upload(filePath, file);
-      return await new Promise((resolve, reject) => {
-        const fileRefSubscribe = this.storage.ref(filePath)
-        .getDownloadURL().subscribe(postImageUrl => {
-          content.attributes.src = postImageUrl;
-          collection.update(Object.assign({}, content));
-          this.toastHelper.showSuccess('Post Image', 'Your Post Image is uploaded!');
-          fileRefSubscribe.unsubscribe();
-          resolve(content);
-        });
-      });
-    });
-  }
-
-  // const path = `blogs/${this.blogId}/posts/${this.params.postId}/images`;
-  getPostImageContentsObserver(blogId: string, postId: string): Observable<any[]> {
-    if (!blogId){
-      return;
-    }
-    const postImageContentsObserver = this.firestore
-    .collection<BlogContent>('blogs').doc(blogId)
-    .collection<PostContent>('posts').doc(postId)
-    .collection<CategoryContent>('images')
-    .valueChanges();
-    return postImageContentsObserver;
   }
 
   getBlogContentsObserver({params = null}): Observable<BlogContent[]> {

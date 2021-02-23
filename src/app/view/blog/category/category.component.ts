@@ -9,7 +9,7 @@ import { CategoryContent } from '../category/category.content';
 import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
-import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 
 @Component({
   selector: 'app-blog-category',

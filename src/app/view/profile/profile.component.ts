@@ -18,7 +18,6 @@ import { ToastHelper } from 'src/app/helper/toast.helper';
 export class ProfileComponent implements OnInit, OnDestroy {
   profileContentsObserver: Observable<ProfileContent[]>;
   profileContents: ProfileContent[];
-  defaultSrc: any;
   isEditing: boolean;
   isPage: boolean;
   isLoading: boolean;
@@ -49,7 +48,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.hasUserEmailCollision = false;
       this.params = params;
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
-      this.profileSub = this.profileContentsObserver?.subscribe(async (profileContents) => {
+      this.profileSub = this.profileContentsObserver?.subscribe((profileContents) => {
         this.profileContents = profileContents;
         if (this.profileContents.length === 0) {
           const currentUser = this.authService.getCurrentUser();

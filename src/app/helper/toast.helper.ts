@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import Swal, { SweetAlertResult } from 'sweetalert2';
-import { PostImageContent } from '../view/blog/post/post-image.content';
-import { DataTransferHelper } from './data-transefer.helper';
+import { ImageHelper, ImageContent } from './image.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +8,7 @@ import { DataTransferHelper } from './data-transefer.helper';
 
 export class ToastHelper {
   constructor(
-    private dataTransferHelper: DataTransferHelper,
+    private imageHelper: ImageHelper,
   ) { }
 
   showError(title: string, text: string) {
@@ -90,10 +89,9 @@ export class ToastHelper {
 
   async editImage(
     title,
-    postImageContent: PostImageContent
+    imageContent: ImageContent
   ): Promise<SweetAlertResult> {
-    const imageStyle = this.dataTransferHelper.getImageStyle(postImageContent);
-    console.log(imageStyle);
+    const imageStyle = this.imageHelper.getImageStyle(imageContent);
 
     return Swal.mixin({
       customClass: {
@@ -106,7 +104,7 @@ export class ToastHelper {
       title,
       html: `
         <div class="d-flex">
-          ${this.dataTransferHelper.getImageString(postImageContent)}
+          ${this.imageHelper.getImageString(imageContent)}
           <div class="my-auto">
             <div class="d-flex mb-2">
               <p style="width:70px;" class="my-auto">Width</p>

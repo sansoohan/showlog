@@ -5,14 +5,15 @@ import { Observable, Subscription } from 'rxjs';
 import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
-import { PostImageContent } from './post-image.content';
 import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
-import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { ProfileService } from 'src/app/services/profile.service';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import Swal from 'sweetalert2';
+import { ImageHelper, ImageContent } from 'src/app/helper/image.helper';
+import { ImageStorage } from 'src/app/storages/image.storage';
 
 @Component({
   selector: 'app-blog-post',
@@ -32,9 +33,9 @@ export class PostComponent implements OnInit, OnDestroy {
   categoryContentsForm: any;
   isEditingCategory: boolean;
 
-  postImageContentsObserver: Observable<PostImageContent[]>;
-  postImageContents: PostImageContent[];
-  postImageContentsSub: Subscription;
+  imageContentsObserver: Observable<ImageContent[]>;
+  imageContents: ImageContent[];
+  imageContentsSub: Subscription;
 
   postContentsObserver: Observable<PostContent[]>;
   postContents: PostContent[];
@@ -61,13 +62,15 @@ export class PostComponent implements OnInit, OnDestroy {
 
   constructor(
     public profileService: ProfileService,
+    public imageHelper: ImageHelper,
+    public authService: AuthService,
+    public routerHelper: RouterHelper,
+    public dataTransferHelper: DataTransferHelper,
     private toastHelper: ToastHelper,
     private route: ActivatedRoute,
     private blogService: BlogService,
-    public authService: AuthService,
-    public routerHelper: RouterHelper,
     private formHelper: FormHelper,
-    public dataTransferHelper: DataTransferHelper,
+    private imageStorage: ImageStorage,
   ) {
     this.isPage = true;
   }
@@ -88,7 +91,7 @@ export class PostComponent implements OnInit, OnDestroy {
         this.postContents[0].id = this.blogService.newId();
         this.postId = this.params.postId || this.postContents[0].id;
         this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
-        this.postImageContents = [];
+        this.imageContents = [];
 
         this.hasNullPostTitleError = false;
         this.isEditingCategory = false;
@@ -98,11 +101,11 @@ export class PostComponent implements OnInit, OnDestroy {
         this._blogContents = blogContents;
         this.blogId = blogContents[0].id;
 
-        this.postImageContentsObserver = this.blogService.getPostImageContentsObserver(
-          blogContents[0].id, this.postId
+        this.imageContentsObserver = this.imageStorage.getImageContentsObserver(
+          `blogs/${this.blogId}/posts/${this.postId}/images`
         );
-        this.postImageContentsSub = this.postImageContentsObserver.subscribe(postImageContents => {
-          this.postImageContents = postImageContents;
+        this.imageContentsSub = this.imageContentsObserver.subscribe(imageContents => {
+          this.imageContents = imageContents;
         });
 
         this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
@@ -152,11 +155,11 @@ export class PostComponent implements OnInit, OnDestroy {
 
   async updateRemovedImage() {
     const inputString = this.postContentsForm.controls.postMarkdown.value;
-    for (const postImageContent of this.postImageContents) {
+    for (const postImageContent of this.imageContents) {
       // tslint:disable-next-line: no-string-literal
       const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
       const imageTagAttributes = imageTagAttributesList.map((tagAttribute) => {
-        const imageTagAttribute: PostImageContent = new PostImageContent();
+        const imageTagAttribute: ImageContent = new ImageContent();
         tagAttribute[2].split(' ').filter(Boolean).forEach((a) => {
           const [key, value] = a.split('=\"');
           imageTagAttribute.attributes[key] = value.replace(/\"/g, '');
@@ -181,7 +184,7 @@ export class PostComponent implements OnInit, OnDestroy {
         }
       }
       if (!isImage) {
-        await this.blogService.removeImageOnPost(path);
+        await this.imageStorage.delete(path);
         await this.blogService.delete(path);
       }
     }
@@ -193,16 +196,17 @@ export class PostComponent implements OnInit, OnDestroy {
         const _URL = window.URL || window.webkitURL;
         const img = new Image();
         const objectUrl = _URL.createObjectURL(data.value);
+        img.src = objectUrl;
         img.onload = async () => {
           const path = `blogs/${this.blogId}/posts/${this.postId}/images`;
-          let postImageContent = new PostImageContent();
+          let postImageContent = new ImageContent();
           postImageContent.attributes.style = [
             `width:${img.width}px`,
             `height:${img.height}px`,
             `max-width:100%`,
             `object-fit:contain`,
           ].join(';');
-          postImageContent = await this.blogService.addImageOnPost(
+          postImageContent = await this.imageStorage.addImage(
             data.value, path, postImageContent
           );
           postImageContent.attributes.id = postImageContent.id;
@@ -212,12 +216,11 @@ export class PostComponent implements OnInit, OnDestroy {
           // Check if you've selected text
           if (startPosition === endPosition) {
             const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
-              + this.dataTransferHelper.getImageString(postImageContent)
+              + this.imageHelper.getImageString(postImageContent)
               + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
             this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
           }
         };
-        img.src = objectUrl;
       }
       else if (data.dismiss === Swal.DismissReason.cancel) {
         // Do Nothing
@@ -225,7 +228,7 @@ export class PostComponent implements OnInit, OnDestroy {
     });
   }
 
-  async handleClickEditPostImage(postImageContent: PostImageContent): Promise<void> {
+  async handleClickEditPostImage(postImageContent: ImageContent): Promise<void> {
     const path = [
       `blogs/${this.blogId}`,
       `posts/${this.postId}`,
@@ -235,7 +238,7 @@ export class PostComponent implements OnInit, OnDestroy {
     // tslint:disable-next-line: no-string-literal
     const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
     const imageTag = imageTagAttributesList.find((tagAttribute) => {
-      const imageTagAttribute: PostImageContent = new PostImageContent();
+      const imageTagAttribute: ImageContent = new ImageContent();
       tagAttribute[2].split(' ').filter(Boolean).forEach((a) => {
         const [key, value] = a.split('=\"');
         imageTagAttribute.attributes[key] = value.replace(/\"/g, '');
@@ -246,7 +249,7 @@ export class PostComponent implements OnInit, OnDestroy {
     const result = await this.toastHelper.editImage('Edit Image', postImageContent);
     const [imageTagString] = imageTag;
     if (result.value) {
-      let imageStyle = this.dataTransferHelper.getImageStyle(postImageContent);
+      let imageStyle = this.imageHelper.getImageStyle(postImageContent);
       imageStyle = Object.assign(imageStyle, result.value);
       const imageStyleNames = Object.keys(imageStyle);
       const imageStyleString = imageStyleNames.map((imageStyleName) => {
@@ -255,14 +258,14 @@ export class PostComponent implements OnInit, OnDestroy {
       postImageContent.attributes.style = imageStyleString;
       inputString = inputString.replace(
         imageTagString,
-        this.dataTransferHelper.getImageString(postImageContent),
+        this.imageHelper.getImageString(postImageContent),
       );
       this.postContentsForm.controls.postMarkdown.setValue(inputString);
       await this.blogService.update(path, postImageContent);
     } else if (result.dismiss === Swal.DismissReason.cancel) {
       inputString = inputString.replace(imageTagString, '');
       this.postContentsForm.controls.postMarkdown.setValue(inputString);
-      await this.blogService.removeImageOnPost(path);
+      await this.imageStorage.delete(path);
       await this.blogService.delete(path);
     }
   }
@@ -390,6 +393,6 @@ export class PostComponent implements OnInit, OnDestroy {
     this.queryParamSub?.unsubscribe();
     this.postContentsSub?.unsubscribe();
     this.categoryContentsSub?.unsubscribe();
-    this.postImageContentsSub?.unsubscribe();
+    this.imageContentsSub?.unsubscribe();
   }
 }
