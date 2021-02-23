@@ -27,12 +27,12 @@ export class BlogService extends CommonService {
   constructor(
     public firestore: AngularFirestore,
     public authService: AuthService,
+    public storage: AngularFireStorage,
     private formHelper: FormHelper,
     private toastHelper: ToastHelper,
-    private storage: AngularFireStorage,
     private dataTransferHelper: DataTransferHelper,
   ) {
-    super(authService, firestore);
+    super(authService, firestore, storage);
   }
 
   getBlogContentsObserver({params = null}): Observable<BlogContent[]> {
@@ -140,9 +140,16 @@ export class BlogService extends CommonService {
       return new Promise((resolve, reject) => {
         return this
         .delete(`blogs/${blogId}/categories/${category.value.id}`, {
-          parentKeyName: null, collectionPath: `blogs/${blogId}/categories`, children: [{
-            parentKeyName: 'categoryId', collectionPath: `blogs/${blogId}/posts`, children: [{
-              parentKeyName: 'postId', collectionPath: `blogs/${blogId}/comments`, children: []
+          parentKeyName: null,
+          collectionPath: `blogs/${blogId}/categories`,
+          children: [{
+            parentKeyName: 'categoryId',
+            collectionPath: `blogs/${blogId}/posts`,
+            childrenStorage: ['images'],
+            children: [{
+              parentKeyName: 'postId',
+              collectionPath: `blogs/${blogId}/comments`,
+              children: []
             }]
           }]
         })

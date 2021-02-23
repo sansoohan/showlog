@@ -126,14 +126,11 @@ export class CategoryComponent implements OnInit, OnDestroy {
           this.selectedCategory?.value,
           ...this.selectedChildCategories.map((selectedChildCategory) => selectedChildCategory.value)
         ].filter(Boolean);
-        const categoryIds = selectedCategories.map((categoryContent) =>
-          categoryContent.id
-        );
         this.postCreatedAtList = [];
         for (const selectedCategory of selectedCategories){
           this.postCreatedAtList = [
             ...this.postCreatedAtList,
-            ...selectedCategory.postCreatedAtList
+            ...(selectedCategory.postCreatedAtList || [])
           ];
         }
         this.changePageList(null);

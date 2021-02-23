@@ -27,11 +27,26 @@ export class CommonStorage {
   async upload(path: string, file: any): Promise<string> {
     await this.storage.upload(path, file);
     return await new Promise((resolve, reject) => {
-      const fileRefSubscribe = this.storage.ref(path)
-      .getDownloadURL().subscribe(postImageUrl => {
+      const fileRefSubscribe = this.storage.ref(path).getDownloadURL().subscribe(postImageUrl => {
         fileRefSubscribe.unsubscribe();
         resolve(postImageUrl);
       });
+    });
+  }
+
+  deleteFolderContents(path) {
+    this.storage
+    .ref(path).listAll().toPromise()
+    .then(dir => {
+      dir.items.forEach(fileRef => {
+        this.delete(fileRef.fullPath);
+      });
+      dir.prefixes.forEach(folderRef => {
+        this.deleteFolderContents(folderRef.fullPath);
+      });
+    })
+    .catch(error => {
+      console.error(error);
     });
   }
 }

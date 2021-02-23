@@ -364,13 +364,15 @@ export class PostComponent implements OnInit, OnDestroy {
             selectedCategory
           ).then(() => {
             this.blogService.delete(
-              `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`,
-              {
-                parentKeyName: null, collectionPath: `blogs/${this.blogContents[0].id}/posts`, children: [
-                  {
-                    parentKeyName: 'postId', collectionPath: `blogs/${this.blogContents[0].id}/comments`, children: []
-                  }
-                ]
+              `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`, {
+                parentKeyName: null,
+                collectionPath: `blogs/${this.blogContents[0].id}/posts`,
+                childrenStorage: ['images'],
+                children: [{
+                  parentKeyName: 'postId',
+                  collectionPath: `blogs/${this.blogContents[0].id}/comments`,
+                  children: []
+                }]
               }
             )
             .then(() => {
