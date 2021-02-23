@@ -3,6 +3,8 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { AuthService } from '../auth.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
+import { AngularFireStorage } from '@angular/fire/storage';
+import { CommonStorage } from 'src/app/storages/abstract/common.storage';
 
 @Injectable({
   providedIn: 'root'
@@ -10,19 +12,36 @@ import FieldPath = firebase.firestore.FieldPath;
 export abstract class CommonService {
   authService: AuthService;
   firestore: AngularFirestore;
+  storage: AngularFireStorage;
+  commonStorage: CommonStorage;
   constructor(
     authService: AuthService,
     firestore: AngularFirestore,
+    storage: AngularFireStorage,
   ) {
     this.authService = authService;
     this.firestore = firestore;
+    this.storage = storage;
+    this.commonStorage = new CommonStorage(storage);
   }
   async update(path: string, content: any): Promise<void> {
     return this.firestore.doc(path).update(JSON.parse(JSON.stringify(content)));
   }
-  async delete(path = '', {parentKeyName = null, collectionPath = '', children = []}): Promise<void> {
+  async delete(path = '', {
+    parentKeyName = null, collectionPath = '', childrenStorage = [], children = []
+  }): Promise<void> {
     const splitedPath = path.split(/\//g);
     const docId = splitedPath[splitedPath.length - 1];
+    if (childrenStorage.length !== 0) {
+      for (const childStorage of childrenStorage) {
+        this.commonStorage.deleteFolderContents(`${path}/${childStorage}`);
+        this.firestore.collection(`${path}/${childStorage}`).get().toPromise().then((querySnapshot) => {
+          querySnapshot.docs.forEach((doc) => {
+            doc.ref.delete();
+          });
+        });
+      }
+    }
     await this.firestore.doc(path).delete();
     children.forEach(async (child) => {
       const tmpObserver = this.firestore.collection(child.collectionPath,

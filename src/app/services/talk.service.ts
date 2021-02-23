@@ -7,6 +7,7 @@ import { RoomContent } from '../view/talk/room/room.content';
 import { CommonService } from './abstract/common.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
+import { AngularFireStorage } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +16,9 @@ export class TalkService extends CommonService {
   constructor(
     public firestore: AngularFirestore,
     public authService: AuthService,
+    public storage: AngularFireStorage,
   ) {
-    super(authService, firestore);
+    super(authService, firestore, storage);
   }
 
   getTalkContentsObserver({params = null}): Observable<TalkContent[]> {

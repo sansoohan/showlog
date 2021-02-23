@@ -17,10 +17,9 @@ export class ProfileService extends CommonService {
   constructor(
     public firestore: AngularFirestore,
     public authService: AuthService,
-    private toastHelper: ToastHelper,
-    private storage: AngularFireStorage,
+    public storage: AngularFireStorage,
   ) {
-    super(authService, firestore);
+    super(authService, firestore, storage);
   }
 
   getUserEmailCollisionObserver(userEmail: string): Observable<ProfileContent[]> {

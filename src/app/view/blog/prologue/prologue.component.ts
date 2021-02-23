@@ -129,7 +129,7 @@ export class PrologueComponent implements OnInit, OnDestroy {
   getCategoryTitle(categoryId: string): string {
     const category = this.categoryContentsForm.controls.categoryContents.controls.find((categoryContent) =>
       categoryContent.value.id === categoryId);
-    return category.value.categoryTitle;
+    return category?.value?.categoryTitle || '';
   }
 
   ngOnInit(): void {

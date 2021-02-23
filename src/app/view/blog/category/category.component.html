@@ -26,13 +26,13 @@
       *ngIf="!isEditingCategory"
       class="blog-category"
     >
-      <form *ngIf="postListForm" [formGroup]="postListForm">
+      <form *ngIf="postListForm && selectedCategory" [formGroup]="postListForm">
         <div formArrayName="postList">
           <section class="container category-section">
             <div class="row category-title-row">
               <span class="col-6 category-title-col">
                 {{selectedCategory.value.categoryTitle}}
-                ({{selectedCategory.value.postCreatedAtList.length + countChildPost()}})
+                ({{selectedCategory.value.postCreatedAtList?.length || 0 + countChildPost()}})
               </span>
               <div class="col-6 d-flex">
                 <span
