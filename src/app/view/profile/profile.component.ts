@@ -9,6 +9,7 @@ import { AdditaionProfileContent } from './additional-profiles/additional-profil
 import { FormHelper } from 'src/app/helper/form.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { ToastHelper } from 'src/app/helper/toast.helper';
+import { ProjectDescription } from './projects/projects.content';
 
 @Component({
   selector: 'app-profile',
@@ -49,6 +50,22 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.params = params;
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
       this.profileSub = this.profileContentsObserver?.subscribe((profileContents) => {
+        profileContents[0].projectsContent.projects.sort((a, b) => {
+          if ((a.finishedAt || '9999-99') < (b.finishedAt || '9999-99')) {
+            return 1;
+          } else if ((a.finishedAt || '9999-99') > (b.finishedAt || '9999-99')) {
+            return -1;
+          } else {
+            if ((a.startedAt || '9999-99') > (b.startedAt || '9999-99')) {
+              return 1;
+            } else if ((a.startedAt || '9999-99') < (b.startedAt || '9999-99')) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }
+        });
+
         this.profileContents = profileContents;
         if (this.profileContents.length === 0) {
           const currentUser = this.authService.getCurrentUser();
