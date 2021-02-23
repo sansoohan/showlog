@@ -9,9 +9,8 @@ import Swal from 'sweetalert2';
 import { CategoryContent } from './category/category.content';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormHelper } from 'src/app/helper/form.helper';
-import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
-import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-blog',

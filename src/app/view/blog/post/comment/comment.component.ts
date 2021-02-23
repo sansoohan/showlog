@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommentContent } from './comment.content';
 import { BlogService } from 'src/app/services/blog.service';
 import { FormHelper } from 'src/app/helper/form.helper';
-import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { BlogContent } from '../../blog.content';
 import { ProfileService } from 'src/app/services/profile.service';
 import { ToastHelper } from 'src/app/helper/toast.helper';

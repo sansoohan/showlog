@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
-import { DataTransferHelper } from 'src/app/helper/data-transefer.helper';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { Subscription } from 'rxjs';

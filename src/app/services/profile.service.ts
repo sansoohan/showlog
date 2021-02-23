@@ -8,7 +8,6 @@ import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
 import { CommonService } from './abstract/common.service';
 import { AuthService } from './auth.service';
-import { RouterHelper } from '../helper/router.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -52,41 +51,5 @@ export class ProfileService extends CommonService {
       .valueChanges();
     }
     return profileContentsObserver;
-  }
-
-  async uploadProfileImage(file: File, profileContent: ProfileContent): Promise<void> {
-    const filePath = `profiles/${JSON.parse(localStorage.currentUser).uid}/profileImage/${file.name}`;
-    const MB = 1024 * 1024;
-    if (file.size > 4 * MB) {
-      this.toastHelper.showError('Profile Image', 'Please Upload under 4MB');
-      return;
-    }
-
-    const fileRef = this.storage.ref(filePath);
-    await this.storage.upload(filePath, file);
-    const fileRefSubscribe = fileRef.getDownloadURL().subscribe(imageUrl => {
-      profileContent.profileImageSrc = imageUrl;
-      this.update(
-        `profiles/${profileContent.id}`,
-        profileContent
-      );
-      this.toastHelper.showSuccess('Profile Image', 'Your Profile Image is uploaded!');
-      fileRefSubscribe.unsubscribe();
-    });
-  }
-
-  async removeProfileImage(profileContent: ProfileContent): Promise<void> {
-    const dirPath = `profiles/${JSON.parse(localStorage.currentUser).uid}/profileImage`;
-    const dirRef = this.storage.ref(dirPath);
-    const dirRefSubscribe = dirRef.listAll().subscribe(dir => {
-      dir.items.forEach(item => item.delete());
-      profileContent.profileImageSrc = '';
-      this.update(
-        `profiles/${profileContent.id}`,
-        profileContent
-      );
-      this.toastHelper.showInfo('Profile Image', 'Your Profile Image is removed!');
-      dirRefSubscribe.unsubscribe();
-    });
   }
 }
