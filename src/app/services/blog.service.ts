@@ -6,11 +6,10 @@ import { PostContent } from '../view/blog/post/post.content';
 import { CategoryContent } from '../view/blog/category/category.content';
 import { CommentContent } from '../view/blog/post/comment/comment.content';
 import { AuthService } from './auth.service';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { ToastHelper } from '../helper/toast.helper';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { ImageContent } from '../helper/image.helper';
 import { CommonService } from './abstract/common.service';
 import * as firebase from 'firebase/app';
 import FieldPath = firebase.firestore.FieldPath;
@@ -47,6 +46,7 @@ export class BlogService extends CommonService {
     }
     return blogContentsObserver;
   }
+
   getPostContentsObserver({params = null}, blogId: string): Observable<PostContent[]> {
     const postId = params?.postId;
     if (!blogId || !postId){
@@ -57,6 +57,7 @@ export class BlogService extends CommonService {
       .collection<PostContent>('posts', ref => ref.where('id', '==', postId))
       .valueChanges();
   }
+
   getProloguePostListObserver(blogId: string): Observable<PostContent[]> {
     if (!blogId){
       return;
@@ -138,7 +139,13 @@ export class BlogService extends CommonService {
     const targetCategoryPromises = targetCategories.map(async (category) => {
       return new Promise((resolve, reject) => {
         return this
-        .delete(`blogs/${blogId}/categories/${category.value.id}`)
+        .delete(`blogs/${blogId}/categories/${category.value.id}`, {
+          parentKeyName: null, collectionPath: `blogs/${blogId}/categories`, children: [{
+            parentKeyName: 'categoryId', collectionPath: `blogs/${blogId}/posts`, children: [{
+              parentKeyName: 'postId', collectionPath: `blogs/${blogId}/comments`, children: []
+            }]
+          }]
+        })
         .then(() => {
           blogContents[0].categoryOrder = blogContents[0].categoryOrder
           .filter((categoryId) => categoryId !== category.value.id);
@@ -151,32 +158,7 @@ export class BlogService extends CommonService {
       });
     });
 
-    const targetPostPromises = targetCategories.map((category) => {
-      return new Promise((resolve, reject) => {
-        const tmpSub = this
-        .getCategoryPostListObserver(blogId, category.value.postCreatedAtList)
-        .subscribe((postContents: Array<PostContent>) => {
-          const postContentPromises = postContents.map((postContent) => {
-            return new Promise((resolveInner, rejectInner) => {
-              this
-              .delete(`blogs/${blogId}/posts/${postContent.id}`)
-              .then(() => resolveInner())
-              .catch((e) => rejectInner(e));
-            });
-          });
-
-          Promise.all(postContentPromises)
-          .then(() => {
-            tmpSub.unsubscribe();
-            resolve();
-          })
-          .catch((e) => reject(e));
-        });
-      });
-    });
-
     return Promise.all([
-      ...targetPostPromises,
       ...targetCategoryPromises,
     ]);
   }

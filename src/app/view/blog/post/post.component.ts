@@ -185,7 +185,7 @@ export class PostComponent implements OnInit, OnDestroy {
       }
       if (!isImage) {
         await this.imageStorage.delete(path);
-        await this.blogService.delete(path);
+        await this.blogService.delete(path, {});
       }
     }
   }
@@ -266,7 +266,7 @@ export class PostComponent implements OnInit, OnDestroy {
       inputString = inputString.replace(imageTagString, '');
       this.postContentsForm.controls.postMarkdown.setValue(inputString);
       await this.imageStorage.delete(path);
-      await this.blogService.delete(path);
+      await this.blogService.delete(path, {});
     }
   }
 
@@ -365,6 +365,13 @@ export class PostComponent implements OnInit, OnDestroy {
           ).then(() => {
             this.blogService.delete(
               `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`,
+              {
+                parentKeyName: null, collectionPath: `blogs/${this.blogContents[0].id}/posts`, children: [
+                  {
+                    parentKeyName: 'postId', collectionPath: `blogs/${this.blogContents[0].id}/comments`, children: []
+                  }
+                ]
+              }
             )
             .then(() => {
               this.toastHelper.showSuccess('Post Delete', 'OK');
