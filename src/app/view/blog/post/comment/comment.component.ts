@@ -69,11 +69,11 @@ export class CommentComponent implements OnInit, OnDestroy {
     this.commentContentsObserver =
       this.blogService.getCommentContentsObserver(this.blogId, this.params.postId);
     this.commentContentsSub = this.commentContentsObserver.subscribe(commentContents => {
-      if (!commentContents || commentContents.length === 0) {
+      this.commentContents = commentContents;
+      if (commentContents.length === 0) {
         this.isPage = false;
         return;
       }
-      this.commentContents = commentContents;
       // this.commentContents.sort((categoryA: CommentContent, categoryB: CommentContent) =>
       //   categoryA.commentNumber - categoryB.commentNumber);
 
@@ -180,6 +180,7 @@ export class CommentComponent implements OnInit, OnDestroy {
       if (result.value && commentContent.value.id) {
         this.blogService.delete(
           `blogs/${this.blogContents[0].id}/comments/${commentContent.value.id}`,
+          {}
         )
         .then(() => {
           this.toastHelper.showSuccess('Comment Delete', 'OK');

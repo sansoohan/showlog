@@ -138,7 +138,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
           if (result.value) {
             Promise.all([
               this.imageStorage.delete(path),
-              this.profileService.delete(path),
+              this.profileService.delete(path, {}),
             ])
             .then(() => {
               this.toastHelper.showSuccess('Profile Image Remove', 'Success!');

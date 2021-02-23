@@ -407,7 +407,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (!roomId) {
       return;
     }
-    this.talkService.delete(`talks/${this.talkContents[0].id}/rooms/${roomId}`);
+    this.talkService.delete(
+      `talks/${this.talkContents[0].id}/rooms/${roomId}`, {});
   }
 
   collectIceCandidates(
