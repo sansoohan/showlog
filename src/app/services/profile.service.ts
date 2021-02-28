@@ -32,12 +32,10 @@ export class ProfileService extends CommonService {
   }
 
   getUserNameCollisionObserver(userName: string): Observable<ProfileContent[]> {
-    let userNameCollisionObserver: Observable<ProfileContent[]>;
-    userNameCollisionObserver = this.firestore
+    return this.firestore
     .collection<ProfileContent>('profiles', ref => ref
     .where(new FieldPath('userName'), '==', userName))
     .valueChanges();
-    return userNameCollisionObserver;
   }
 
   getProfileContentsObserver({params = null}): Observable<ProfileContent[]> {

@@ -14,12 +14,19 @@ export class AboutComponent implements OnInit {
   @Output() keyupUserName: EventEmitter<boolean> = new EventEmitter();
 
   hasUserNameCollision: boolean;
-
+  public availableServiceURLs: Array<string>;
   public newAboutSocial: AboutSocial = new AboutSocial();
 
   constructor(
     private profileService: ProfileService,
-  ) { }
+  ) {
+    this.availableServiceURLs = [
+      `${location.origin}/#/profile/`,
+      `${location.origin}/#/blog/`,
+      `${location.origin}/#/talk/`,
+    ];
+    this.hasUserNameCollision = false;
+  }
 
   ngOnInit() {
   }
