@@ -62,6 +62,7 @@
         <input
           [value]="searchValue"
           (keyup)="changeSearch($event)"
+          (blur)="blurSearchListDropDown($event)"
           class="search-input form-control ms-2"
           type="search"
           list="staticUserIds"
@@ -75,39 +76,31 @@
         >
           <div
             *ngFor="let result of searchResults | async"
-            class="d-flex ms-2"
-            (click)="setSearchValue(result.aboutContent.userName)"
+            class="d-flex m-2"
+            (click)="setSearchValue(result.userName)"
           >
-            <img class="rounded-circle search-profile" [src]="getSearchProfileImage(result)">
-            <a>
-              {{result.aboutContent.userName}}
+            <img class="rounded-circle search-profile mx-2" [src]="getSearchProfileImage(result)">
+            <a class="mx-2">
+              {{result.userName}}
               <br>
               ({{result.aboutContent.email}})
             </a>
           </div>
-          <a
-            class="dropdown-item"
-            (click)="closeSearchListDropDown()"
-          >Close</a>
         </div>
     
         <div [class]="searchValue&&isSearchValueSelected?'dropdown-menu show':'dropdown-menu'">
           <a
             class="dropdown-item"
-            (click)="routerHelper.goToProfile({userName:searchValue})"
+            (click)="goToProfile({userName:searchValue})"
           >{{searchValue}}'s Profile</a>
           <a
             class="dropdown-item"
-            (click)="routerHelper.goToBlogPrologue({userName:searchValue})"
+            (click)="goToBlogPrologue({userName:searchValue})"
           >{{searchValue}}'s Blog</a>
           <a
             class="dropdown-item"
-            (click)="routerHelper.goToTalk({userName:searchValue})"
+            (click)="goToTalk({userName:searchValue})"
           >{{searchValue}}'s Talk</a>
-          <a
-            class="dropdown-item"
-            (click)="closeProfileLinkDropDown()"
-          >Close</a>
         </div>
       </div>
     </div>

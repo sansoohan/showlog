@@ -27,7 +27,6 @@ export class HeaderComponent {
   // tslint:disable-next-line:no-shadowed-variable
   constructor(
     private firestore: AngularFirestore,
-    private route: ActivatedRoute,
     public authService: AuthService,
     public routerHelper: RouterHelper,
     private domSanitizer: DomSanitizer,
@@ -37,11 +36,16 @@ export class HeaderComponent {
     this.isSearchValueSelected = false;
   }
 
-  closeSearchListDropDown() {
-    this.searchValue = '';
-    this.isSearchValueSelected = false;
+  blurSearchListDropDown(event) {
+    const beforeValue = event?.target?.value;
+    setTimeout(() => {
+      if (beforeValue === this.searchValue) {
+        this.closeSearchListDropDown();
+      }
+    }, 100);
   }
-  closeProfileLinkDropDown() {
+
+  closeSearchListDropDown() {
     this.searchValue = '';
     this.isSearchValueSelected = false;
   }
@@ -87,7 +91,7 @@ export class HeaderComponent {
       }
 
       this.searchResults = this.firestore.collection('profiles', ref => ref
-      .orderBy(new firebase.firestore.FieldPath('aboutContent', 'userName'))
+      .orderBy(new firebase.firestore.FieldPath('userName'))
       .limit(10)
       .startAt(this.searchValue)
       .endAt(this.searchValue + '\uf8ff'))
@@ -96,5 +100,17 @@ export class HeaderComponent {
   }
   toggleSearchValueSelected(isSelected: boolean): void{
     this.isSearchValueSelected = isSelected;
+  }
+  goToProfile(params): void {
+    this.closeSearchListDropDown();
+    this.routerHelper.goToProfile(params);
+  }
+  goToBlogPrologue(params): void {
+    this.closeSearchListDropDown();
+    this.routerHelper.goToBlogPrologue(params);
+  }
+  goToTalk(params): void {
+    this.closeSearchListDropDown();
+    this.routerHelper.goToTalk(params);
   }
 }
