@@ -24,8 +24,19 @@
 
 <section *ngIf="isEditing" class="profile-section p-3 p-lg-5 d-column d-flex" id="about" [formGroup]="profileForm">
   <div class="my-auto container">
-    <div [class.user-name-collision-error]="hasUserNameCollision">
-      Your Site URL {{hasUserNameCollision ? '(Site Name is already exists)' : ''}}
+    <div [class.user-name-collision-error]="
+      userNameValidationError.hasUserNameCollisionError
+      || userNameValidationError.hasUserNameCharacterError
+    ">
+      Your Site URL
+      {{
+        userNameValidationError.hasUserNameCollisionError ?
+        '(Site Name is already exists)' : ''
+      }}
+      {{
+        userNameValidationError.hasUserNameCharacterError ?
+        '(6 to 20 Length of Upper/Lower Alphabet, Number, -, _ can be used for Site Name)' : ''
+      }}
     </div>
     <div class="mb-3 d-flex justify-content-start">
       <div class="d-flex flex-column">
@@ -37,10 +48,13 @@
         <input
           type="text"
           class="form-control form-control-sm"
-          [class.user-name-collision-error]="hasUserNameCollision"
+          [class.user-name-collision-error]="
+            userNameValidationError.hasUserNameCollisionError
+            || userNameValidationError.hasUserNameCharacterError
+          "    
           placeholder="User Name"
           formControlName="userName"
-          (keyup)=handleKeyupUserName($event)
+          (keyup)=handleValidateUserName($event)
         >
       </div>
     </div>

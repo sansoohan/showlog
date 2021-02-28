@@ -2,6 +2,11 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AboutContent, AboutSocial } from './about.content';
 import { ProfileService } from 'src/app/services/profile.service';
 
+export type UserNameValidationError = {
+  hasUserNameCollisionError?: boolean,
+  hasUserNameCharacterError?: boolean,
+};
+
 @Component({
   selector: 'app-profile-about',
   templateUrl: './about.component.html',
@@ -11,11 +16,11 @@ export class AboutComponent implements OnInit {
   @Input() aboutContent: AboutContent;
   @Input() isEditing: boolean;
   @Input() profileForm: any;
-  @Output() keyupUserName: EventEmitter<boolean> = new EventEmitter();
+  @Output() validateUserName: EventEmitter<any> = new EventEmitter();
 
-  hasUserNameCollision: boolean;
-  public availableServiceURLs: Array<string>;
-  public newAboutSocial: AboutSocial = new AboutSocial();
+  userNameValidationError: UserNameValidationError;
+  availableServiceURLs: Array<string>;
+  newAboutSocial: AboutSocial = new AboutSocial();
 
   constructor(
     private profileService: ProfileService,
@@ -25,25 +30,33 @@ export class AboutComponent implements OnInit {
       `${location.origin}/#/blog/`,
       `${location.origin}/#/talk/`,
     ];
-    this.hasUserNameCollision = false;
+    this.userNameValidationError = {
+      hasUserNameCollisionError: false,
+      hasUserNameCharacterError: false,
+    };
   }
 
   ngOnInit() {
   }
 
-  handleKeyupUserName(event) {
-    this.hasUserNameCollision = false;
-    this.keyupUserName.emit(this.hasUserNameCollision);
-    if (event.target.value){
-      const tmpSubscription = this.profileService.getUserNameCollisionObserver(event.target.value).subscribe(
-        ([profileContent]) => {
-          if (profileContent && profileContent?.ownerId !== this.profileForm.value.ownerId){
-            this.hasUserNameCollision = true;
-            this.keyupUserName.emit(this.hasUserNameCollision);
+  async handleValidateUserName(event): Promise<void> {
+    this.userNameValidationError.hasUserNameCollisionError = false;
+    this.userNameValidationError.hasUserNameCharacterError
+    = !/^[0-9a-zA-Z-_]{6,30}$/g.test(this.profileForm.value.userName);
+
+    if (event.target.value) {
+      await new Promise((resolve) => {
+        const tmpSubscription = this.profileService.getUserNameCollisionObserver(event.target.value).subscribe(
+          ([profileContent]) => {
+            if (profileContent && profileContent?.ownerId !== this.profileForm.value.ownerId){
+              this.userNameValidationError.hasUserNameCollisionError = true;
+            }
+            tmpSubscription.unsubscribe();
           }
-          tmpSubscription.unsubscribe();
-        }
-      );
+        );
+        resolve();
+      });
+      this.validateUserName.emit(this.userNameValidationError);
     }
   }
 }
