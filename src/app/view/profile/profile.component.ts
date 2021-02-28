@@ -12,6 +12,7 @@ import { ToastHelper } from 'src/app/helper/toast.helper';
 import { ProjectDescription } from './projects/projects.content';
 import { BlogService } from 'src/app/services/blog.service';
 import { TalkService } from 'src/app/services/talk.service';
+import { UserNameValidationError } from './about/about.component';
 
 @Component({
   selector: 'app-profile',
@@ -24,8 +25,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isEditing: boolean;
   isPage: boolean;
   isLoading: boolean;
-  hasUserNameCollision: boolean;
-  hanUserNameValidateError: boolean;
+  userNameValidationError: UserNameValidationError;
   userEmail: string;
   paramSub: Subscription;
   profileSub: Subscription;
@@ -106,14 +106,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.isEditing = false;
   }
 
-  handleKeyupUserName(hasCollision: boolean) {
-    this.hasUserNameCollision = hasCollision;
+  handleValidateUserName(error: UserNameValidationError) {
+    this.userNameValidationError = error;
   }
 
   async handleClickEditProfileUpdate() {
     this.toastHelper.askYesNo('Update Profile', 'Are you sure?').then((result) => {
-      if (this.hasUserNameCollision) {
+      if (this.userNameValidationError.hasUserNameCollisionError) {
         this.toastHelper.showError('Upate Fail', 'User URL is already registered.');
+        return;
+      }
+
+      if (this.userNameValidationError.hasUserNameCharacterError) {
+        this.toastHelper.showError('Upate Fail', '(6 to 20 Length of Upper/Lower Alphabet, Number, -, _ can be used for Site Name)');
         return;
       }
 
@@ -157,11 +162,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   isUserNameChanged() {
     return this.profileForm.value.userName !== this.profileContents[0].userName;
-  }
-
-  validateUserName() {
-    /^[0-9a-zA-Z-_]{6,20}$/g.test(this.profileForm.value.userName);
-    this.hanUserNameValidateError = true;
   }
 
   ngOnInit(): void {
