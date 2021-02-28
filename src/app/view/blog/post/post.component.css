@@ -55,16 +55,16 @@ section.post-editing-section {
 }
 
 .post-edit-title-col {
-  margin: 0.5rem;
-  padding: 0.5rem 1rem;
+  margin-top: 0.8rem;
+  padding: .375rem .75rem;
   font-size: 1.5rem;
   color: yellow;
   background-color: #222222;
 }
 
 .post-edit-content-col {
-  margin: 0.5rem;
-  padding: 0.5rem 1rem;
+  margin-top: 0.8rem;
+  padding: .375rem .75rem;
   font-size: 0.8rem;
   background-color: #222222;
 }
@@ -77,24 +77,24 @@ section.post-editing-section {
 .post-editarea {
   color: white;
   font-size: 0.8rem;
-  border: solid #222222;
+  border: none;
   background-color: #222222;
-  margin-top: 10px;
+  margin-top: 0.8rem;
 }
 
 .post-edit-col {
   width: 100%;
-  padding-right: 1rem;
+  padding: 0 0.4rem;
 }
 
 .post-edit-preview-col {
   width: 100%;
+  padding: 0 0.4rem;
 }
 
 @media (min-width: 1200px) {
   .post-edit-col {
     width: 50%;
-    padding-right: 1rem;
   }
   
   .post-edit-preview-col {

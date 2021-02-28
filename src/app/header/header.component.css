@@ -1,6 +1,6 @@
 .selected-header{
   height: 56px;
-  width: 50vw;
+  width: 50%;
   position: fixed;
   top: 0;
   right: 0;
@@ -54,18 +54,18 @@
 }
 
 .header-navbar.talk-header {
-  margin-left: 50vw;
-  width: 50vw;
+  margin-left: 50%;
+  width: 50%;
 }
 
 .header-navbar.blog-header {
-  margin-left: 50vw;
-  width: 50vw;
+  margin-left: 50%;
+  width: 50%;
 }
 
 .header-navbar.profile-header {
-  margin-left: 50vw;
-  width: 50vw;
+  margin-left: 50%;
+  width: 50%;
 }
 
 @media (min-width: 992px) {  
