@@ -1,0 +1,9 @@
+.user-page-url {
+  font-size: 0.8rem;
+  margin-left: 0.4rem;
+  color: black;
+}
+
+.user-name-collision-error {
+  color: red;
+}

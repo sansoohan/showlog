@@ -10,6 +10,8 @@ import { FormHelper } from 'src/app/helper/form.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import { ProjectDescription } from './projects/projects.content';
+import { BlogService } from 'src/app/services/blog.service';
+import { TalkService } from 'src/app/services/talk.service';
 
 @Component({
   selector: 'app-profile',
@@ -23,10 +25,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isPage: boolean;
   isLoading: boolean;
   hasUserNameCollision: boolean;
-  hasUserEmailCollision: boolean;
+  hanUserNameValidateError: boolean;
   userEmail: string;
-  validateUserName: string;
-  validateUserEmail: string;
   paramSub: Subscription;
   profileSub: Subscription;
   params: any;
@@ -35,6 +35,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   constructor(
     public profileService: ProfileService,
+    public blogService: BlogService,
+    public talkService: TalkService,
     private toastHelper: ToastHelper,
     public authService: AuthService,
     private route: ActivatedRoute,
@@ -45,12 +47,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.isEditing = false;
       this.isPage = true;
-      this.hasUserNameCollision = false;
-      this.hasUserEmailCollision = false;
       this.params = params;
       this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
       this.profileSub = this.profileContentsObserver?.subscribe((profileContents) => {
-        profileContents[0].projectsContent.projects.sort((a, b) => {
+        this.profileContents = profileContents;
+        if (this.profileContents.length === 0) {
+          const currentUser = this.authService.getCurrentUser();
+          this.routerHelper.goToProfile({userName: currentUser?.userName || 'sansoohan'});
+        }
+
+        this.profileContents[0].projectsContent.projects.sort((a, b) => {
           if ((a.finishedAt || '9999-99') < (b.finishedAt || '9999-99')) {
             return 1;
           } else if ((a.finishedAt || '9999-99') > (b.finishedAt || '9999-99')) {
@@ -66,11 +72,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
         });
 
-        this.profileContents = profileContents;
-        if (this.profileContents.length === 0) {
-          const currentUser = this.authService.getCurrentUser();
-          this.routerHelper.goToProfile({userName: currentUser?.userName || 'sansoohan'});
-        }
         this.profileForm = this.formHelper.buildFormRecursively(this.profileContents[0]);
         this.isLoading = false;
       });
@@ -112,19 +113,34 @@ export class ProfileComponent implements OnInit, OnDestroy {
   async handleClickEditProfileUpdate() {
     this.toastHelper.askYesNo('Update Profile', 'Are you sure?').then((result) => {
       if (this.hasUserNameCollision) {
-        this.toastHelper.showError('Upate Fail', 'User Name is already registered.');
+        this.toastHelper.showError('Upate Fail', 'User URL is already registered.');
         return;
       }
 
       if (result.value) {
-        if (this.isEditing){
-          this.profileService
-          .update(
-            `profiles/${this.profileForm.value.id}`,
-            this.profileForm.value
-          )
+        if (this.isEditing) {
+          const { userName, ownerId, id } = this.profileForm.value;
+          Promise.all([
+            this.isUserNameChanged() ? this.blogService.update(
+              `blogs/${id}`,
+              {userName, ownerId}
+            ) : null,
+            this.isUserNameChanged() ? this.talkService.update(
+              `talks/${id}`,
+              {userName, ownerId}
+            ) : null,
+            this.profileService
+            .update(
+              `profiles/${id}`,
+              this.profileForm.value
+            )
+          ].filter(Boolean))
           .then(() => {
             this.toastHelper.showSuccess('Profile Update', 'Success!');
+            const currentUser = JSON.parse(localStorage.currentUser || null);
+            currentUser.userName = this.profileForm.value.userName;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            this.routerHelper.goToProfile({});
           })
           .catch(e => {
             console.error(e);
@@ -137,6 +153,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       }
     });
+  }
+
+  isUserNameChanged() {
+    return this.profileForm.value.userName !== this.profileContents[0].userName;
+  }
+
+  validateUserName() {
+    /^[0-9a-zA-Z-_]{6,20}$/g.test(this.profileForm.value.userName);
+    this.hanUserNameValidateError = true;
   }
 
   ngOnInit(): void {
