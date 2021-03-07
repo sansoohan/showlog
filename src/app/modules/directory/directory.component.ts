@@ -15,6 +15,7 @@ export interface DropInfo {
 })
 export class DirectoryComponent {
   @Output() selectCategory: EventEmitter<string> = new EventEmitter();
+  @Output() sortCategory: EventEmitter<Array<any>> = new EventEmitter();
   @Output() editCategory: EventEmitter<string> = new EventEmitter();
   @Output() addCategory: EventEmitter<string|undefined> = new EventEmitter();
   @Input() canEdit: boolean;
@@ -46,6 +47,10 @@ export class DirectoryComponent {
 
   @debounce(50)
   dragMoved(event) {
+    if (!this.canEdit){
+      return;
+    }
+
     const e = this.document.elementFromPoint(event.pointerPosition.x, event.pointerPosition.y);
     if (!e) {
       this.clearDragInfo();
@@ -114,6 +119,7 @@ export class DirectoryComponent {
     }
 
     this.clearDragInfo(true);
+    this.handleSortCategory();
   }
   getParentNodeId(id: string, nodesToSearch, parentId: string): string {
     for (const node of nodesToSearch) {
@@ -146,6 +152,9 @@ export class DirectoryComponent {
 
   handleSelectCategory(categoryId: string): void {
     this.selectCategory.emit(categoryId);
+  }
+  handleSortCategory(): void {
+    this.sortCategory.emit(this.nodes);
   }
   handleEditCategory(categoryId: string): void {
     this.editCategory.emit(categoryId);

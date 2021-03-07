@@ -49,7 +49,7 @@ export class BlogComponent implements OnInit, OnDestroy {
 
         this.canEdit = false;
         this.authService.getAuthUser().then((authUser) => {
-          this.canEdit = authUser.uid === blogContents[0].ownerId;
+          this.canEdit = authUser?.uid === blogContents[0].ownerId;
         });
 
         this.blogId = this.blogContents[0].id;
