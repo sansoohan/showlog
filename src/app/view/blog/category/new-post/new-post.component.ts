@@ -9,6 +9,7 @@ import { BlogContent } from '../../blog.content';
 export class NewPostComponent implements OnInit {
   @Input() isEditingPost: boolean;
   @Input() isCreatingPost: boolean;
+  @Input() canEdit: string;
   @Input() blogContents: Array<BlogContent>;
 
   constructor() { }
