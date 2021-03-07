@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
-import { FormGroup, AbstractControl } from '@angular/forms';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
@@ -136,6 +135,13 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   handleSelectCategory(categoryId): void {
     this.routerHelper.goToBlogCategory(this.params, categoryId);
   }
+  handleSortCategory(categoryMap): void {
+    this.blogContents[0].categoryMap = categoryMap;
+    this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0])
+    .catch(() => {
+      this.toastHelper.showSuccess('Category Map', 'Updating Category Map is failed');
+    });
+  }
   handleEditCategory(categoryId): void {
     const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
     this.toastHelper.askUpdateDelete('Edit Category', 'Category Name', category.name)
@@ -172,6 +178,25 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       }
     });
   }
+  handleAddCategory(categoryId): void {
+    const categoryContent = new CategoryContent();
+    categoryContent.id = this.blogService.newId();
+
+    if (!categoryId) {
+      this.blogContents[0].categoryMap = [
+        categoryContent,
+        ...this.blogContents[0].categoryMap,
+      ];
+    } else {
+      const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+      category.children = [
+        categoryContent,
+        ...category.children,
+      ];
+    }
+
+    this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0]);
+  }
 
   getCategoryPageList(category: CategoryContent): Array<number> {
     let results: Array<number> = [...(category?.postCreatedAtList || [])];
@@ -198,26 +223,6 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     }
 
     return results;
-  }
-
-  handleAddCategory(categoryId): void {
-    const categoryContent = new CategoryContent();
-    categoryContent.id = this.blogService.newId();
-
-    if (!categoryId) {
-      this.blogContents[0].categoryMap = [
-        categoryContent,
-        ...this.blogContents[0].categoryMap,
-      ];
-    } else {
-      const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
-      category.children = [
-        categoryContent,
-        ...category.children,
-      ];
-    }
-
-    this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0]);
   }
 
   ngOnInit(): void {
