@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="sideNav">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="sideNav" *ngIf="blogContents">
   <!-- Collapse button -->
   <div class="fixed-top">
     <button
@@ -19,7 +19,7 @@
       <div class="nav-item">
         <Button
           class="btn btn-sm btn-dark ms-2 mb-2"
-          *ngIf="authService.isSignedIn() && !isEditingCategory && !isAddingCategory"
+          *ngIf="authService.isSignedIn()"
           (click)="handleClickStartUploadPostImageSrc()"
         >Add Image</Button>
       </div>
@@ -38,158 +38,14 @@
     </ul>
     <ul class="navbar-nav blog-navbar" *ngIf="!isEditingPost">
       <div class="nav-item">
-        <Button
-          class="btn btn-sm btn-dark ms-2 mb-2"
-          *ngIf="authService.isSignedIn() && !isEditingCategory && !isAddingCategory"
-          (click)="clickCategoryEdit()"
-        >Edit Category</Button>
-        <Button
-          class="btn btn-sm btn-outline-light ms-2 mb-2"
-          *ngIf="authService.isSignedIn() && isEditingCategory"
-          (click)="clickCategoryEditUpdate(
-            blogContents,
-            categoryContents,
-            categoryContentsForm.controls.categoryContents
-          )"
-        >Create</Button>
-        <Button
-          class="btn btn-sm btn-outline-light ms-2 mb-2"
-          *ngIf="authService.isSignedIn() && isEditingCategory"
-          (click)="clickCategoryEditUpdate(
-            blogContents,
-            categoryContents,
-            categoryContentsForm.controls.categoryContents
-          )"
-        >Update</Button>
-        <Button
-          class="btn btn-sm btn-outline-light ms-2 mb-2"
-          *ngIf="authService.isSignedIn() && isEditingCategory"
-          (click)="clickCategoryEditCancel()"
-        >Cancel</Button>
+        <app-modules-directory
+          [nodes]="blogContents[0].categoryMap || []"
+          [canEdit]="canEdit"
+          (selectCategory)="handleSelectCategory($event)"
+          (editCategory)="handleEditCategory($event)"
+          (addCategory)="handleAddCategory($event)"
+        ></app-modules-directory>
       </div>
-
-      <form
-        *ngIf="categoryContentsForm"
-        [formGroup]="categoryContentsForm"
-      >
-        <div formArrayName="categoryContents">
-          <div
-            *ngFor="let categoryContent of categoryContentsForm.controls.categoryContents['controls'];
-            let i=index"
-          >
-            <li
-              *ngIf="!categoryContent.controls.hidden.value"
-              class="nav-item"
-              [formGroupName]="i"
-            >
-              <div class="row g-0">
-                <div
-                  *ngFor="let n of dataTransferHelper.numberToArray(
-                    blogService.getCategoryDeepCount(
-                      categoryContent,categoryContentsForm.controls.categoryContents['controls']
-                    )-1
-                  ) ; let j=index"
-                  class="col-1"
-                  style="padding:0"
-                >
-                  <i
-                    *ngIf="j==blogService.getCategoryDeepCount(
-                      categoryContent,categoryContentsForm.controls.categoryContents['controls']
-                    )-2"
-                    class="fa fa-chevron-up fa-rotate-225"
-                  ></i>
-                </div>
-                <div
-                  *ngIf="isEditingCategory"
-                  class="col-1 container cateogory-move-up-down"
-                >
-                  <div
-                    class="fa fa-arrow-up category-move-up-button"
-                    (click)="moveUpCategory(
-                      categoryContent.value.id,
-                      categoryContentsForm.controls.categoryContents
-                    )"
-                  ></div>
-                  <!-- <div
-                    class="fa fa-arrow-down category-move-up-button"
-                    (click)="switchCategory(
-                      categoryContent,
-                      categoryContentsForm.controls.categoryContents['controls'][i+1],
-                      categoryContentsForm.controls.categoryContents
-                    )"
-                  ></div> -->
-                </div>
-                <input
-                  *ngIf="isEditingCategory"
-                  type="text"
-                  class="form-control nav-link-edit col-6"
-                  formControlName="categoryTitle"
-                >
-                <div
-                  *ngIf="isEditingCategory"
-                  class="col-1 container cateogory-add-remove"
-                >
-                  <div
-                    *ngIf="blogService.getCategoryDeepCount(
-                      categoryContent,categoryContentsForm.controls.categoryContents['controls']
-                    )<4"
-                    class="fa fa-plus category-add-button"
-                    (click)="addCategory(
-                      blogContents,
-                      categoryContent,
-                      categoryContentsForm.controls.categoryContents
-                    )"
-                  ></div>
-                  <div
-                    class="fa fa-times category-remove-button"
-                    (click)="removeCategory(
-                      blogContents,
-                      categoryContent,
-                      categoryContentsForm
-                    )"
-                  ></div>
-                </div>
-
-                <a
-                  *ngIf="!isEditingCategory"
-                  class="nav-link col-8 blog-link"
-                  (click)="routerHelper.goToBlogCategory(
-                    params,categoryContent.controls.id.value
-                  )"
-                >
-                  <i class="fa fa-caret-right"></i>  {{categoryContent.controls.categoryTitle.value}}
-                </a>
-                <div
-                  *ngFor="let n of dataTransferHelper.numberToArray(
-                    4-blogService.getCategoryDeepCount(
-                      categoryContent,categoryContentsForm.controls.categoryContents['controls']
-                    )
-                  ) ; let j=index"
-                  class="col-1"
-                ></div>
-                <div
-                  *ngIf="formHelper.countChildContent(
-                    categoryContentsForm.controls.categoryContents['controls'],categoryContent
-                  )!==0"
-                  class="nav-link col-1 blog-link"
-                  (click)="formHelper.toggleCollapse(
-                    categoryContentsForm.controls.categoryContents['controls'],categoryContent
-                  )"
-                >
-                  <i
-                    *ngIf="categoryContent.controls.collapsed.value"
-                    class="fa fa-caret-down blog-link"
-                  ></i>
-                  <i
-                    *ngIf="!categoryContent.controls.collapsed.value"
-                    class="fa fa-caret-up blog-link"
-                  ></i>
-                </div>
-              </div>
-            </li>
-          </div>
-        </div>
-      </form>
     </ul>
   </div>
 </nav>

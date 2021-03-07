@@ -62,10 +62,9 @@ export class AuthService {
       // Init Blog Data
       await this.set(`blogs/${authUser.uid}`, new BlogContent());
       const newCategoryContent = new CategoryContent();
-      newCategoryContent.blogId = authUser.uid;
-      await this.create(`blogs/${authUser.uid}/categories`, newCategoryContent);
+      newCategoryContent.id = this.newId();
       const newBlogContent = new BlogContent();
-      newBlogContent.categoryOrder.push(newCategoryContent.id);
+      newBlogContent.categoryMap = [newCategoryContent];
       await this.set(`blogs/${authUser.uid}`, newBlogContent);
     }
   }
@@ -115,6 +114,15 @@ export class AuthService {
       localStorage.removeItem('currentUser');
       this.router.navigate(['/sign-in']);
     });
+  }
+
+  newId(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let autoId = '';
+    for (let i = 0; i < 20; i++) {
+      autoId += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return autoId;
   }
 
   async create(path: string, content: any): Promise<void> {

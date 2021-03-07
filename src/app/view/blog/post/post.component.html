@@ -7,16 +7,14 @@
   </div>  
   <app-blog-left-sidebar
     [isEditingPost]="isEditingPost"
-    [isEditingCategory]="isEditingCategory"
-    [categoryContents]="categoryContents"
-    [categoryContentsForm]="categoryContentsForm"
+    [canEdit]="canEdit"
     [blogContents]="blogContents"
     [imageContents]="imageContents"
     (clickStartUploadPostImageSrc)="handleClickStartUploadPostImageSrc()"
     (clickEditPostImage)="handleClickEditPostImage($event)"
   ></app-blog-left-sidebar>
   <div class="blog-post">
-    <form *ngIf="postContentsForm" [formGroup]="postContentsForm">
+    <form  [formGroup]="postContentsForm">
       <section class="post-section">
         <div *ngIf="isCreatingPost">
           <Button
@@ -62,6 +60,7 @@
             >Create New Post</Button>
           </div>
         </div>
+
         <div *ngIf="!isEditingPost">
           <div class="row">
             <div class="col-9">

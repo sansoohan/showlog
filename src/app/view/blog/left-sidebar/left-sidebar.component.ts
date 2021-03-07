@@ -11,6 +11,7 @@ import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import { ImageContent, ImageHelper } from 'src/app/helper/image.helper';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-blog-left-sidebar',
@@ -19,15 +20,14 @@ import { ImageContent, ImageHelper } from 'src/app/helper/image.helper';
 })
 export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Input() isEditingPost: boolean;
-  @Input() isEditingCategory: boolean;
-  @Input() isAddingCategory: boolean;
-  @Input() categoryContentsForm: FormGroup;
+  @Input() canEdit: boolean;
   @Input() imageContents: Array<ImageContent>;
-  @Input() categoryContents: Array<CategoryContent>;
   @Input() blogContents: Array<BlogContent>;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
   @Output() clickEditPostImage: EventEmitter<ImageContent> = new EventEmitter();
+  @Output() updateCategory: EventEmitter<string> = new EventEmitter();
 
+  editingCategoryId: string;
   paramSub: Subscription;
   params: any;
   isPage: boolean;
@@ -45,75 +45,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.isPage = true;
-      this.isEditingCategory = false;
-      this.isAddingCategory = false;
       this.params = params;
-    });
-  }
-
-  addCategory(
-    blogContents: Array<BlogContent>,
-    parentCategory: FormGroup,
-    categoryContentsArray: any,
-  ){
-    const newCategory = Object.assign({}, new CategoryContent());
-    newCategory.blogId = blogContents[0].id;
-    newCategory.parentId = parentCategory.value.id;
-    const newCategoryCount = categoryContentsArray.value
-    .filter((category) =>
-      new RegExp(newCategory.categoryTitle, 'g').test(category.categoryTitle)
-    ).length;
-    newCategory.categoryTitle = `${newCategory.categoryTitle}${newCategoryCount + 1}`;
-    this.blogService
-    .create(`blogs/${blogContents[0].id}/categories`, newCategory)
-    .then(() => {
-      const insertIndex = blogContents[0].categoryOrder
-      .findIndex((categoryId) => categoryId === parentCategory.value.id);
-      blogContents[0].categoryOrder.splice(insertIndex + 1, 0, newCategory.id);
-      this.blogService.update(
-        `blogs/${blogContents[0].id}`,
-        blogContents[0]
-      )
-      .then(() => {
-        this.toastHelper.showSuccess('Category Create', 'Success!');
-      })
-      .catch(e => {
-        this.toastHelper.showWarning('Category Create Failed.', e);
-      });
-    })
-    .catch(e => {
-      this.toastHelper.showWarning('Category Create Failed.', e);
-    });
-  }
-
-  removeCategory(
-    blogContents: Array<BlogContent>,
-    targetCategory: FormGroup,
-    categoryContentsForm: FormGroup,
-  ) {
-    const blogId = blogContents[0].id;
-    const targetChildCategories = this.formHelper.getChildContentsRecusively(
-      // tslint:disable-next-line: no-string-literal
-      categoryContentsForm.controls.categoryContents['controls'], targetCategory
-    );
-    const targetCategories = [targetCategory, ...targetChildCategories];
-    const removeMessages = targetCategories.map((category) => `${category.value.categoryTitle}`);
-    this.toastHelper.askYesNo('Remove Category', [...removeMessages].join(', '))
-    .then((result) => {
-      if (result.value) {
-        this.blogService.cascadeDeleteCateogry(
-          blogContents,
-          targetCategory,
-          categoryContentsForm
-        )
-        .then(() => {
-          this.toastHelper.showSuccess('Category Remove', 'Success!');
-          this.routerHelper.goToBlogPrologue(this.params);
-        })
-        .catch(e => {
-          this.toastHelper.showWarning('Category Remove Failed.', e);
-        });
-      }
     });
   }
 
@@ -193,68 +125,99 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  clickCategoryEdit(): void {
-    this.isEditingCategory = true;
-  }
-
-  clickCategoryEditCancel(): void {
-    this.isEditingCategory = false;
-  }
-
-  async clickCategoryEditUpdate(
-    blogContents: Array<BlogContent>,
-    categoryContents: Array<CategoryContent>,
-    categoryContentsArray: AbstractControl,
-  ) {
-    blogContents[0].categoryOrder = categoryContentsArray.value
-    .map((categoryContent: CategoryContent) => categoryContent.id);
-    let categoryContentPromises = [
-      this.blogService.update(
-        `blogs/${blogContents[0].id}`,
-        blogContents[0]
-      )
-    ];
-
-    categoryContentPromises = [
-      ...categoryContentPromises,
-      ...categoryContents.map((categoryContent) => {
-        const categoryMightBeChanged = categoryContentsArray.value
-        .find((category) => category.id === categoryContent.id);
-
-        if (
-          categoryMightBeChanged.parentId !== categoryContent.parentId ||
-          categoryMightBeChanged.categoryTitle !== categoryContent.categoryTitle ||
-          categoryMightBeChanged.hidden !== categoryContent.hidden ||
-          categoryMightBeChanged.collapsed !== categoryContent.collapsed
-        ) {
-          return this.blogService.update(
-            `blogs/${blogContents[0].id}/categories/${categoryContent.id}`,
-            categoryContentsArray.value.find(
-              (category: CategoryContent) => category.id === categoryContent.id
-            )
-          );
-        }
-        else {
-          return new Promise<void>((resolve) => { resolve(); });
-        }
-      })
-    ];
-
-    await Promise.all(categoryContentPromises)
-    .then(() => {
-      this.toastHelper.showSuccess('Category Update', 'Success!');
-    })
-    .catch(e => {
-      this.toastHelper.showWarning('Category Update Failed.', e);
-    });
-  }
-
   handleClickStartUploadPostImageSrc(): void {
     this.clickStartUploadPostImageSrc.emit();
   }
 
   handleClickEditPostImage(imageContent: ImageContent): void {
     this.clickEditPostImage.emit(imageContent);
+  }
+
+  handleSelectCategory(categoryId): void {
+    this.routerHelper.goToBlogCategory(this.params, categoryId);
+  }
+  handleEditCategory(categoryId): void {
+    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+    this.toastHelper.askUpdateDelete('Edit Category', 'Category Name', category.name)
+    .then(async (data) => {
+      if (data.value) {
+        category.name = data.value;
+        this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0])
+        .then(() => {
+          this.toastHelper.showSuccess('Category Name', 'Category Name is updated');
+        })
+        .catch(() => {
+          this.toastHelper.showSuccess('Category Name', 'Updating Category Name is failed');
+        });
+      }
+      else if (data.dismiss === Swal.DismissReason.cancel) {
+        this.toastHelper.askYesNo('Remove Category', 'Are you sure?').then(result => {
+          if (result.value) {
+            const blogId = this.blogContents[0].id;
+            this.blogContents[0].categoryMap = this.deleteCategory(
+              blogId, categoryId, this.blogContents[0].categoryMap
+            );
+            this.blogService.update(`blogs/${blogId}`, this.blogContents[0])
+            .then(() => {
+              this.toastHelper.showSuccess('Remove Category', 'Category is removed');
+            })
+            .catch(() => {
+              this.toastHelper.showSuccess('Remove Category', 'Removing Category is failed');
+            });
+          }
+          else if (result.dismiss === Swal.DismissReason.cancel){
+
+          }
+        });
+      }
+    });
+  }
+
+  getCategoryPageList(category: CategoryContent): Array<number> {
+    let results: Array<number> = [...(category?.postCreatedAtList || [])];
+    for (const child of category.children) {
+      results = [...results, ...this.getCategoryPageList(child)];
+    }
+    return results;
+  }
+
+  deleteCategory(
+    blogId: string,
+    categoryId: string,
+    categories: Array<CategoryContent>
+  ): Array<CategoryContent>{
+    const results: Array<CategoryContent> = [];
+    for (const category of categories) {
+      if (category.id !== categoryId) {
+        category.children = this.deleteCategory(blogId, categoryId, category.children);
+        results.push(category);
+      } else {
+        const postCreatedAtList = this.getCategoryPageList(category);
+        this.blogService.removeCategoryPosts(blogId, postCreatedAtList);
+      }
+    }
+
+    return results;
+  }
+
+  handleAddCategory(categoryId): void {
+    const categoryContent = new CategoryContent();
+    categoryContent.id = this.blogService.newId();
+
+    if (!categoryId) {
+      this.blogContents[0].categoryMap = [
+        categoryContent,
+        ...this.blogContents[0].categoryMap,
+      ];
+    } else {
+      const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+      category.children = [
+        categoryContent,
+        ...category.children,
+      ];
+    }
+
+    this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0]);
   }
 
   ngOnInit(): void {

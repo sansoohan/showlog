@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
+import { DirectoryModule } from 'src/app/modules/directory/directory.module';
 import { PageLoadingModule } from 'src/app/modules/page-loading/page-loading.module';
 
 import { BlogComponent } from './blog.component';
@@ -18,7 +19,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { EmptyComponent } from './empty/empty.component';
 
 @NgModule({
   declarations: [
@@ -29,12 +29,12 @@ import { EmptyComponent } from './empty/empty.component';
     LeftSidebarComponent,
     PrologueComponent,
     NewPostComponent,
-    EmptyComponent,
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     NotFoundModule,
+    DirectoryModule,
     PageLoadingModule,
     MatPaginatorModule,
     MatButtonModule,
@@ -45,6 +45,7 @@ import { EmptyComponent } from './empty/empty.component';
   ],
   exports: [
     NotFoundModule,
+    DirectoryModule,
     PageLoadingModule,
     MatPaginatorModule,
     MatButtonModule,

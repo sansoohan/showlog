@@ -17,42 +17,24 @@ import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
   styleUrls: ['../blog.component.css', './category.component.css']
 })
 export class CategoryComponent implements OnInit, OnDestroy {
-  categoryContentsObserver: Observable<CategoryContent[]>;
-  categoryContents: CategoryContent[];
-  categoryContentsSub: Subscription;
-  categoryContentsForm: any;
-  isEditingCategory: boolean;
-
-  postContentsObserver: Observable<PostContent[]>;
-  postContents: PostContent[];
-  postContentsForm: any;
-  isShowingCategoryContents: boolean;
-  isEditingPost: boolean;
-  isCreatingPost: boolean;
+  @Input() canEdit: string;
+  @Input() isCreatingPost: boolean;
 
   postListObserver: Observable<PostContent[]>;
   postList: PostContent[];
   postListSub: Subscription;
   postListForm: any;
-  isShowingPostList: boolean;
 
   blogId: string;
   isPage: boolean;
   isLoading: boolean;
-  updateOk: boolean;
-  newDescription: '';
 
-  newPostConent = new PostContent();
   paramSub: Subscription;
   queryParamSub: Subscription;
   params: any;
   queryParams: any;
-  selectedCategory: FormGroup;
-  selectedChildCategories: Array<FormGroup>;
-  selectedCategoryId: string;
-  selectedChildCategoryIds: Array<string>;
+  selectedCategory: CategoryContent;
 
-  selectedPageNum: number;
   pageSize: number;
   pageIndex: number;
   postCreatedAtList: Array<number>;
@@ -68,8 +50,6 @@ export class CategoryComponent implements OnInit, OnDestroy {
     this.isPage = true;
     this.isLoading = true;
     this.paramSub = this.route.params.subscribe(params => {
-      this.isShowingCategoryContents = false;
-      this.isEditingCategory = false;
       this.params = params;
     });
     this.queryParamSub = this.route.queryParams.subscribe(queryParams => {
@@ -91,67 +71,27 @@ export class CategoryComponent implements OnInit, OnDestroy {
     this._blogContents = blogContents;
     this.blogId = blogContents[0].id;
 
-    this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
-    this.categoryContentsSub = this.categoryContentsObserver.subscribe(categoryContents => {
-      if (!categoryContents || categoryContents.length === 0){
-        return;
-      }
-
-      this.categoryContents = categoryContents.map((categoryContent) => {
-        categoryContent.categoryNumber = blogContents[0].categoryOrder
-        .findIndex(categoryId => categoryId === categoryContent.id);
-        return categoryContent;
-      });
-
-      this.categoryContents.sort((categoryA: CategoryContent, categoryB: CategoryContent) =>
-        categoryA.categoryNumber - categoryB.categoryNumber);
-
-      this.categoryContentsForm = this.formHelper.buildFormRecursively({categoryContents: this.categoryContents});
-
-      if (this.params.categoryId){
-        this.selectedCategory =
-          this.categoryContentsForm.controls.categoryContents.controls.find((categoryContent) =>
-          categoryContent.value.id === this.params.categoryId);
-        if (!this.selectedCategory) {
-          this.isPage = false;
-          return;
-        }
-
-        this.selectedChildCategories =
-          this.formHelper.getChildContentsRecusively(
-            this.categoryContentsForm.controls.categoryContents.controls, this.selectedCategory
-          );
-
-        const selectedCategories = [
-          this.selectedCategory?.value,
-          ...this.selectedChildCategories.map((selectedChildCategory) => selectedChildCategory.value)
-        ].filter(Boolean);
-        this.postCreatedAtList = [];
-        for (const selectedCategory of selectedCategories){
-          this.postCreatedAtList = [
-            ...this.postCreatedAtList,
-            ...(selectedCategory.postCreatedAtList || [])
-          ];
-        }
-        this.changePageList(null);
-      }
-    });
+    if (this.params.categoryId){
+      const [category] = this.blogService.getCategory(this.params.categoryId, blogContents[0].categoryMap);
+      this.selectedCategory = category;
+      this.postCreatedAtList = this.getCategoryPageList(category);
+      this.changePageList(null);
+    }
   }
   // tslint:disable-next-line: variable-name
   private _blogContents: Array<BlogContent>;
 
-  countChildPost() {
-    let count = 0;
-    this.selectedChildCategories.forEach((categoryContent) => {
-      count += categoryContent.value.postCreatedAtList.length;
-    });
-    return count;
+  getCategoryPageList(category: CategoryContent): Array<number> {
+    let results: Array<number> = [...(category?.postCreatedAtList || [])];
+    for (const child of category.children) {
+      results = [...results, ...this.getCategoryPageList(child)];
+    }
+    return results;
   }
 
   getCategoryTitle(categoryId: string): string {
-    const category = this.categoryContentsForm.controls.categoryContents.controls.find((categoryContent) =>
-      categoryContent.value.id === categoryId);
-    return category.value.categoryTitle;
+    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+    return category.name;
   }
 
   changePageList(event) {
@@ -165,7 +105,6 @@ export class CategoryComponent implements OnInit, OnDestroy {
     const selectedCreatedAtList = this.postCreatedAtList
     .sort((createdA, createdB) => createdA - createdB)
     .splice(this.pageIndex * this.pageSize, this.pageSize);
-    this.postCreatedAtList = [...selectedCreatedAtList, ...this.postCreatedAtList];
     this.postListObserver = this.blogService.getCategoryPostListObserver(
       this.blogId, selectedCreatedAtList
     );
@@ -184,6 +123,5 @@ export class CategoryComponent implements OnInit, OnDestroy {
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
     this.postListSub?.unsubscribe();
-    this.categoryContentsSub?.unsubscribe();
   }
 }

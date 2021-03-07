@@ -1,0 +1,90 @@
+<button
+  *ngIf="canEdit"
+  class="node-title btn btn-sm btn-dark d-flex"
+  (click)="handleAddCategory()"
+>
+  <div
+    class="icon-edit-wraper m-auto"
+  >
+    <i class="fa fa-plus icon-edit"></i>
+  </div>
+  <span class="me-1">Add Category</span>
+</button>
+
+<ng-template #tmplNode let-node="node">
+  <div class="node-item" [attr.data-id]="node.id" [attr.id]="'node-'+node.id">
+    <div class="node-title d-flex">
+      <div
+        class="icon-directory-wraper"
+        (click)="node.isExpanded=!node.isExpanded"
+      >
+        <i
+          *ngIf="node.children.length && node.isExpanded"
+          class="fa fa-angle-down icon-directory"
+        ></i>
+        <i
+          *ngIf="node.children.length && !node.isExpanded"
+          class="fa fa-angle-right icon-directory"
+        ></i>
+      </div>
+      <!-- {{node.children.length ? (node.isExpanded?'-&nbsp;':'+') : '&nbsp;&nbsp;&nbsp;'}} &nbsp;&nbsp;&nbsp; -->
+      <span
+        class="node-name"
+        (click)="handleSelectCategory(node.id)">{{node.name}}
+      </span>
+      <!-- <span class="item-notes"> ({{node.children.length}}{{node.children.length?', expanded: ' + !!node.isExpanded:''}})</span> -->
+      <div
+        *ngIf="canEdit"
+        class="icon-edit-wraper ms-2"
+        (click)="handleEditCategory(node.id)"
+      >
+        <i class="fa fa-pencil icon-edit"></i>
+      </div>
+      <div
+        *ngIf="canEdit"
+        class="icon-edit-wraper"
+        (click)="handleAddCategory(node.id)"
+      >
+        <i class="fa fa-plus icon-edit"></i>
+      </div>
+    </div>
+
+    <div
+      *ngIf="node.isExpanded && node.children.length"
+      class="node-children"
+      cdkDropList
+      [cdkDropListData]="node.children"
+      [id]="node.id"
+      [cdkDropListConnectedTo]="dropTargetIds"
+      (cdkDropListDropped)="drop($event)"
+      [cdkDropListSortingDisabled]="true"
+    >
+      <div
+        *ngFor="let child of node.children"
+        cdkDrag
+        [cdkDragData]="child.id" 
+        (cdkDragMoved)="dragMoved($event)"
+      >
+        <ng-container *ngTemplateOutlet="tmplNode,context:{node:child}"></ng-container>  
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<div
+  cdkDropList
+  [cdkDropListData]="nodes"
+  [id]="'main'"
+  [cdkDropListConnectedTo]="dropTargetIds"
+  (cdkDropListDropped)="drop($event)"
+  [cdkDropListSortingDisabled]="true"
+>   
+  <div
+    *ngFor="let node of nodes"
+    cdkDrag
+    [cdkDragData]="node.id"      
+    (cdkDragMoved)="dragMoved($event)"
+  >
+    <ng-container *ngTemplateOutlet="tmplNode,context:{node:node}"></ng-container>
+  </div>
+</div>
