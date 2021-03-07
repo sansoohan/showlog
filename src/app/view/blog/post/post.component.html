@@ -14,7 +14,7 @@
     (clickEditPostImage)="handleClickEditPostImage($event)"
   ></app-blog-left-sidebar>
   <div class="blog-post">
-    <form  [formGroup]="postContentsForm">
+    <form *ngIf="postContentsForm" [formGroup]="postContentsForm">
       <section class="post-section">
         <div *ngIf="isCreatingPost">
           <Button
@@ -110,14 +110,26 @@
               formControlName="postTitle"
               placeholder="Title"
             />
-            <textarea
-              id="postTextArea"
-              #postTextArea
-              class="form-control post-editarea"
-              rows="{{getPostMarkdownLines()}}"
-              formControlName="postMarkdown"
-              placeholder="Content"
-            ></textarea>
+            <div style="position: relative;">
+              <ngx-file-drop
+                class="dropdown-wraper"
+                dropZoneClassName="h-100"
+                contentClassName="h-100"
+                (onFileDrop)="dropped($event)" 
+                (onFileOver)="fileOver($event)"
+                (onFileLeave)="fileLeave($event)"
+              >
+              </ngx-file-drop>
+              <textarea
+                id="postTextArea"
+                #postTextArea
+                class="form-control post-editarea"
+                rows="{{getPostMarkdownLines()}}"
+                formControlName="postMarkdown"
+                placeholder="Content"
+              >
+              </textarea>
+            </div>
           </div>
 
           <div class="post-edit-preview-col">

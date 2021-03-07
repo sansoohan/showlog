@@ -29,6 +29,7 @@ import { environment } from 'src/environments/environment';
 // ngx module
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { MarkdownModule } from 'ngx-markdown';
+import { NgxFileDropModule } from 'ngx-file-drop';
 
 // View
 import { AppComponent } from 'src/app/app.component';
@@ -67,6 +68,7 @@ import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
     MarkdownModule.forRoot({
       sanitize: SecurityContext.NONE,
     }),
+    NgxFileDropModule,
     MatButtonModule,
     MatIconModule,
     MatTabsModule,
