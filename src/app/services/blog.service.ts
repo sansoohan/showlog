@@ -28,9 +28,6 @@ export class BlogService extends CommonService {
     public firestore: AngularFirestore,
     public authService: AuthService,
     public storage: AngularFireStorage,
-    private formHelper: FormHelper,
-    private toastHelper: ToastHelper,
-    private dataTransferHelper: DataTransferHelper,
   ) {
     super(authService, firestore, storage);
   }
@@ -68,6 +65,19 @@ export class BlogService extends CommonService {
       .valueChanges();
   }
 
+  getCategory(categoryId: string, categories: Array<CategoryContent>): Array<CategoryContent>{
+    let results: Array<CategoryContent> = [];
+    for (const category of categories) {
+      if (category.id === categoryId) {
+        results.push(category);
+      } else {
+        results = [...this.getCategory(categoryId, category.children), ...results];
+      }
+    }
+
+    return results.filter(Boolean);
+  }
+
   getCategoryPostListObserver(
     blogId: string,
     postCreatedAtList: Array<number>,
@@ -87,15 +97,35 @@ export class BlogService extends CommonService {
       .valueChanges();
   }
 
-  getCategoryContentsObserver(blogId: string): Observable<CategoryContent[]> {
+  removeCategoryPosts(
+    blogId: string,
+    postCreatedAtList: Array<number>,
+  ): Promise<void> {
     if (!blogId){
       return;
     }
-    const categoryContentsObserver = this.firestore
+    if (postCreatedAtList.length === 0) {
+      postCreatedAtList = [-1];
+    }
+
+    this.firestore
     .collection<BlogContent>('blogs').doc(blogId)
-    .collection<CategoryContent>('categories')
-    .valueChanges();
-    return categoryContentsObserver;
+    .collection<PostContent>('posts', ref => ref
+      .where('createdAt', 'in', postCreatedAtList)
+    ).get().toPromise().then(posts => posts.forEach(postDoc => {
+      this.delete(
+        `blogs/${blogId}/posts/${postDoc.id}`, {
+          parentKeyName: null,
+          collectionPath: `blogs/${blogId}/posts`,
+          childrenStorage: ['images'],
+          children: [{
+            parentKeyName: 'postId',
+            collectionPath: `blogs/${blogId}/comments`,
+            children: []
+          }]
+        }
+      );
+    }));
   }
 
   getCommentContentsObserver(
@@ -105,11 +135,10 @@ export class BlogService extends CommonService {
     if (!blogId || !postId){
       return;
     }
-    const categoryContentsObserver = this.firestore
+    return this.firestore
     .collection<BlogContent>('blogs').doc(blogId)
     .collection<CommentContent>('comments', ref => ref.where('postId', '==', postId))
     .valueChanges();
-    return categoryContentsObserver;
   }
 
   getCategoryDeepCount(
@@ -123,50 +152,5 @@ export class BlogService extends CommonService {
     .find((category) => category.value.id === categoryContent.value.parentId);
 
     return 1 + this.getCategoryDeepCount(parentCategory, categoryContents);
-  }
-
-  async cascadeDeleteCateogry(
-    blogContents: Array<BlogContent>,
-    targetCategory: FormGroup,
-    categoryContentsForm: FormGroup,
-  ): Promise<any> {
-    const blogId = blogContents[0].id;
-    const targetChildCategories = this.formHelper.getChildContentsRecusively(
-      // tslint:disable-next-line: no-string-literal
-      categoryContentsForm.controls.categoryContents['controls'], targetCategory
-    );
-    const targetCategories = [targetCategory, ...targetChildCategories];
-    const targetCategoryPromises = targetCategories.map(async (category) => {
-      return new Promise((resolve, reject) => {
-        return this
-        .delete(`blogs/${blogId}/categories/${category.value.id}`, {
-          parentKeyName: null,
-          collectionPath: `blogs/${blogId}/categories`,
-          children: [{
-            parentKeyName: 'categoryId',
-            collectionPath: `blogs/${blogId}/posts`,
-            childrenStorage: ['images'],
-            children: [{
-              parentKeyName: 'postId',
-              collectionPath: `blogs/${blogId}/comments`,
-              children: []
-            }]
-          }]
-        })
-        .then(() => {
-          blogContents[0].categoryOrder = blogContents[0].categoryOrder
-          .filter((categoryId) => categoryId !== category.value.id);
-          this
-          .update(`blogs/${blogId}`, blogContents[0])
-          .then(() => resolve())
-          .catch(e => reject(e));
-        })
-        .catch(e => reject(e));
-      });
-    });
-
-    return Promise.all([
-      ...targetCategoryPromises,
-    ]);
   }
 }

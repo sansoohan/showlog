@@ -24,14 +24,13 @@ export class PostComponent implements OnInit, OnDestroy {
   @ViewChild ('postTextArea') public postTextArea: ElementRef;
   @Output() goToPost: EventEmitter<string> = new EventEmitter();
   @Output() goToCategory: EventEmitter<string> = new EventEmitter();
-  @Input() isEditingPost;
-  @Input() isCreatingPost;
+  @Input() canEdit: string;
+  @Input() isCreatingPost: boolean;
 
   categoryContentsObserver: Observable<CategoryContent[]>;
   categoryContents: CategoryContent[];
   categoryContentsSub: Subscription;
   categoryContentsForm: any;
-  isEditingCategory: boolean;
 
   imageContentsObserver: Observable<ImageContent[]>;
   imageContents: ImageContent[];
@@ -44,14 +43,10 @@ export class PostComponent implements OnInit, OnDestroy {
   hasNullPostTitleError: boolean;
   postId: string;
 
-  postListObserver: Observable<PostContent[]>;
-  postList: PostContent[];
-  postListForm: any;
-
   blogId: string;
   isPage: boolean;
   isLoading: boolean;
-  updateOk: boolean;
+  isEditingPost: boolean;
 
   queryParamSub: Subscription;
   paramSub: Subscription;
@@ -81,10 +76,12 @@ export class PostComponent implements OnInit, OnDestroy {
     if (!blogContents || blogContents.length === 0) {
       return;
     }
+
     this.paramSub = this.route.params.subscribe(params => {
       this.queryParamSub = this.route.queryParams.subscribe(queryParams => {
         this.queryParams = queryParams;
         this.isCreatingPost = !!queryParams.isCreatingPost;
+        this.isEditingPost = this.isCreatingPost;
 
         this.params = params;
         this.postContents = [new PostContent()];
@@ -94,8 +91,6 @@ export class PostComponent implements OnInit, OnDestroy {
         this.imageContents = [];
 
         this.hasNullPostTitleError = false;
-        this.isEditingCategory = false;
-
         this.isPage = true;
         this.isLoading = true;
         this._blogContents = blogContents;
@@ -108,45 +103,24 @@ export class PostComponent implements OnInit, OnDestroy {
           this.imageContents = imageContents;
         });
 
-        this.categoryContentsObserver = this.blogService.getCategoryContentsObserver(this.blogId);
-        this.categoryContentsSub = this.categoryContentsObserver.subscribe(categoryContents => {
-          if (!categoryContents || categoryContents.length === 0){
-            this.isPage = false;
-            return;
-          }
-
-          this.categoryContents = categoryContents.map((categoryContent) => {
-            categoryContent.categoryNumber = blogContents[0].categoryOrder
-            .findIndex(categoryId => categoryId === categoryContent.id);
-            return categoryContent;
+        if (!this.isCreatingPost) {
+          this.postContentsObserver = this.blogService.getPostContentsObserver({
+            params: {
+              postId: this.postId,
+              blogId: this.blogId,
+            }
+          }, this.blogId);
+          this.postContentsSub = this.postContentsObserver.subscribe(postContents => {
+            this.postContents = postContents;
+            if (postContents.length === 0) {
+              this.isPage = false;
+              return;
+            }
+            this.postContents[0].postMarkdown = this.postContents[0]?.postMarkdown.replace(/\\n/g, '\n');
+            this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
           });
-
-          this.categoryContents.sort((categoryA: CategoryContent, categoryB: CategoryContent) =>
-          categoryA.categoryNumber - categoryB.categoryNumber);
-
-          this.categoryContentsForm =
-            this.formHelper.buildFormRecursively({categoryContents: this.categoryContents});
-
-          if (!this.isCreatingPost) {
-            this.postContentsObserver = this.blogService.getPostContentsObserver({
-              params: {
-                postId: this.postId,
-                blogId: this.blogId,
-              }
-            }, this.blogId);
-            this.postContentsSub = this.postContentsObserver.subscribe(postContents => {
-              this.postContents = postContents;
-              if (postContents.length === 0) {
-                this.isPage = false;
-                return;
-              }
-              this.postContents[0].postMarkdown = this.postContents[0]?.postMarkdown.replace(/\\n/g, '\n');
-              this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
-            });
-          }
-
-          this.isLoading = false;
-        });
+        }
+        this.isLoading = false;
       });
     });
   }
@@ -271,9 +245,8 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   getCategoryTitle(categoryId: string): string {
-    const category = this.categoryContentsForm?.controls.categoryContents.controls.find((categoryContent) =>
-      categoryContent.value.id === categoryId);
-    return category?.value.categoryTitle;
+    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+    return category?.name;
   }
 
   clickPostEdit(): void {

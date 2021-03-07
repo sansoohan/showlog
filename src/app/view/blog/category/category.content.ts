@@ -1,35 +1,23 @@
 export class CategoryContent {
   id: string;
-  blogId: string;
-  categoryNumber: number;
-  categoryTitle: string;
+  name: string;
   createdAt: number;
-  collapsed: boolean;
-  parentId: string;
+  isExpanded: boolean;
   postCreatedAtList: Array<number>;
-  hidden: boolean;
-  ownerId: string;
+  children: Array<CategoryContent>;
   constructor(
     id: string = '',
-    blogId: string = '',
-    categoryNumber: number = 0,
-    categoryTitle: string = 'New Category',
+    name: string = 'New Category',
     createdAt: number = Number(new Date()),
-    collapsed: boolean = false,
-    parentId: string = null,
+    isExpanded: boolean = false,
     postCreatedAtList: Array<number> = [],
-    hidden: boolean = false,
-    ownerId: string = '',
+    children: Array<CategoryContent> = [],
   ){
     this.id = id;
-    this.blogId = blogId;
-    this.categoryNumber = categoryNumber;
-    this.categoryTitle = categoryTitle;
+    this.name = name;
     this.createdAt = createdAt;
-    this.collapsed = collapsed;
-    this.parentId = parentId;
+    this.isExpanded = isExpanded;
     this.postCreatedAtList = postCreatedAtList;
-    this.hidden = hidden;
-    this.ownerId = ownerId;
+    this.children = children;
   }
 }

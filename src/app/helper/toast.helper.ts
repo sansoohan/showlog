@@ -37,10 +37,11 @@ export class ToastHelper {
     });
   }
 
-  async showPrompt(title: string, inputPlaceholder: string){
+  async showPrompt(title: string, inputPlaceholder: string, inputValue?: string){
     return await Swal.fire({
       title,
       input: 'text',
+      inputValue,
       inputPlaceholder,
       showCancelButton: true,
       inputValidator: (value) => {
@@ -65,6 +66,28 @@ export class ToastHelper {
       showCancelButton: true,
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
+      reverseButtons: true
+    });
+  }
+
+  async askUpdateDelete(title: string, inputPlaceholder: string, inputValue?: string): Promise<SweetAlertResult> {
+    return Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger me-2',
+        closeButton: 'btn btn-secondary me-2',
+      },
+      buttonsStyling: false
+    }).fire({
+      title,
+      input: 'text',
+      inputPlaceholder,
+      inputValue,
+      icon: 'warning',
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Update',
+      cancelButtonText: 'Remove',
       reverseButtons: true
     });
   }

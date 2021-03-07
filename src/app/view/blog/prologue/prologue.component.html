@@ -10,12 +10,10 @@
   </div>
   <app-blog-left-sidebar
     [isEditingPost]="isEditingPost"
-    [isEditingCategory]="isEditingCategory"
-    [categoryContents]="categoryContents"
-    [categoryContentsForm]="categoryContentsForm"
+    [canEdit]="canEdit"
     [blogContents]="blogContents"
   ></app-blog-left-sidebar>
-  <div class="blog-prologue" *ngIf="!isEditingCategory">
+  <div class="blog-prologue">
     <form *ngIf="postListForm" [formGroup]="postListForm">
       <div formArrayName="postList">
         <section class="container prologue-section">

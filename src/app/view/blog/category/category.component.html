@@ -16,14 +16,11 @@
   
   <div *ngIf="!isCreatingPost">
     <app-blog-left-sidebar
-      [isEditingPost]="isEditingPost"
-      [isEditingCategory]="isEditingCategory"
-      [categoryContents]="categoryContents"
-      [categoryContentsForm]="categoryContentsForm"
+      [isEditingPost]="false"
+      [canEdit]="canEdit"
       [blogContents]="blogContents"
     ></app-blog-left-sidebar>
     <div
-      *ngIf="!isEditingCategory"
       class="blog-category"
     >
       <form *ngIf="postListForm && selectedCategory" [formGroup]="postListForm">
@@ -31,8 +28,8 @@
           <section class="container category-section">
             <div class="row category-title-row">
               <span class="col-6 category-title-col">
-                {{selectedCategory.value.categoryTitle}}
-                ({{selectedCategory.value.postCreatedAtList?.length || 0 + countChildPost()}})
+                {{selectedCategory.name}}
+                ({{this.getCategoryPageList(selectedCategory).length}})
               </span>
               <div class="col-6 d-flex">
                 <span

@@ -1,17 +1,19 @@
+import { CategoryContent } from './category/category.content';
+
 export class BlogContent {
   id: string;
   userName: string;
   ownerId: string;
-  categoryOrder: Array<string>;
+  categoryMap: Array<CategoryContent>;
   constructor(
     id: string = '',
     userName: string = '',
     ownerId: string = '',
-    categoryOrder: Array<string> = [],
+    categoryMap: Array<CategoryContent> = [],
   ){
     this.id = id;
     this.userName = userName;
     this.ownerId = ownerId;
-    this.categoryOrder = categoryOrder;
+    this.categoryMap = categoryMap;
   }
 }
