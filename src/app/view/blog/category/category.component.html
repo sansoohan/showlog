@@ -34,7 +34,7 @@
               <div class="col-6 d-flex">
                 <span
                   class="btn btn-warning ms-auto"
-                  *ngIf="authService.isSignedIn() && !isEditingPost"
+                  *ngIf="authService.isSignedIn()"
                   (click)="routerHelper.goToBlogCategoryNewPost(params,params.categoryId)"
                 >Create New Post</span>
               </div>
