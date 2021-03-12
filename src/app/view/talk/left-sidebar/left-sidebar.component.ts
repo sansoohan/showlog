@@ -11,7 +11,7 @@ import { ProfileService } from 'src/app/services/profile.service';
 @Component({
   selector: 'app-talk-left-sidebar',
   templateUrl: './left-sidebar.component.html',
-  styleUrls: ['../talk.component.css', './left-sidebar.component.css']
+  styleUrls: ['../talk.component.scss', './left-sidebar.component.scss']
 })
 export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Output() clickCreateRoom: EventEmitter<null> = new EventEmitter();
@@ -20,16 +20,17 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Output() clickStartScreenSharing: EventEmitter<null> = new EventEmitter();
   @Output() clickStopScreenSharing: EventEmitter<null> = new EventEmitter();
 
-  @Input() isInRoom: boolean;
-  @Input() isScreenSharing: boolean;
-  @Input() isMobileDevice: boolean;
+  @Input() isInRoom?: boolean;
+  @Input() isScreenSharing?: boolean;
+  @Input() isMobileDevice?: boolean;
 
   paramSub: Subscription;
   params: any;
-  isPage: boolean;
-  isLoading: boolean;
-  talkContent: TalkContent;
+  talkContent?: TalkContent;
   sessionStorage: Storage;
+
+  isPage = true;
+  isLoading = true;
 
   constructor(
     public profileService: ProfileService,
@@ -50,27 +51,27 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleClickCreateRoom() {
+  handleClickCreateRoom(): void {
     this.clickCreateRoom.emit();
   }
 
-  handleClickJoinRoom() {
+  handleClickJoinRoom(): void {
     this.clickJoinRoom.emit();
   }
 
-  handleClickLeaveRoom() {
+  handleClickLeaveRoom(): void {
     this.clickLeaveRoom.emit();
   }
 
-  handleClickStartScreenSharing() {
+  handleClickStartScreenSharing(): void {
     this.clickStartScreenSharing.emit();
   }
 
-  handleClickStopScreenSharing() {
+  handleClickStopScreenSharing(): void {
     this.clickStopScreenSharing.emit();
   }
 
-  clickBackToRoom() {
+  clickBackToRoom(): void {
     const roomId = sessionStorage.getItem('beforeRoomId');
     this.routerHelper.goToUrl(
       `${window.location.origin}/#/talk/${this.params.userName}/room/${roomId}`

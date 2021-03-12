@@ -1,6 +1,7 @@
 <div *ngIf="!isEditingPost">
   <div class="blog-comment" *ngIf="!isEditingPost">
     <section
+      *ngIf="isEditingCommentIds"
       class="p-3 d-flex flex-column"
       id="comment-edit"
       [class.comment-section]="isEditingCommentIds.length===0"

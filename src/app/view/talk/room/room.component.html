@@ -21,7 +21,6 @@
   <app-talk-room-entrance
     *ngIf="!isInRoom && talkContents"
     [roomContents]="roomContents"
-    (clickBackToJoinedRoom)="handleClickBackToJoinedRoom($event)"
     (clickRemoveRoom)="handleClickRemoveRoom($event)"
   ></app-talk-room-entrance>
   <div class="copy-to-clipboard">

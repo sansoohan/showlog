@@ -2,7 +2,7 @@
   <div class="my-auto">
     <h2 class="mb-5">Interests</h2>
       <div *ngIf="!isEditing">
-        <p class="mb-0" *ngFor="let description of interestsContent.descriptions">
+        <p class="mb-0" *ngFor="let description of interestsContent?.descriptions">
           {{description}}
         </p>
       </div>
@@ -16,25 +16,25 @@
           <div formGroupName='interestsContent'>
             <div formArrayName='descriptions'>
 
-              <div *ngIf="profileForm.controls.interestsContent.controls.descriptions.controls.length === 0">
+              <div *ngIf="profileForm.controls.interestsContent?.controls.descriptions.controls.length === 0">
                 <div class="row mb-1">
                   <div class="col-11"></div>
                   <div class="col-1" style="padding: 0;">
                     <app-modules-user-form-input-add-remove
-                      [targetArrayForm]="profileForm.controls.interestsContent.controls.descriptions"
+                      [targetArrayForm]="profileForm.controls.interestsContent?.controls.descriptions"
                       [newObject]="newDescription"
                     ></app-modules-user-form-input-add-remove>
                   </div>
                 </div>
               </div>
 
-              <div class="row mb-1" *ngFor="let interest of profileForm.controls.interestsContent.controls.descriptions.controls; let i=index">
+              <div class="row mb-1" *ngFor="let interest of profileForm.controls.interestsContent?.controls.descriptions.controls; let i=index">
                 <div class="col-11">
                   <input type="text" class="form-control form-control-sm" placeholder="Interest" [formControlName]="i">
                 </div>
                 <div class="col-1" style="padding: 0;">
                   <app-modules-user-form-input-add-remove
-                    [targetArrayForm]="profileForm.controls.interestsContent.controls.descriptions"
+                    [targetArrayForm]="profileForm.controls.interestsContent?.controls.descriptions"
                     [targetArrayIndex]="i"
                     [newObject]="newDescription"
                   ></app-modules-user-form-input-add-remove>

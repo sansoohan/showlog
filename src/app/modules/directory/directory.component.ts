@@ -10,7 +10,7 @@ export interface DropInfo {
 @Component({
   selector: 'app-modules-directory',
   templateUrl: './directory.component.html',
-  styleUrls: ['./directory.component.css'],
+  styleUrls: ['./directory.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class DirectoryComponent {
@@ -18,27 +18,27 @@ export class DirectoryComponent {
   @Output() sortCategory: EventEmitter<Array<any>> = new EventEmitter();
   @Output() editCategory: EventEmitter<string> = new EventEmitter();
   @Output() addCategory: EventEmitter<string|undefined> = new EventEmitter();
-  @Input() canEdit: boolean;
+  @Input() canEdit?: boolean;
 
   @Input()
-  get nodes(): Array<any> { return this._nodes; }
-  set nodes(nodes: Array<any>) {
+  get nodes(): Array<any>|undefined { return this._nodes; }
+  set nodes(nodes: Array<any>|undefined) {
     this._nodes = nodes;
     this.prepareDragDrop(nodes);
   }
-  // tslint:disable-next-line: variable-name
-  private _nodes: Array<any>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
+  private _nodes?: Array<any>;
 
   // ids for connected drop lists
-  dropTargetIds = [];
-  nodeLookup = {};
-  dropActionTodo: DropInfo = null;
+  dropTargetIds: Array<string> = [];
+  nodeLookup: {[index: string]: any} = {};
+  dropActionTodo: DropInfo|null = null;
 
   constructor(@Inject(DOCUMENT) private document: Document) {
   }
 
-  prepareDragDrop(nodes) {
-    nodes.forEach(node => {
+  prepareDragDrop(nodes?: Array<{[index: string]: any}>): void {
+    nodes?.forEach(node => {
       this.dropTargetIds.push(node.id);
       this.nodeLookup[node.id] = node;
       this.prepareDragDrop(node.children);
@@ -46,7 +46,7 @@ export class DirectoryComponent {
   }
 
   @debounce(50)
-  dragMoved(event) {
+  dragMoved(event: any): void {
     if (!this.canEdit){
       return;
     }
@@ -61,9 +61,19 @@ export class DirectoryComponent {
       this.clearDragInfo();
       return;
     }
+    if (!this.dropActionTodo) {
+      return;
+    }
+
+    const targetId = container.getAttribute('data-id');
+    if (!targetId) {
+      return;
+    }
+
     this.dropActionTodo = {
-      targetId: container.getAttribute('data-id')
+      targetId
     };
+
     const targetRect = container.getBoundingClientRect();
     const oneThird = targetRect.height / 3;
 
@@ -80,23 +90,25 @@ export class DirectoryComponent {
     this.showDragInfo();
   }
 
-
-  drop(event) {
+  drop(event: any): void {
     if (!this.dropActionTodo) { return; }
 
     const draggedItemId = event.item.data;
     const parentItemId = event.previousContainer.id;
     const targetListId = this.getParentNodeId(this.dropActionTodo.targetId, this.nodes, 'main');
+    if (!targetListId) {
+      return;
+    }
 
-    // tslint:disable-next-line: no-console
+    // eslint-disable-next-line no-console
     console.log(
       '\nmoving\n[' + draggedItemId + '] from list [' + parentItemId + ']',
       '\n[' + this.dropActionTodo.action + ']\n[' + this.dropActionTodo.targetId + '] from list [' + targetListId + ']');
 
     const draggedItem = this.nodeLookup[draggedItemId];
 
-    const oldItemContainer = parentItemId !== 'main' ? this.nodeLookup[parentItemId].children : this.nodes;
-    const newContainer = targetListId !== 'main' ? this.nodeLookup[targetListId].children : this.nodes;
+    const oldItemContainer: Array<{[index: string]: any}> = parentItemId !== 'main' ? this.nodeLookup[parentItemId].children : this.nodes;
+    const newContainer: Array<{[index: string]: any}> = targetListId !== 'main' ? this.nodeLookup[targetListId].children : this.nodes;
 
     const i = oldItemContainer.findIndex(c => c.id === draggedItemId);
     oldItemContainer.splice(i, 1);
@@ -104,7 +116,7 @@ export class DirectoryComponent {
     switch (this.dropActionTodo.action) {
       case 'before':
       case 'after':
-        const targetIndex = newContainer.findIndex(c => c.id === this.dropActionTodo.targetId);
+        const targetIndex = newContainer.findIndex(c => c.id === this.dropActionTodo?.targetId);
         if (this.dropActionTodo.action === 'before') {
           newContainer.splice(targetIndex, 0, draggedItem);
         } else {
@@ -121,21 +133,23 @@ export class DirectoryComponent {
     this.clearDragInfo(true);
     this.handleSortCategory();
   }
-  getParentNodeId(id: string, nodesToSearch, parentId: string): string {
+  getParentNodeId(id: string, nodesToSearch: any, parentId: string): string|null {
     for (const node of nodesToSearch) {
       if (node.id === id) { return parentId; }
       const ret = this.getParentNodeId(id, node.children, node.id);
       if (ret) { return ret; }
     }
+
     return null;
   }
-  showDragInfo() {
+  showDragInfo(): void {
     this.clearDragInfo();
-    if (this.dropActionTodo) {
-      this.document.getElementById('node-' + this.dropActionTodo.targetId).classList.add('drop-' + this.dropActionTodo.action);
+    if (this.dropActionTodo?.targetId) {
+      const document = this.document as any;
+      document.getElementById('node-' + this.dropActionTodo.targetId).classList.add('drop-' + this.dropActionTodo.action);
     }
   }
-  clearDragInfo(dropped = false) {
+  clearDragInfo(dropped = false): void {
     if (dropped) {
       this.dropActionTodo = null;
     }

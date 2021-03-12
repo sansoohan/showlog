@@ -5,20 +5,20 @@ import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 @Component({
   selector: 'app-modules-user-form-input-add-remove',
   templateUrl: './input-add-remove.component.html',
-  styleUrls: ['./input-add-remove.component.css']
+  styleUrls: ['./input-add-remove.component.scss']
 })
 export class InputAddRemoveComponent implements OnInit {
-  @Input() targetArrayForm: FormArray;
-  @Input() targetArrayIndex: number;
+  @Input() targetArrayForm?: FormArray;
+  @Input() targetArrayIndex: any;
   @Input() newObject: any;
 
   constructor(private fb: FormBuilder) { }
 
-  addInput(){
-    this.targetArrayForm.push(this.buildFormRecursively(this.newObject));
+  addInput(): void {
+    this.targetArrayForm?.push(this.buildFormRecursively(this.newObject));
   }
 
-  buildFormRecursively(profileContent: any){
+  buildFormRecursively(profileContent: any): any {
     if (profileContent instanceof Date) {
       return this.fb.control(new Date(profileContent).toISOString().slice(0, -1));
     }
@@ -43,7 +43,7 @@ export class InputAddRemoveComponent implements OnInit {
     }
   }
 
-  removeInput(){
+  removeInput(): void {
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
@@ -54,7 +54,7 @@ export class InputAddRemoveComponent implements OnInit {
 
     swalWithBootstrapButtons.fire({
       title: 'Are you sure?',
-      // tslint:disable-next-line:quotemark
+      // eslint-disable-next-line @typescript-eslint/quotes
       text: "Remove this data",
       icon: 'warning',
       showCancelButton: true,
@@ -62,8 +62,8 @@ export class InputAddRemoveComponent implements OnInit {
       cancelButtonText: 'No, cancel!',
       reverseButtons: true
     }).then((result) => {
-      if (result.value) {
-        this.targetArrayForm.removeAt(this.targetArrayIndex);
+      if (result.value && this.targetArrayIndex) {
+        this.targetArrayForm?.removeAt(this.targetArrayIndex);
       }
       else if (result.dismiss === Swal.DismissReason.cancel) {
       }

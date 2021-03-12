@@ -19,43 +19,9 @@ import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 
 @Component({
   selector: 'app-blog-post',
   templateUrl: './post.component.html',
-  styleUrls: ['../blog.component.css', './post.component.css']
+  styleUrls: ['../blog.component.scss', './post.component.scss']
 })
 export class PostComponent implements OnInit, OnDestroy {
-  @ViewChild ('postTextArea') public postTextArea: ElementRef;
-  @Output() goToPost: EventEmitter<string> = new EventEmitter();
-  @Output() goToCategory: EventEmitter<string> = new EventEmitter();
-  @Input() canEdit: string;
-  @Input() isCreatingPost: boolean;
-
-  categoryContentsObserver: Observable<CategoryContent[]>;
-  categoryContents: CategoryContent[];
-  categoryContentsSub: Subscription;
-  categoryContentsForm: any;
-
-  imageContentsObserver: Observable<ImageContent[]>;
-  imageContents: ImageContent[];
-  imageContentsSub: Subscription;
-
-  postContentsObserver: Observable<PostContent[]>;
-  postContents: PostContent[];
-  postContentsSub: Subscription;
-  postContentsForm: any;
-  hasNullPostTitleError: boolean;
-  postId: string;
-
-  blogId: string;
-  isPage: boolean;
-  isLoading: boolean;
-  isEditingPost: boolean;
-
-  queryParamSub: Subscription;
-  paramSub: Subscription;
-  queryParams: any;
-  params: any;
-
-  removeImageTag: string;
-
   constructor(
     public profileService: ProfileService,
     public imageHelper: ImageHelper,
@@ -68,12 +34,17 @@ export class PostComponent implements OnInit, OnDestroy {
     private formHelper: FormHelper,
     private imageStorage: ImageStorage,
   ) {
+    this.paramSub = this.route.params.subscribe(params => {
+    });
+    this.queryParamSub = this.route.queryParams.subscribe(queryParams => {
+    });
+
     this.isPage = true;
   }
 
   @Input()
-  get blogContents(): Array<BlogContent> { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>) {
+  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
+  set blogContents(blogContents: Array<BlogContent>|undefined) {
     if (!blogContents || blogContents.length === 0) {
       return;
     }
@@ -89,11 +60,7 @@ export class PostComponent implements OnInit, OnDestroy {
         this.postContents[0].id = this.blogService.newId();
         this.postId = this.params.postId || this.postContents[0].id;
         this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
-        this.imageContents = [];
 
-        this.hasNullPostTitleError = false;
-        this.isPage = true;
-        this.isLoading = true;
         this._blogContents = blogContents;
         this.blogId = blogContents[0].id;
 
@@ -111,7 +78,7 @@ export class PostComponent implements OnInit, OnDestroy {
               blogId: this.blogId,
             }
           }, this.blogId);
-          this.postContentsSub = this.postContentsObserver.subscribe(postContents => {
+          this.postContentsSub = this.postContentsObserver?.subscribe(postContents => {
             this.postContents = postContents;
             if (postContents.length === 0) {
               this.isPage = false;
@@ -125,13 +92,46 @@ export class PostComponent implements OnInit, OnDestroy {
       });
     });
   }
-  // tslint:disable-next-line: variable-name
-  private _blogContents: Array<BlogContent>;
+  @ViewChild ('postTextArea') public postTextArea: ElementRef|null = null;
+  @Output() goToPost: EventEmitter<string> = new EventEmitter();
+  @Output() goToCategory: EventEmitter<string> = new EventEmitter();
+  @Input() canEdit?: boolean;
+  @Input() isCreatingPost?: boolean;
 
-  async updateRemovedImage() {
+  // categoryContentsObserver: Observable<CategoryContent[]>;
+  // categoryContents: CategoryContent[];
+  // categoryContentsSub: Subscription;
+  // categoryContentsForm: any;
+
+  imageContentsObserver?: Observable<ImageContent[]>;
+  imageContents?: ImageContent[];
+  imageContentsSub?: Subscription;
+
+  postContentsObserver?: Observable<PostContent[]>;
+  postContents?: PostContent[];
+  postContentsSub?: Subscription;
+  postContentsForm: any;
+  hasNullPostTitleError = false;
+
+  postId = '';
+  blogId = '';
+  isPage = true;
+  isLoading = true;
+  isEditingPost = false;
+
+  queryParamSub: Subscription;
+  paramSub: Subscription;
+  queryParams: any;
+  params: any;
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
+  private _blogContents?: Array<BlogContent>;
+
+  public files: NgxFileDropEntry[] = [];
+
+  async updateRemovedImage(): Promise<void> {
     const inputString = this.postContentsForm.controls.postMarkdown.value;
-    for (const postImageContent of this.imageContents) {
-      // tslint:disable-next-line: no-string-literal
+    for (const postImageContent of this.imageContents || []) {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
       const imageTagAttributes = imageTagAttributesList.map((tagAttribute) => {
         const imageTagAttribute: ImageContent = new ImageContent();
@@ -148,7 +148,7 @@ export class PostComponent implements OnInit, OnDestroy {
         `images/${postImageContent.id}`,
       ].join('/');
 
-      // tslint:disable-next-line: no-inferrable-types
+      // eslint-disable-next-line @typescript-eslint/no-inferrable-types
       let isImage: boolean = false;
       for (const tagAttribute of imageTagAttributes) {
         isImage = tagAttribute?.attributes.id === postImageContent.id;
@@ -165,7 +165,7 @@ export class PostComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleClickStartUploadPostImageSrc() {
+  handleClickStartUploadPostImageSrc(): void {
     this.toastHelper.uploadImage('Select Your Post Image', false).then((data) => {
       if (data.value) {
         const _URL = window.URL || window.webkitURL;
@@ -186,8 +186,8 @@ export class PostComponent implements OnInit, OnDestroy {
           );
           postImageContent.attributes.id = postImageContent.id;
           _URL.revokeObjectURL(objectUrl);
-          const startPosition = this.postTextArea.nativeElement.selectionStart;
-          const endPosition = this.postTextArea.nativeElement.selectionEnd;
+          const startPosition = this.postTextArea?.nativeElement.selectionStart;
+          const endPosition = this.postTextArea?.nativeElement.selectionEnd;
           // Check if you've selected text
           if (startPosition === endPosition) {
             const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
@@ -210,7 +210,7 @@ export class PostComponent implements OnInit, OnDestroy {
       `images/${postImageContent.id}`,
     ].join('/');
     let inputString = this.postContentsForm.controls.postMarkdown.value;
-    // tslint:disable-next-line: no-string-literal
+    // eslint-disable-next-line @typescript-eslint/dot-notation
     const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
     const imageTag = imageTagAttributesList.find((tagAttribute) => {
       const imageTagAttribute: ImageContent = new ImageContent();
@@ -222,14 +222,12 @@ export class PostComponent implements OnInit, OnDestroy {
     });
 
     const result = await this.toastHelper.editImage('Edit Image', postImageContent);
-    const [imageTagString] = imageTag;
+    const [imageTagString] = imageTag || [];
     if (result.value) {
       let imageStyle = this.imageHelper.getImageStyle(postImageContent);
       imageStyle = Object.assign(imageStyle, result.value);
       const imageStyleNames = Object.keys(imageStyle);
-      const imageStyleString = imageStyleNames.map((imageStyleName) => {
-        return [imageStyleName, imageStyle[imageStyleName]].join(':');
-      }).join(';');
+      const imageStyleString = imageStyleNames.map((imageStyleName) => [imageStyleName, imageStyle[imageStyleName]].join(':')).join(';');
       postImageContent.attributes.style = imageStyleString;
       inputString = inputString.replace(
         imageTagString,
@@ -246,7 +244,8 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   getCategoryTitle(categoryId: string): string {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+    const [blogContent] = this.blogContents || [];
+    const [category] = this.blogService.getCategory(categoryId, blogContent.categoryMap);
     return category?.name;
   }
 
@@ -263,39 +262,42 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   async handleClickEditPostCreateUpdate(): Promise<void> {
-    if (this.isEditingPost){
-      this.hasNullPostTitleError = false;
-      if (!this.postContentsForm.value.postTitle){
-        this.hasNullPostTitleError = true;
-        return;
-      }
-
-      const newPost = this.postContentsForm.value;
-      newPost.categoryId = this.params.categoryId;
-      newPost.createdAt = Number(new Date());
-      const selectedCategory: CategoryContent = this.categoryContents.find((categoryContent) =>
-        categoryContent.id === newPost.categoryId
-      );
-      if (selectedCategory) {
-        selectedCategory.postCreatedAtList = [
-          ...selectedCategory.postCreatedAtList,
-          newPost.createdAt,
-        ];
-        this.blogService.update(
-          `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
-          selectedCategory
-        ).then(async () => {
-          await this.blogService.set(`blogs/${this.blogContents[0].id}/posts/${newPost.id}`, newPost);
-          await this.updateRemovedImage();
-          this.toastHelper.showSuccess('Post Update', 'Success!');
-          this.routerHelper.goToBlogPost(this.params, newPost.id);
-        })
-        .catch(e => {
-          this.toastHelper.showWarning('Post Update Failed.', e);
-        });
-      }
-    }
   }
+
+  // async handleClickEditPostCreateUpdate(): Promise<void> {
+  //   if (this.isEditingPost){
+  //     this.hasNullPostTitleError = false;
+  //     if (!this.postContentsForm.value.postTitle){
+  //       this.hasNullPostTitleError = true;
+  //       return;
+  //     }
+
+  //     const newPost = this.postContentsForm.value;
+  //     newPost.categoryId = this.params.categoryId;
+  //     newPost.createdAt = Number(new Date());
+  //     const selectedCategory: CategoryContent|undefined = this.categoryContents.find((categoryContent) =>
+  //       categoryContent.id === newPost.categoryId
+  //     );
+  //     if (selectedCategory) {
+  //       selectedCategory.postCreatedAtList = [
+  //         ...selectedCategory.postCreatedAtList,
+  //         newPost.createdAt,
+  //       ];
+  //       this.blogService.update(
+  //         `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
+  //         selectedCategory
+  //       ).then(async () => {
+  //         await this.blogService.set(`blogs/${this.blogContents[0].id}/posts/${newPost.id}`, newPost);
+  //         await this.updateRemovedImage();
+  //         this.toastHelper.showSuccess('Post Update', 'Success!');
+  //         this.routerHelper.goToBlogPost(this.params, newPost.id);
+  //       })
+  //       .catch(e => {
+  //         this.toastHelper.showWarning('Post Update Failed.', e);
+  //       });
+  //     }
+  //   }
+  // }
 
   handleClickEditPostCreateCancel(): void {
     this.routerHelper.goToBlogCategory(this.params, this.params.categoryId);
@@ -304,10 +306,10 @@ export class PostComponent implements OnInit, OnDestroy {
   async handleClickEditPostUpdate(): Promise<void> {
     if (this.isEditingPost){
       await this.updateRemovedImage();
-
+      const [blogContent] = this.blogContents || [];
       this.blogService
       .update(
-        `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`,
+        `blogs/${blogContent.id}/posts/${this.postContentsForm.value.id}`,
         this.postContentsForm.value
       )
       .then(() => {
@@ -321,55 +323,55 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   async handleClickEditPostDelete(): Promise<void> {
-    this.toastHelper.askYesNo('Remove Post', 'Are you sure?').then((result) => {
-      if (result.value) {
-        this.isLoading = true;
-        const targetCreatedAt = this.postContentsForm.value.createdAt;
-
-        const selectedCategory: CategoryContent = this.categoryContents.find((categoryContent) =>
-          categoryContent.id === this.postContentsForm.value.categoryId
-        );
-
-        if (selectedCategory) {
-          selectedCategory.postCreatedAtList = selectedCategory.postCreatedAtList
-            .filter((createdAt) => createdAt !== targetCreatedAt);
-          this.blogService.update(
-            `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
-            selectedCategory
-          ).then(() => {
-            this.blogService.delete(
-              `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`, {
-                parentKeyName: null,
-                collectionPath: `blogs/${this.blogContents[0].id}/posts`,
-                childrenStorage: ['images'],
-                children: [{
-                  parentKeyName: 'postId',
-                  collectionPath: `blogs/${this.blogContents[0].id}/comments`,
-                  children: []
-                }]
-              }
-            )
-            .then(() => {
-              this.toastHelper.showSuccess('Post Delete', 'OK');
-              this.routerHelper.goToBlogCategory(this.params, this.postContentsForm.value.categoryId);
-            })
-            .catch(e => {
-              this.toastHelper.showWarning('Post Delete Failed.', e);
-            });
-          })
-          .catch(e => {
-            this.toastHelper.showWarning('Post Delete Failed.', e);
-          });
-        }
-      }
-      else if (result.dismiss === Swal.DismissReason.cancel) {
-      }
-    });
   }
+  // async handleClickEditPostDelete(): Promise<void> {
+  //   this.toastHelper.askYesNo('Remove Post', 'Are you sure?').then((result) => {
+  //     if (result.value) {
+  //       this.isLoading = true;
+  //       const targetCreatedAt = this.postContentsForm.value.createdAt;
 
-  public files: NgxFileDropEntry[] = [];
+  //       const selectedCategory: CategoryContent = this.categoryContents.find((categoryContent) =>
+  //         categoryContent.id === this.postContentsForm.value.categoryId
+  //       );
 
-  public dropped(files: NgxFileDropEntry[]) {
+  //       if (selectedCategory) {
+  //         selectedCategory.postCreatedAtList = selectedCategory.postCreatedAtList
+  //           .filter((createdAt) => createdAt !== targetCreatedAt);
+  //         this.blogService.update(
+  //           `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
+  //           selectedCategory
+  //         ).then(() => {
+  //           this.blogService.delete(
+  //             `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`, {
+  //               parentKeyName: null,
+  //               collectionPath: `blogs/${this.blogContents[0].id}/posts`,
+  //               childrenStorage: ['images'],
+  //               children: [{
+  //                 parentKeyName: 'postId',
+  //                 collectionPath: `blogs/${this.blogContents[0].id}/comments`,
+  //                 children: []
+  //               }]
+  //             }
+  //           )
+  //           .then(() => {
+  //             this.toastHelper.showSuccess('Post Delete', 'OK');
+  //             this.routerHelper.goToBlogCategory(this.params, this.postContentsForm.value.categoryId);
+  //           })
+  //           .catch(e => {
+  //             this.toastHelper.showWarning('Post Delete Failed.', e);
+  //           });
+  //         })
+  //         .catch(e => {
+  //           this.toastHelper.showWarning('Post Delete Failed.', e);
+  //         });
+  //       }
+  //     }
+  //     else if (result.dismiss === Swal.DismissReason.cancel) {
+  //     }
+  //   });
+  // }
+
+  public dropped(files: NgxFileDropEntry[]): void {
     this.files = files;
     for (const droppedFile of files) {
 
@@ -377,26 +379,7 @@ export class PostComponent implements OnInit, OnDestroy {
       if (droppedFile.fileEntry.isFile) {
         const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
         fileEntry.file((file: File) => {
-
-          // Here you can access the real file
-          console.log(droppedFile.relativePath, file);
-
-          /**
-          // You could upload it like this:
-          const formData = new FormData()
-          formData.append('logo', file, relativePath)
-
-          // Headers
-          const headers = new HttpHeaders({
-            'security-token': 'mytoken'
-          })
-
-          this.http.post('https://mybackend.com/api/upload/sanitize-and-save-logo', formData, { headers: headers, responseType: 'blob' })
-          .subscribe(data => {
-            // Sanitized logo returned from backend
-          })
-          **/
-
+        console.log(droppedFile.relativePath, file);
         });
       } else {
         // It was a directory (empty directories are added, otherwise only files)
@@ -406,11 +389,11 @@ export class PostComponent implements OnInit, OnDestroy {
     }
   }
 
-  public fileOver(event){
+  public fileOver(event: ElementRef): void{
     console.log(event);
   }
 
-  public fileLeave(event){
+  public fileLeave(event: ElementRef): void{
     console.log(event);
   }
 
@@ -422,7 +405,7 @@ export class PostComponent implements OnInit, OnDestroy {
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
     this.postContentsSub?.unsubscribe();
-    this.categoryContentsSub?.unsubscribe();
+    // this.categoryContentsSub?.unsubscribe();
     this.imageContentsSub?.unsubscribe();
   }
 }

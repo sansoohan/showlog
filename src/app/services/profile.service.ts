@@ -5,15 +5,15 @@ import { ToastHelper } from '../helper/toast.helper';
 import { ProfileContent } from '../view/profile/profile.content';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase/app';
-import FieldPath = firebase.firestore.FieldPath;
 import { CommonService } from './abstract/common.service';
 import { AuthService } from './auth.service';
+
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService extends CommonService {
-  profileUpdateState: string = null;
   constructor(
     public firestore: AngularFirestore,
     public authService: AuthService,
@@ -38,15 +38,15 @@ export class ProfileService extends CommonService {
     .valueChanges();
   }
 
-  getProfileContentsObserver({params = null}): Observable<ProfileContent[]> {
-    let profileContentsObserver: Observable<ProfileContent[]>;
+  getProfileContentsObserver(params: any): Observable<ProfileContent[]>|undefined {
     const queryUserName = params?.userName;
-    if (queryUserName){
-      profileContentsObserver = this.firestore
-      .collection<ProfileContent>('profiles', ref => ref
-      .where(new FieldPath('userName'), '==', queryUserName))
-      .valueChanges();
+    if (!queryUserName) {
+      return;
     }
-    return profileContentsObserver;
+
+    return this.firestore
+    .collection<ProfileContent>('profiles', ref => ref
+    .where(new FieldPath('userName'), '==', queryUserName))
+    .valueChanges();
   }
 }

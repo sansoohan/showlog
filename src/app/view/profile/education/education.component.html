@@ -2,7 +2,7 @@
   <div class="my-auto">
     <h2 class="mb-5">Education</h2>
 
-    <div *ngFor="let educationContent of educationsContent.educations; index as i" class="profile-item d-flex flex-column flex-md-row mb-5">
+    <div *ngFor="let educationContent of educationsContent?.educations; index as i" class="profile-item d-flex flex-column flex-md-row mb-5">
       <div *ngIf="!isEditing" class="profile-content me-auto">
         <h3 class="mb-0">{{educationContent.organization}}</h3>
         <div class="subheading mb-3 mt-3">{{educationContent.degree}}</div>
@@ -12,9 +12,9 @@
       </div>
       <div *ngIf="!isEditing" class="profile-date text-md-right">
         <span class="text-primary">
-          {{educationContent.startedAt ? educationContent.startedAt.toLocaleString('en-us',{month:'short', year:'numeric'}) : 'None'}}
-           - 
-          {{educationContent.finishedAt ? educationContent.finishedAt.toLocaleString('en-us',{month:'short', year:'numeric'}) : 'Now'}}
+          {{educationContent.startedAt || 'None'}}
+          ~ 
+          {{educationContent.finishedAt || 'Now'}}
         </span>
       </div>
     </div>
@@ -23,19 +23,19 @@
       <div formGroupName="educationsContent">
         <div formArrayName='educations'>
 
-          <div *ngIf="profileForm.controls.educationsContent.controls.educations.controls.length === 0">
+          <div *ngIf="profileForm.controls.educationsContent?.controls.educations.controls.length === 0">
             <div class="row mb-3">
               <div class="col-11"></div>
               <div class="col-1" style="padding: 0;">
                 <app-modules-user-form-input-add-remove
-                  [targetArrayForm]="profileForm.controls.educationsContent.controls.educations"
+                  [targetArrayForm]="profileForm.controls.educationsContent?.controls.educations"
                   [newObject]="newEducation"
                 ></app-modules-user-form-input-add-remove>
               </div>
             </div>
           </div>
 
-          <div *ngFor="let education of profileForm.controls.educationsContent.controls.educations.controls; let i=index">
+          <div *ngFor="let education of profileForm.controls.educationsContent?.controls.educations.controls; let i=index">
             <div [formGroupName]="i">
               <div *ngIf="isEditing">
                 <div class="row mb-3">
@@ -50,7 +50,7 @@
                   </div>
                   <div class="col-1" style="padding: 0;">
                     <app-modules-user-form-input-add-remove
-                      [targetArrayForm]="profileForm.controls.educationsContent.controls.educations"
+                      [targetArrayForm]="profileForm.controls.educationsContent?.controls.educations"
                       [targetArrayIndex]="i"
                       [newObject]="newEducation"
                     ></app-modules-user-form-input-add-remove>

@@ -12,60 +12,60 @@ import { RoomContent } from './room.content';
 @Component({
   selector: 'app-talk-room',
   templateUrl: './room.component.html',
-  styleUrls: ['../talk.component.css', './room.component.css'],
+  styleUrls: ['../talk.component.scss', './room.component.scss'],
 })
 export class RoomComponent implements OnInit, OnDestroy {
   // WebRTC Connection
-  public localStream: MediaStream;
-  public canvasStream: MediaStream;
-  public shareStream: MediaStream;
-  public remoteStream: MediaStream;
-  peerConnection: RTCPeerConnection;
-  roomId: string;
-  createdRoomUrl: string;
-  callerCandidatesString: string;
-  calleeCandidatesString: string;
+  public localStream?: MediaStream;
+  public canvasStream?: MediaStream;
+  public shareStream?: MediaStream;
+  public remoteStream?: MediaStream;
+  peerConnection?: RTCPeerConnection;
+  roomId?: string;
+  createdRoomUrl?: string;
+  callerCandidatesString = 'callerCandidates';
+  calleeCandidatesString = 'calleeCandidates';
   mediaContraints: any;
   configuration: any;
-  isInRoom: boolean;
+  isInRoom?: boolean;
   params: any;
   paramSub: Subscription;
-  talkSub: Subscription;
-  roomSub: Subscription;
-  selectedRoomSub: Subscription;
+  talkSub?: Subscription;
+  roomSub?: Subscription;
+  selectedRoomSub?: Subscription;
 
   @ViewChild ('videos') public videos: any;
-  @ViewChild ('localVideo') public localVideo: ElementRef;
-  @ViewChild ('canvasVideo') public canvasVideo: ElementRef;
-  @ViewChild ('localCanvas') public localCanvas: ElementRef;
-  @ViewChild ('remoteVideo') public remoteVideo: ElementRef;
-  @ViewChild ('localVideoGroup') public localVideoGroup: ElementRef;
-  @ViewChild ('remoteVideoGroup') public remoteVideoGroup: ElementRef;
+  @ViewChild ('localVideo') public localVideo?: ElementRef;
+  @ViewChild ('canvasVideo') public canvasVideo?: ElementRef;
+  @ViewChild ('localCanvas') public localCanvas?: ElementRef;
+  @ViewChild ('remoteVideo') public remoteVideo?: ElementRef;
+  @ViewChild ('localVideoGroup') public localVideoGroup?: ElementRef;
+  @ViewChild ('remoteVideoGroup') public remoteVideoGroup?: ElementRef;
 
-  isPage: boolean;
-  isLoading: boolean;
-  isCopiedToClipboard: boolean;
+  roomsObserver?: Observable<RoomContent[]>;
+  roomContents?: Array<RoomContent>;
+  isHorizontalVideo?: boolean;
+  localCanvasInterval?: any;
+  deviceRotation?: number;
+  isMobileDevice?: boolean;
+  localCanvasZoom?: number;
+  sessionStorage?: Storage;
+  isCaller?: boolean;
+  mediaDevices?: any;
 
-  roomsObserver: Observable<RoomContent[]>;
-  roomContents: Array<RoomContent>;
-  isHorizontalVideo: boolean;
-  isLocalVideoOn: boolean;
-  isLocalAudioOn: boolean;
-  isRemoteVideoOn: boolean;
-  isRemoteAudioOn: boolean;
-  hasRemoteConnection: boolean;
-  isVideoButtonGroupHeightMininum: boolean;
-  isScreenSharing: boolean;
-  isFullScreen: boolean;
-  isShowingLocalControl: boolean;
-  isShowingRemoteControl: boolean;
-  localCanvasInterval: any;
-  deviceRotation: number;
-  isMobileDevice: boolean;
-  localCanvasZoom: number;
-  sessionStorage: Storage;
-  isCaller: boolean;
-  mediaDevices: any;
+  isPage: any;
+  isLoading: any;
+  isLocalVideoOn: any;
+  isLocalAudioOn: any;
+  isRemoteVideoOn: any;
+  isRemoteAudioOn: any;
+  hasRemoteConnection: any;
+  isCopiedToClipboard: any;
+  isVideoButtonGroupHeightMininum: any;
+  isScreenSharing: any;
+  isFullScreen: any;
+  isShowingLocalControl: any;
+  isShowingRemoteControl: any;
 
   // sessionStorage.getItem('createdRoomId');
   // sessionStorage.getItem('joinedRoomUrl');
@@ -77,16 +77,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private routerHelper: RouterHelper,
   ) {
-    this.paramSub?.unsubscribe();
     this.paramSub = this.route.params.subscribe(params => {
       this.params = params;
     });
   }
 
   @Input()
-  get talkContents(): Array<TalkContent> { return this._talkContents; }
-  set talkContents(talkContents: Array<TalkContent>) {
-    this._talkContents = talkContents;
+  get talkContents(): Array<TalkContent>|undefined { return this._talkContents; }
+  set talkContents(talkContents: Array<TalkContent>|undefined) {
     this.isPage = true;
     this.isLoading = true;
     this.isLocalVideoOn = true;
@@ -100,8 +98,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.isFullScreen = false;
     this.isShowingLocalControl = false;
     this.isShowingRemoteControl = false;
-    this.callerCandidatesString = 'callerCandidates';
-    this.calleeCandidatesString = 'calleeCandidates';
+    this._talkContents = talkContents;
     this.localCanvasZoom = 1;
     this.sessionStorage = window.sessionStorage;
     this.mediaContraints = {
@@ -151,7 +148,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       }
 
       this.roomsObserver = this.talkService.getRoomsObserver(talkContents[0].id);
-      this.roomSub = this.roomsObserver.subscribe(async (roomContents) => {
+      this.roomSub = this.roomsObserver?.subscribe(async (roomContents) => {
         this.roomContents = roomContents;
 
         // Run on First Rendering
@@ -196,13 +193,19 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
   // tslint:disable-next-line: variable-name
-  _talkContents: Array<TalkContent>;
+  _talkContents?: Array<TalkContent>;
 
-  setMediaStatus(stream: MediaStream, mediaType: string, status: boolean) {
-    stream[`get${mediaType}Tracks`]().forEach((track) => track.enabled = status);
+  setMediaStatus(stream: MediaStream, mediaType: string, status: boolean): void {
+    if (mediaType === 'Audio') {
+      stream.getAudioTracks().forEach((track) => track.enabled = status);
+    }
+
+    if (mediaType === 'Video') {
+      stream.getVideoTracks().forEach((track) => track.enabled = status);
+    }
   }
 
-  clickLocalVideoToggle() {
+  clickLocalVideoToggle(): void {
     this.isLocalVideoOn = !this.isLocalVideoOn;
     if (this.isScreenSharing) {
       if (this.shareStream) {
@@ -218,32 +221,32 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  clickLocalAudioToggle() {
+  clickLocalAudioToggle(): void {
     this.isLocalAudioOn = !this.isLocalAudioOn;
     if (this.canvasStream) {
       this.setMediaStatus(this.canvasStream, 'Audio', this.isLocalAudioOn);
     }
   }
 
-  clickRemoteVideoToggle() {
+  clickRemoteVideoToggle(): void {
     this.isRemoteVideoOn = !this.isRemoteVideoOn;
     if (this.remoteStream) {
       this.setMediaStatus(this.remoteStream, 'Video', this.isRemoteVideoOn);
     }
   }
 
-  clickRemoteAudioToggle() {
+  clickRemoteAudioToggle(): void {
     this.isRemoteAudioOn = !this.isRemoteAudioOn;
     if (this.remoteStream) {
       this.setMediaStatus(this.remoteStream, 'Audio', this.isRemoteAudioOn);
     }
   }
 
-  toggleFullScreen(videoGroup: ElementRef) {
+  toggleFullScreen(videoGroup: any): void {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      const el: any = videoGroup;
+      const el = videoGroup;
       if (el.requestFullscreen) { el.requestFullscreen(); }
       else if (el.msRequestFullscreen) { el.msRequestFullscreen(); }
       else if (el.mozRequestFullScreen) { el.mozRequestFullScreen(); }
@@ -251,16 +254,18 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  async handleClickStartScreenSharing() {
+  async handleClickStartScreenSharing(): Promise<void> {
     try {
-      this.shareStream = await this.mediaDevices[`getDisplayMedia`]({video: true});
-      this.setMediaStatus(this.shareStream, 'Video', this.isLocalVideoOn);
-      this.canvasVideo.nativeElement.srcObject = this.shareStream;
-      const videoSender = this.peerConnection.getSenders().find(sender => {
-        return sender.track.kind === 'video';
-      });
-      const [screenVideoTrack] = this.shareStream.getVideoTracks();
-      videoSender.replaceTrack(screenVideoTrack);
+      this.shareStream = await this.mediaDevices.getDisplayMedia({video: true});
+      if (this.shareStream) {
+        this.setMediaStatus(this.shareStream, 'Video', this.isLocalVideoOn);
+      }
+      if (this.canvasVideo?.nativeElement) {
+        this.canvasVideo.nativeElement.srcObject = this.shareStream;
+      }
+      const videoSender = this.peerConnection?.getSenders().find(sender => sender.track?.kind === 'video');
+      const [screenVideoTrack] = this.shareStream?.getVideoTracks() || [];
+      videoSender?.replaceTrack(screenVideoTrack);
       screenVideoTrack.addEventListener('ended', () => {
         this.handleClickStopScreenSharing();
       }, {once: true});
@@ -270,19 +275,19 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  async handleClickStopScreenSharing() {
-    this.canvasVideo.nativeElement.srcObject = this.canvasStream;
-    const videoSender = this.peerConnection.getSenders().find(sender => {
-      return sender.track.kind === 'video';
-    });
-    const [screenVideoTrack] = this.canvasStream.getVideoTracks();
-    videoSender.replaceTrack(screenVideoTrack);
+  async handleClickStopScreenSharing(): Promise<void> {
+    if (this.canvasVideo?.nativeElement) {
+      this.canvasVideo.nativeElement.srcObject = this.canvasStream;
+    }
+    const videoSender = this.peerConnection?.getSenders().find(sender => sender.track?.kind === 'video');
+    const [screenVideoTrack] = this.canvasStream?.getVideoTracks() || [];
+    videoSender?.replaceTrack(screenVideoTrack);
     this.isScreenSharing = false;
   }
 
-  handleClickCreateRoom() {
+  handleClickCreateRoom(): void {
     this.firestore
-    .collection('talks').doc(this.talkContents[0].id)
+    .collection('talks').doc(this.talkContents?.[0].id)
     .collection('rooms').add({}).then(async (roomDoc) => {
       await roomDoc.update({
         id: roomDoc.id,
@@ -295,7 +300,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     return;
   }
 
-  async joinRoomById(roomId: string, isCaller: boolean) {
+  async joinRoomById(roomId: string, isCaller: boolean): Promise<void> {
     if (!roomId) {
       console.error(`There is no roomId`);
       return;
@@ -303,10 +308,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.isInRoom = true;
     this.isCaller = isCaller;
     const roomDoc: AngularFirestoreDocument<RoomContent> = this.firestore
-    .collection<TalkContent>('talks').doc(this.talkContents[0].id)
+    .collection<TalkContent>('talks').doc(this.talkContents?.[0].id)
     .collection<RoomContent>('rooms').doc(`${roomId}`);
     const roomRef = roomDoc.ref;
-    // tslint:disable-next-line: no-console
+    // eslint-disable-next-line no-console
     this.createdRoomUrl = `${window.location.href}`;
     this.selectedRoomSub = roomDoc.valueChanges().subscribe(async (currrenRoom) => {
       if (this.peerConnection?.remoteDescription && this.peerConnection?.localDescription) {
@@ -316,7 +321,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.remoteStream?.getTracks().forEach(track => { track.stop(); });
           delete this.remoteStream;
           if (!isCaller) {
-            await this.onDisconnect(roomId, false, {answer: firebase.firestore.FieldValue.delete()});
+            await this.onDisconnect(roomId, false, {answer: firebase.default.firestore.FieldValue.delete()});
             location.reload();
           }
         }
@@ -331,31 +336,35 @@ export class RoomComponent implements OnInit, OnDestroy {
           isCaller ? this.calleeCandidatesString : this.callerCandidatesString,
         );
         this.registerPeerConnectionListeners(roomId, isCaller);
-        this.canvasStream.getTracks().forEach(track => {
-          this.peerConnection.addTrack(track, this.canvasStream);
+        this.canvasStream?.getTracks().forEach(track => {
+          if (this.canvasStream) {
+            this.peerConnection?.addTrack(track, this.canvasStream);
+          }
         });
         this.remoteStream = new MediaStream();
-        this.remoteVideo.nativeElement.srcObject = this.remoteStream;
-        this.remoteVideo.nativeElement.muted = false;
-        this.remoteVideo.nativeElement.autoplay = true;
-        this.remoteVideo.nativeElement.play();
-        this.remoteVideo.nativeElement.setAttribute('playsinline', '');
+        if (this.remoteVideo) {
+          this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+          this.remoteVideo.nativeElement.muted = false;
+          this.remoteVideo.nativeElement.autoplay = true;
+          this.remoteVideo.nativeElement.play();
+          this.remoteVideo.nativeElement.setAttribute('playsinline', '');
+        }
       }
       if (
         !this.peerConnection.remoteDescription &&
         isCaller ? currrenRoom?.answer : currrenRoom?.offer
       ) {
         this.peerConnection.addEventListener('track', event => {
-          // tslint:disable-next-line: no-console
+          // eslint-disable-next-line no-console
           console.log('Got remote track:', event.streams[0]);
           event.streams[0].getTracks().forEach(track => {
-            // tslint:disable-next-line: no-console
+            // eslint-disable-next-line no-console
             console.log('Add a track to the remoteStream:', track);
-            this.remoteStream.addTrack(track);
+            this.remoteStream?.addTrack(track);
           });
         });
         const rtcSessionDescription = new RTCSessionDescription(
-          isCaller ? currrenRoom.answer : currrenRoom.offer
+          isCaller ? currrenRoom?.answer : currrenRoom?.offer
         );
         await this.peerConnection.setRemoteDescription(rtcSessionDescription);
       }
@@ -363,7 +372,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         if (isCaller) {
           const offer = await this.peerConnection.createOffer();
           await this.peerConnection.setLocalDescription(offer);
-          // tslint:disable-next-line: no-console
+          // eslint-disable-next-line no-console
           console.log('Created offer:', offer);
           await roomRef.update({
             offer: {
@@ -374,7 +383,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
         else {
           const answer = await this.peerConnection.createAnswer();
-          // tslint:disable-next-line: no-console
+          // eslint-disable-next-line no-console
           console.log('Created answer:', answer);
           await this.peerConnection.setLocalDescription(answer);
           await roomRef.update({
@@ -388,13 +397,13 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleClickJoinRoom() {
+  handleClickJoinRoom(): void {
     this.toastHelper.showPrompt('Join Talk', 'Please Enter TalkRoom Url')
     .then(async (roomUrl) => {
       if (!roomUrl.value) {
         return;
       }
-      // tslint:disable-next-line: no-console
+      // eslint-disable-next-line no-console
       console.log('Join Room URL: ', roomUrl.value);
       this.routerHelper.goToUrl(roomUrl.value);
       return;
@@ -403,12 +412,12 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleClickRemoveRoom(roomId) {
+  handleClickRemoveRoom(roomId?: string): void {
     if (!roomId) {
       return;
     }
     this.talkService.delete(
-      `talks/${this.talkContents[0].id}/rooms/${roomId}`, {});
+      `talks/${this.talkContents?.[0].id}/rooms/${roomId}`, {});
   }
 
   collectIceCandidates(
@@ -416,7 +425,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     peerConnection: RTCPeerConnection,
     localName: string,
     remoteName: string,
-  ) {
+  ): void {
     peerConnection.addEventListener('icecandidate', event => {
       if (event.candidate) {
         const json = event.candidate.toJSON();
@@ -437,7 +446,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  async openUserMedia() {
+  async openUserMedia(): Promise<void> {
     if (!this.isInRoom) {
       console.error(`isInRoom is false`);
       return;
@@ -445,7 +454,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     const navi: any = navigator;
     this.mediaDevices = navigator.mediaDevices ||
     ((navi.mozGetUserMedia || navi.webkitGetUserMedia) ? {
-      getUserMedia(c) {
+      // eslint-disable-next-line
+      getUserMedia(c: any) {
         return new Promise((y, n) => {
           (navi.mozGetUserMedia ||
             navi.webkitGetUserMedia).call(navigator, c, y, n);
@@ -454,39 +464,43 @@ export class RoomComponent implements OnInit, OnDestroy {
     } : null);
 
     if (!this.mediaDevices) {
-      // tslint:disable-next-line: no-console
+      // eslint-disable-next-line no-console
       console.log('getUserMedia() not supported.');
       return;
     }
 
     const stream = await this.mediaDevices.getUserMedia({video: true, audio: true});
-    this.localVideo.nativeElement.srcObject = stream;
-    this.localVideo.nativeElement.muted = true;
-    this.localVideo.nativeElement.autoplay = true;
-    this.localVideo.nativeElement.play();
-    this.localVideo.nativeElement.setAttribute('playsinline', '');
+    if (this.localVideo) {
+      this.localVideo.nativeElement.srcObject = stream;
+      this.localVideo.nativeElement.muted = true;
+      this.localVideo.nativeElement.autoplay = true;
+      this.localVideo.nativeElement.play();
+      this.localVideo.nativeElement.setAttribute('playsinline', '');
+    }
     this.localStream = stream;
     if (/Firefox/g.test(navigator.userAgent)) {
-      await new Promise((resolve) => {
+      await new Promise<void>((resolve) => {
         setTimeout(async () => {
           resolve();
         }, 3000);
       });
     }
 
-    this.canvasStream = this.localCanvas.nativeElement.captureStream();
-    const [localVideoAudio] = this.localStream.getAudioTracks();
-    this.canvasStream.addTrack(localVideoAudio);
-    this.canvasVideo.nativeElement.srcObject = this.canvasStream;
-    this.canvasVideo.nativeElement.muted = true;
-    this.canvasVideo.nativeElement.autoplay = true;
-    this.canvasVideo.nativeElement.setAttribute('playsinline', '');
+    this.canvasStream = this.localCanvas?.nativeElement.captureStream();
+    const [localVideoAudio] = this.localStream?.getAudioTracks() || [];
+    this.canvasStream?.addTrack(localVideoAudio);
+    if (this.canvasVideo) {
+      this.canvasVideo.nativeElement.srcObject = this.canvasStream;
+      this.canvasVideo.nativeElement.muted = true;
+      this.canvasVideo.nativeElement.autoplay = true;
+      this.canvasVideo.nativeElement.setAttribute('playsinline', '');
+    }
   }
 
-  async onDisconnect(roomId: string, isCaller: boolean, data: any) {
+  async onDisconnect(roomId: string, isCaller: boolean, data: any): Promise<void[]> {
     const removePromise = [];
     const roomDoc = this.firestore
-    .collection('talks').doc(this.talkContents[0].id)
+    .collection('talks').doc(this.talkContents?.[0].id)
     .collection('rooms').doc(roomId);
 
     roomDoc.collection(
@@ -500,7 +514,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     return Promise.all(removePromise);
   }
 
-  async leaveRoom(roomId) {
+  async leaveRoom(roomId: string): Promise<void> {
     this.isInRoom = false;
     this.isCopiedToClipboard = false;
     this.isScreenSharing = false;
@@ -510,63 +524,65 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.peerConnection?.close();
     this.createdRoomUrl = '';
     if (roomId) {
-      const currentRoom = this.roomContents.find((roomContent) => roomContent.id === roomId);
-      await this.onDisconnect(roomId, this.isCaller, {
-        [this.isCaller ? 'offer' : 'answer']: firebase.firestore.FieldValue.delete()
-      });
+      const currentRoom = this.roomContents?.find((roomContent) => roomContent.id === roomId);
+      if (this.isCaller !== undefined) {
+        await this.onDisconnect(roomId, this.isCaller, {
+          [this.isCaller ? 'offer' : 'answer']: firebase.default.firestore.FieldValue.delete()
+        });
+      }
     }
     this.selectedRoomSub?.unsubscribe();
   }
 
-  async handleClickLeaveRoom() {
+  async handleClickLeaveRoom(): Promise<void> {
     await this.leaveRoom(this.params.roomId);
     const params = Object.assign({}, this.params);
     delete params.roomId;
     this.routerHelper.goToTalk(params);
   }
 
-  handleClickBackToCreatedRoom(selectedRoomId: string) {
+  handleClickBackToCreatedRoom(selectedRoomId: string): void {
     this.roomId = selectedRoomId;
     this.handleClickCreateRoom();
   }
 
-  handleClickBackToJoinedRoom(selectedRoomUrl: string) {
+  handleClickBackToJoinedRoom(selectedRoomUrl: string): void {
     this.routerHelper.goToUrl(selectedRoomUrl);
   }
 
-  registerPeerConnectionListeners(roomId: string, isCaller: boolean) {
-    this.peerConnection.addEventListener('icegatheringstatechange', () => {
-      // tslint:disable-next-line: no-console
-      console.log(`ICE gathering state changed: ${this.peerConnection.iceGatheringState}`);
+  registerPeerConnectionListeners(roomId: string, isCaller: boolean): void {
+    this.peerConnection?.addEventListener('icegatheringstatechange', () => {
+      // eslint-disable-next-line no-console
+      console.log(`ICE gathering state changed: ${this.peerConnection?.iceGatheringState}`);
     });
-    this.peerConnection.addEventListener('connectionstatechange', async () => {
-      // tslint:disable-next-line: no-console
-      console.log(`Connection state change: ${this.peerConnection.connectionState}`);
-      if (this.peerConnection.connectionState === 'connected') {
+    this.peerConnection?.addEventListener('connectionstatechange', async () => {
+      // eslint-disable-next-line no-console
+      console.log(`Connection state change: ${this.peerConnection?.connectionState}`);
+      if (this.peerConnection?.connectionState === 'connected') {
         this.hasRemoteConnection = true;
       }
 
-      if (/(disconnected)|(failed)/g.test(this.peerConnection.connectionState)) {
+      if (/(disconnected)|(failed)/g.test(this.peerConnection?.connectionState || '')) {
         this.hasRemoteConnection = false;
-        await this.onDisconnect(roomId, true, {offer: firebase.firestore.FieldValue.delete()});
-        await this.onDisconnect(roomId, false, {answer: firebase.firestore.FieldValue.delete()});
+        await this.onDisconnect(roomId, true, {offer: firebase.default.firestore.FieldValue.delete()});
+        await this.onDisconnect(roomId, false, {answer: firebase.default.firestore.FieldValue.delete()});
         location.reload();
       }
     });
-    this.peerConnection.addEventListener('signalingstatechange', () => {
-      // tslint:disable-next-line: no-console
-      console.log(`Signaling state change: ${this.peerConnection.signalingState}`);
+    this.peerConnection?.addEventListener('signalingstatechange', () => {
+      // eslint-disable-next-line no-console
+      console.log(`Signaling state change: ${this.peerConnection?.signalingState}`);
     });
-    this.peerConnection.addEventListener('iceconnectionstatechange ', () => {
-      // tslint:disable-next-line: no-console
-      console.log(`ICE connection state change: ${this.peerConnection.iceConnectionState}`);
+    this.peerConnection?.addEventListener('iceconnectionstatechange ', () => {
+      // eslint-disable-next-line no-console
+      console.log(`ICE connection state change: ${this.peerConnection?.iceConnectionState}`);
     });
   }
 
-  copyToClipboard(str: string): void{
+  copyToClipboard(str?: string): void{
     this.isCopiedToClipboard = true;
     const el = document.createElement('textarea');
-    el.value = str;
+    el.value = str || '';
     el.setAttribute('readonly', '');
     el.style.position = 'absolute';
     el.style.left = '-9999px';
@@ -576,7 +592,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     document.body.removeChild(el);
   }
 
-  onResizeWindow() {
+  onResizeWindow(): void {
     if (this.isFullScreen) {
       return;
     }
@@ -596,11 +612,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
     if (this.canvasVideo && this.remoteVideo) {
       this.localCanvasZoom =
-        this.remoteVideo.nativeElement.offsetWidth / this.localCanvas.nativeElement.width;
+        this.remoteVideo.nativeElement.offsetWidth / this.localCanvas?.nativeElement.width;
     }
 
     const videoButtons = (document.getElementsByClassName('video-button') as any);
-    const buttonSize = this.remoteVideo.nativeElement.offsetWidth / 15;
+    const buttonSize = this.remoteVideo?.nativeElement.offsetWidth / 15;
     for (const buttonElement of videoButtons) {
       buttonElement.style.padding = '0';
       buttonElement.style.fontSize = `${buttonSize * 3 / 4}px`;
@@ -611,8 +627,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  drawContext(videoTag: ElementRef, canvasTag: ElementRef) {
-    if (!videoTag?.nativeElement) {
+  drawContext(videoTag?: ElementRef, canvasTag?: ElementRef): void {
+    if (!videoTag?.nativeElement || !canvasTag?.nativeElement) {
       return;
     }
 

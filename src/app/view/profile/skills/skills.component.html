@@ -2,7 +2,7 @@
   <div class="my-auto">
     <h2 class="mb-5">Skills</h2>
     <div *ngIf="!isEditing">
-      <div *ngFor="let skillGroup of skillsContent.skillGroups container">
+      <div *ngFor="let skillGroup of skillsContent?.skillGroups container">
         <div class="subheading mb-3 mt-3" >{{skillGroup.skillGroupName}}</div>
 
         <ul class="list-inline list-icons row mb-1">
@@ -26,19 +26,19 @@
       <div formGroupName='skillsContent'>
         <div formArrayName='skillGroups'>
 
-          <div *ngIf="profileForm.controls.skillsContent.controls.skillGroups.controls.length === 0">
+          <div *ngIf="profileForm.controls.skillsContent?.controls.skillGroups.controls.length === 0">
             <div class="row mb-1">
               <div class="col-11"></div>
               <div class="col-1" style="padding: 0;">
                 <app-modules-user-form-input-add-remove
-                  [targetArrayForm]="profileForm.controls.skillsContent.controls.skillGroups"
+                  [targetArrayForm]="profileForm.controls.skillsContent?.controls.skillGroups"
                   [newObject]="newSkillGroup"
                 ></app-modules-user-form-input-add-remove>
               </div>
             </div>
           </div>
 
-          <div *ngFor="let skillGroup of profileForm.controls.skillsContent.controls.skillGroups.controls; let i=index">
+          <div *ngFor="let skillGroup of profileForm.controls.skillsContent?.controls.skillGroups.controls; let i=index">
             <div [formGroupName]="i">
               <div class="row mb-1">
                 <div class="col-11">
@@ -46,7 +46,7 @@
                 </div>
                 <div class="col-1" style="padding: 0;">
                   <app-modules-user-form-input-add-remove
-                    [targetArrayForm]="profileForm.controls.skillsContent.controls.skillGroups"
+                    [targetArrayForm]="profileForm.controls.skillsContent?.controls.skillGroups"
                     [targetArrayIndex]="i"
                     [newObject]="newSkillGroup"
                   ></app-modules-user-form-input-add-remove>

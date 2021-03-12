@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormArray } from '@angular/forms';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
@@ -18,7 +18,7 @@ import { ImageStorage } from 'src/app/storages/image.storage';
 @Component({
   selector: 'app-profile-left-sidebar',
   templateUrl: './left-sidebar.component.html',
-  styleUrls: ['../profile.component.css', './left-sidebar.component.css']
+  styleUrls: ['../profile.component.scss', './left-sidebar.component.scss']
 })
 export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Output() clickEditProfileStart: EventEmitter<null> = new EventEmitter();
@@ -26,18 +26,19 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Output() clickEditProfileAbort: EventEmitter<null> = new EventEmitter();
   @Output() clickAddAdditionalProfile: EventEmitter<null> = new EventEmitter();
   @Output() clickRemoveAdditionalProfile: EventEmitter<number> = new EventEmitter();
-  @Input() isEditing: boolean;
+  @Input() isEditing = false;
 
-  paramSub: Subscription;
+  paramSub?: Subscription;
   params: any;
-  isPage: boolean;
-  isLoading: boolean;
-  defaultSrc: string | SafeUrl;
-  profileContent: ProfileContent;
+  defaultSrc?: string | SafeUrl;
+  profileContent?: ProfileContent;
 
-  imageContentsObserver: Observable<ImageContent[]>;
-  imageContents: ImageContent[];
-  imageContentsSub: Subscription;
+  imageContentsObserver?: Observable<ImageContent[]>;
+  imageContents?: ImageContent[];
+  imageContentsSub?: Subscription;
+
+  isPage = true;
+  isLoading = true;
 
   constructor(
     public profileService: ProfileService,
@@ -52,23 +53,23 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   ) { }
 
   @Input()
-  get profileForm(): FormGroup { return this._profileForm; }
-  set profileForm(profileForm: FormGroup) {
+  get profileForm(): FormGroup|undefined { return this._profileForm; }
+  set profileForm(profileForm: FormGroup|undefined) {
     this._profileForm = profileForm;
     this.paramSub = this.route.params.subscribe(params => {
       this.isPage = true;
       this.isLoading = true;
       this.params = params;
-      this.profileContent = profileForm.value;
+      this.profileContent = profileForm?.value;
 
       this.imageContentsObserver = this.imageStorage.getImageContentsObserver(
-        `profiles/${this.profileContent.id}/images`
+        `profiles/${this.profileContent?.id}/images`
       );
       this.imageContentsSub = this.imageContentsObserver.subscribe((imageContents) => {
         this.imageContents = imageContents;
         if (imageContents.length === 0) {
-          const hash = profileForm.value.ownerId;
-          const options = {
+          const hash = profileForm?.value.ownerId;
+          const options: any = {
             // foreground: [0, 0, 0, 255],               // rgba black
             background: [230, 230, 230, 230],         // rgba white
             margin: 0.2,                              // 20% margin
@@ -86,29 +87,29 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     });
   }
   // tslint:disable-next-line: variable-name
-  _profileForm: FormGroup;
+  _profileForm?: FormGroup;
 
-  handleClickEditProfileStart() {
+  handleClickEditProfileStart(): void {
     this.clickEditProfileStart.emit();
   }
 
-  handleClickEditProfileAbort(){
+  handleClickEditProfileAbort(): void {
     this.clickEditProfileAbort.emit();
   }
 
-  handleClickEditProfileUpdate(){
+  handleClickEditProfileUpdate(): void {
     this.clickEditProfileUpdate.emit();
   }
 
-  handleAddAdditionalProfile(){
+  handleAddAdditionalProfile(): void {
     this.clickAddAdditionalProfile.emit();
   }
 
-  handleRemoveAdditionalProfile(index){
+  handleRemoveAdditionalProfile(index: number): void{
     this.clickRemoveAdditionalProfile.emit(index);
   }
 
-  handleClickStartUploadProfileImageSrc() {
+  handleClickStartUploadProfileImageSrc(): void {
     this.toastHelper.uploadImage('Select Your Profile Image', true).then(async (data) => {
       if (data.value) {
         const _URL = window.URL || window.webkitURL;
@@ -116,8 +117,8 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
         const objectUrl = _URL.createObjectURL(data.value);
         img.src = objectUrl;
         img.onload = async () => {
-          const path = `profiles/${this.profileContent.id}/images`;
-          let profileImageContent = new ImageContent();
+          const path = `profiles/${this.profileContent?.id}/images`;
+          let profileImageContent: ImageContent = new ImageContent();
           profileImageContent.attributes.style = [
             `width:${img.width}px`,
             `height:${img.height}px`,
@@ -133,7 +134,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
         };
       }
       else if (data.dismiss === Swal.DismissReason.cancel) {
-        const path = `profiles/${this.profileContent.id}/images/${this.imageContents[0].id}`;
+        const path = `profiles/${this.profileContent?.id}/images/${this.imageContents?.[0].id}`;
         this.toastHelper.askYesNo('Remove Profile Image', 'Are you sure?').then(result => {
           if (result.value) {
             Promise.all([
@@ -153,6 +154,10 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  get additaionProfilesContent(): FormArray {
+    return this.profileForm?.get('additaionProfilesContent') as FormArray;
   }
 
   ngOnInit(): void {

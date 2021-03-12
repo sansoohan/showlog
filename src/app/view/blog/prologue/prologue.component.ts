@@ -13,26 +13,26 @@ import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 @Component({
   selector: 'app-blog-prologue',
   templateUrl: './prologue.component.html',
-  styleUrls: ['../blog.component.css', './prologue.component.css']
+  styleUrls: ['../blog.component.scss', './prologue.component.scss']
 })
 export class PrologueComponent implements OnInit, OnDestroy {
-  @Input() canEdit: string;
+  @Input() canEdit?: boolean;
 
-  postListObserver: Observable<PostContent[]>;
-  postList: PostContent[];
-  postListSub: Subscription;
+  postListObserver?: Observable<PostContent[]>;
+  postList?: PostContent[];
+  postListSub?: Subscription;
   postListForm: any;
 
-  blogId: string;
-  isPage: boolean;
-  isLoading: boolean;
-  isEmptyBlog: boolean;
-
+  blogId?: string;
   newPostConent = new PostContent();
   paramSub: Subscription;
   queryParamSub: Subscription;
   params: any;
   queryParams: any;
+
+  isPage = true;
+  isLoading = true;
+  isEmptyBlog = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,8 +42,6 @@ export class PrologueComponent implements OnInit, OnDestroy {
     private formHelper: FormHelper,
     public dataTransferHelper: DataTransferHelper,
   ) {
-    this.isPage = true;
-    this.isLoading = true;
     this.paramSub = this.route.params.subscribe(params => {
       this.params = params;
     });
@@ -53,9 +51,8 @@ export class PrologueComponent implements OnInit, OnDestroy {
   }
 
   @Input()
-  get blogContents(): Array<BlogContent> { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>) {
-    this.isEmptyBlog = false;
+  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
+  set blogContents(blogContents: Array<BlogContent>|undefined) {
     if (!blogContents || blogContents.length === 0) {
       this.isEmptyBlog = true;
       this.isLoading = false;
@@ -65,17 +62,17 @@ export class PrologueComponent implements OnInit, OnDestroy {
     this.blogId = blogContents[0].id;
 
     this.postListObserver = this.blogService.getProloguePostListObserver(this.blogId);
-    this.postListSub = this.postListObserver.subscribe(postList => {
+    this.postListSub = this.postListObserver?.subscribe(postList => {
       this.postList = postList;
       this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
       this.isLoading = false;
     });
   }
-  // tslint:disable-next-line: variable-name
-  private _blogContents: Array<BlogContent>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
+  private _blogContents?: Array<BlogContent>;
 
   getCategoryTitle(categoryId: string): string {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+    const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
     return category?.name || '';
   }
 

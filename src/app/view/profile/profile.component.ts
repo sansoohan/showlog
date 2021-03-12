@@ -9,7 +9,6 @@ import { AdditaionProfileContent } from './additional-profiles/additional-profil
 import { FormHelper } from 'src/app/helper/form.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { ToastHelper } from 'src/app/helper/toast.helper';
-import { ProjectDescription } from './projects/projects.content';
 import { BlogService } from 'src/app/services/blog.service';
 import { TalkService } from 'src/app/services/talk.service';
 import { UserNameValidationError } from './about/about.component';
@@ -17,20 +16,21 @@ import { UserNameValidationError } from './about/about.component';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.css']
+  styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-  profileContentsObserver: Observable<ProfileContent[]>;
-  profileContents: ProfileContent[];
-  isEditing: boolean;
-  isPage: boolean;
-  isLoading: boolean;
-  userNameValidationError: UserNameValidationError;
-  userEmail: string;
+  profileContentsObserver?: Observable<ProfileContent[]>|null = null;
+  profileContents?: ProfileContent[];
+  userNameValidationError?: UserNameValidationError;
   paramSub: Subscription;
-  profileSub: Subscription;
+  profileSub?: Subscription;
   params: any;
   profileForm: any;
+
+  isEditing = false;
+  isPage = true;
+  isLoading = true;
+
   public newAdditaionProfileContent: AdditaionProfileContent = new AdditaionProfileContent();
 
   constructor(
@@ -44,19 +44,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
     public routerHelper: RouterHelper,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
-      this.isLoading = true;
-      this.isEditing = false;
-      this.isPage = true;
       this.params = params;
-      this.profileContentsObserver = this.profileService.getProfileContentsObserver({params});
+      this.profileContentsObserver = this.profileService.getProfileContentsObserver(params);
       this.profileSub = this.profileContentsObserver?.subscribe((profileContents) => {
         this.profileContents = profileContents;
+
         if (this.profileContents.length === 0) {
           const currentUser = this.authService.getCurrentUser();
           this.routerHelper.goToProfile({userName: currentUser?.userName || 'sansoohan'});
+          return;
         }
 
-        this.profileContents[0].projectsContent.projects.sort((a, b) => {
+        this.profileContents[0]?.projectsContent.projects.sort((a, b) => {
           if ((a.finishedAt || '9999-99') < (b.finishedAt || '9999-99')) {
             return 1;
           } else if ((a.finishedAt || '9999-99') > (b.finishedAt || '9999-99')) {
@@ -82,13 +81,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleAddAdditionalProfile(){
+  handleAddAdditionalProfile(): void {
     this.profileForm?.controls.additaionProfilesContent.push(
       this.formHelper.buildFormRecursively(this.newAdditaionProfileContent)
     );
   }
 
-  handleRemoveAdditionalProfile(index){
+  handleRemoveAdditionalProfile(index: number): void{
     this.toastHelper.askYesNo('Remove Profile Category', 'Are you sure?').then((result) => {
       if (result.value) {
         this.profileForm?.controls.additaionProfilesContent.removeAt(index);
@@ -98,26 +97,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleClickEditProfileStart() {
+  handleClickEditProfileStart(): void {
     this.isEditing = true;
   }
 
-  handleClickEditProfileAbort() {
+  handleClickEditProfileAbort(): void {
     this.isEditing = false;
   }
 
-  handleValidateUserName(error: UserNameValidationError) {
+  handleValidateUserName(error: UserNameValidationError): void {
     this.userNameValidationError = error;
   }
 
-  async handleClickEditProfileUpdate() {
+  async handleClickEditProfileUpdate(): Promise<void> {
     this.toastHelper.askYesNo('Update Profile', 'Are you sure?').then((result) => {
-      if (this.userNameValidationError.hasUserNameCollisionError) {
+      if (this.userNameValidationError?.hasUserNameCollisionError) {
         this.toastHelper.showError('Upate Fail', 'User URL is already registered.');
         return;
       }
 
-      if (this.userNameValidationError.hasUserNameCharacterError) {
+      if (this.userNameValidationError?.hasUserNameCharacterError) {
         this.toastHelper.showError('Upate Fail', '(6 to 20 Length of Upper/Lower Alphabet, Number, -, _ can be used for Site Name)');
         return;
       }
@@ -160,8 +159,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  isUserNameChanged() {
-    return this.profileForm.value.userName !== this.profileContents[0].userName;
+  isUserNameChanged(): boolean {
+    return this.profileForm.value.userName !== this.profileContents?.[0].userName;
   }
 
   ngOnInit(): void {
