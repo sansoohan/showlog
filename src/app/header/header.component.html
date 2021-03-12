@@ -7,17 +7,17 @@
     <a
       *ngIf="router.url.includes('/profile')"
       class="navbar-brand selected-header-link d-flex"
-      (click)="goToProfile()"
+      (click)="goToProfile({})"
     ><span class="mx-auto">Profile</span></a>
     <a
       *ngIf="router.url.includes('/blog')"
       class="navbar-brand selected-header-link d-flex"
-      (click)="goToBlog()"
+      (click)="goToBlogPrologue({})"
    ><span class="mx-auto">Blog</span></a>
     <a
       *ngIf="router.url.includes('/talk')"
       class="navbar-brand selected-header-link d-flex"
-      (click)="goToTalk()"
+      (click)="goToTalk({})"
     ><span class="mx-auto">Talk</span></a>
   </div>
 </nav>
@@ -37,17 +37,17 @@
     <a
       *ngIf="!router.url.includes('/profile')"
       class="navbar-brand header-link"
-      (click)="goToProfile()"
+      (click)="goToProfile({})"
     >Profile</a>
     <a
       *ngIf="!router.url.includes('/blog')"
       class="navbar-brand header-link"
-      (click)="goToBlog()"
+      (click)="goToBlogPrologue({})"
     >Blog</a>
     <a
       *ngIf="!router.url.includes('/talk')"
       class="navbar-brand header-link"
-      (click)="goToTalk()"
+      (click)="goToTalk({})"
     >Talk</a>
 
     <!-- Right Side -->

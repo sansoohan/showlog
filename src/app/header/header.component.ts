@@ -103,28 +103,22 @@ export class HeaderComponent {
   toggleSearchValueSelected(isSelected: boolean): void{
     this.isSearchValueSelected = isSelected;
   }
-  goToProfile(): void {
+  goToProfile(params: any): void {
     this.closeSearchListDropDown();
-    let { userName } = this.authService.getCurrentUser();
-    if (!userName) {
-      userName = 'sansoohan';
-    }
-    this.routerHelper.goToProfile({ userName });
+    const { userName: ownerName } = this.authService.getCurrentUser();
+    this.routerHelper.goToProfile({
+      userName: params?.userName || ownerName || 'sansoohan' });
   }
-  goToBlogPrologue(): void {
+  goToBlogPrologue(params: any): void {
     this.closeSearchListDropDown();
-    let { userName } = this.authService.getCurrentUser();
-    if (!userName) {
-      userName = 'sansoohan';
-    }
-    this.routerHelper.goToBlogPrologue({ userName });
+    const { userName: ownerName } = this.authService.getCurrentUser();
+    this.routerHelper.goToBlogPrologue({
+      userName: params?.userName || ownerName || 'sansoohan' });
   }
-  goToTalk(): void {
+  goToTalk(params: any): void {
     this.closeSearchListDropDown();
-    let { userName } = this.authService.getCurrentUser();
-    if (!userName) {
-      userName = 'sansoohan';
-    }
-    this.routerHelper.goToTalk({ userName });
+    const { userName: ownerName } = this.authService.getCurrentUser();
+    this.routerHelper.goToTalk({
+      userName: params?.userName || ownerName || 'sansoohan' });
   }
 }
