@@ -103,16 +103,28 @@ export class HeaderComponent {
   toggleSearchValueSelected(isSelected: boolean): void{
     this.isSearchValueSelected = isSelected;
   }
-  goToProfile(params: any): void {
+  goToProfile(): void {
     this.closeSearchListDropDown();
-    this.routerHelper.goToProfile(params);
+    let { userName } = this.authService.getCurrentUser();
+    if (!userName) {
+      userName = 'sansoohan';
+    }
+    this.routerHelper.goToProfile({ userName });
   }
-  goToBlogPrologue(params: any): void {
+  goToBlogPrologue(): void {
     this.closeSearchListDropDown();
-    this.routerHelper.goToBlogPrologue(params);
+    let { userName } = this.authService.getCurrentUser();
+    if (!userName) {
+      userName = 'sansoohan';
+    }
+    this.routerHelper.goToBlogPrologue({ userName });
   }
-  goToTalk(params: any): void {
+  goToTalk(): void {
     this.closeSearchListDropDown();
-    this.routerHelper.goToTalk(params);
+    let { userName } = this.authService.getCurrentUser();
+    if (!userName) {
+      userName = 'sansoohan';
+    }
+    this.routerHelper.goToTalk({ userName });
   }
 }

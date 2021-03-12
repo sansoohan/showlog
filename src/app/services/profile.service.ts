@@ -23,12 +23,10 @@ export class ProfileService extends CommonService {
   }
 
   getUserEmailCollisionObserver(userEmail: string): Observable<ProfileContent[]> {
-    let userEmailCollisionObserver: Observable<ProfileContent[]>;
-    userEmailCollisionObserver = this.firestore
+    return this.firestore
     .collection<ProfileContent>('profiles', ref => ref
     .where(new FieldPath('email'), '==', userEmail))
     .valueChanges();
-    return userEmailCollisionObserver;
   }
 
   getUserNameCollisionObserver(userName: string): Observable<ProfileContent[]> {
@@ -43,7 +41,6 @@ export class ProfileService extends CommonService {
     if (!queryUserName) {
       return;
     }
-
     return this.firestore
     .collection<ProfileContent>('profiles', ref => ref
     .where(new FieldPath('userName'), '==', queryUserName))

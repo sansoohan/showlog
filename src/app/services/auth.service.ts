@@ -95,7 +95,7 @@ export class AuthService {
   }
 
   getCurrentUser(): any {
-    return JSON.parse(localStorage.getItem('currentUser') || '');
+    return JSON.parse(localStorage.getItem('currentUser') || '{}');
   }
 
   signInFailed(event: any): void {

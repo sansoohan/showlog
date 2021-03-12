@@ -7,20 +7,17 @@
     <a
       *ngIf="router.url.includes('/profile')"
       class="navbar-brand selected-header-link d-flex"
-      routerLink="/profile"
-      routerLinkActive="active"
+      (click)="goToProfile()"
     ><span class="mx-auto">Profile</span></a>
     <a
       *ngIf="router.url.includes('/blog')"
       class="navbar-brand selected-header-link d-flex"
-      routerLink="/blog"
-      routerLinkActive="active"
-    ><span class="mx-auto">Blog</span></a>
+      (click)="goToBlog()"
+   ><span class="mx-auto">Blog</span></a>
     <a
       *ngIf="router.url.includes('/talk')"
       class="navbar-brand selected-header-link d-flex"
-      routerLink="/talk"
-      routerLinkActive="active"
+      (click)="goToTalk()"
     ><span class="mx-auto">Talk</span></a>
   </div>
 </nav>
@@ -40,20 +37,17 @@
     <a
       *ngIf="!router.url.includes('/profile')"
       class="navbar-brand header-link"
-      routerLink="/profile"
-      routerLinkActive="active"
+      (click)="goToProfile()"
     >Profile</a>
     <a
       *ngIf="!router.url.includes('/blog')"
       class="navbar-brand header-link"
-      routerLink="/blog"
-      routerLinkActive="active"
+      (click)="goToBlog()"
     >Blog</a>
     <a
       *ngIf="!router.url.includes('/talk')"
       class="navbar-brand header-link"
-      routerLink="/talk"
-      routerLinkActive="active"
+      (click)="goToTalk()"
     >Talk</a>
 
     <!-- Right Side -->
