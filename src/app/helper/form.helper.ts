@@ -70,7 +70,7 @@ export class FormHelper {
     });
   }
 
-  countChildContent(allContents: Array<FormGroup>, parentContent: FormGroup) {
+  countChildContent(allContents: Array<FormGroup>, parentContent: FormGroup): number {
     const count = allContents.filter((content) =>
       parentContent.controls.id?.value === content.value.parentId &&
       parentContent.controls.id?.value !== content.value.id

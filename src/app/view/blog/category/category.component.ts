@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { PostContent } from '../post/post.content';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -14,30 +13,30 @@ import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 @Component({
   selector: 'app-blog-category',
   templateUrl: './category.component.html',
-  styleUrls: ['../blog.component.css', './category.component.css']
+  styleUrls: ['../blog.component.scss', './category.component.scss']
 })
 export class CategoryComponent implements OnInit, OnDestroy {
-  @Input() canEdit: string;
-  @Input() isCreatingPost: boolean;
+  @Input() canEdit?: boolean;
+  @Input() isCreatingPost?: boolean;
 
-  postListObserver: Observable<PostContent[]>;
-  postList: PostContent[];
-  postListSub: Subscription;
+  postListObserver?: Observable<PostContent[]>;
+  postList?: PostContent[];
+  postListSub?: Subscription;
   postListForm: any;
 
-  blogId: string;
-  isPage: boolean;
-  isLoading: boolean;
-
+  blogId?: string;
   paramSub: Subscription;
   queryParamSub: Subscription;
   params: any;
   queryParams: any;
-  selectedCategory: CategoryContent;
+  selectedCategory?: CategoryContent;
 
-  pageSize: number;
-  pageIndex: number;
-  postCreatedAtList: Array<number>;
+  pageSize = 0;
+  pageIndex = 0;
+  postCreatedAtList: Array<number> = [];
+
+  isPage = true;
+  isLoading = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -61,8 +60,8 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   @Input()
-  get blogContents(): Array<BlogContent> { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>) {
+  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
+  set blogContents(blogContents: Array<BlogContent>|undefined) {
     if (!blogContents || blogContents.length === 0){
       return;
     }
@@ -78,8 +77,8 @@ export class CategoryComponent implements OnInit, OnDestroy {
       this.changePageList(null);
     }
   }
-  // tslint:disable-next-line: variable-name
-  private _blogContents: Array<BlogContent>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
+  private _blogContents?: Array<BlogContent>;
 
   getCategoryPageList(category: CategoryContent): Array<number> {
     let results: Array<number> = [...(category?.postCreatedAtList || [])];
@@ -90,11 +89,11 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   getCategoryTitle(categoryId: string): string {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+    const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
     return category.name;
   }
 
-  changePageList(event) {
+  changePageList(event: any): void {
     if (event) {
       this.pageIndex = event?.pageIndex;
       this.pageSize = event?.pageSize;
@@ -108,18 +107,18 @@ export class CategoryComponent implements OnInit, OnDestroy {
     this.postListObserver = this.blogService.getCategoryPostListObserver(
       this.blogId, selectedCreatedAtList
     );
-    this.postListSub = this.postListObserver.subscribe(postList => {
+    this.postListSub = this.postListObserver?.subscribe(postList => {
       this.postList = postList;
       this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
       this.isLoading = false;
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
 
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
     this.postListSub?.unsubscribe();

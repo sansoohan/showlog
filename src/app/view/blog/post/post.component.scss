@@ -87,6 +87,19 @@ section.post-editing-section {
   padding: 0 0.4rem;
 }
 
+.dropdown-wraper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.dropdown-editarea {
+  height: 99%;
+}
+
+/* .dropdown-wraper > * > div {
+  height: 100%;
+} */
+
 .post-edit-preview-col {
   width: 100%;
   padding: 0 0.4rem;

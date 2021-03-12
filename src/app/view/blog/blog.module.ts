@@ -19,6 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { NgxFileDropModule } from 'ngx-file-drop';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatIconModule,
     MatTabsModule,
     MatToolbarModule,
+    NgxFileDropModule,
     MarkdownModule.forChild(),
   ],
   exports: [

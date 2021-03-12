@@ -26,14 +26,14 @@ export class EducationContent {
   organization: string;
   degree: string;
   descriptions: Array<string>;
-  startedAt: string;
-  finishedAt: string;
+  startedAt: string|null;
+  finishedAt: string|null;
   constructor(
     organization: string = '',
     degree: string = '',
     descriptions: Array<string> = [''],
-    startedAt: string = null,
-    finishedAt: string = null
+    startedAt: string|null = null,
+    finishedAt: string|null = null,
   ){
     this.organization = organization;
     this.degree = degree;

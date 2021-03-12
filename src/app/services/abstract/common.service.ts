@@ -1,10 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable, defineInjectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AuthService } from '../auth.service';
 import * as firebase from 'firebase/app';
-import FieldPath = firebase.firestore.FieldPath;
 import { AngularFireStorage } from '@angular/fire/storage';
 import { CommonStorage } from 'src/app/storages/abstract/common.storage';
+
+const FieldPath = firebase.default.firestore.FieldPath;
+
+export interface CascadeDeleteOption {
+  parentKeyName?: string|null;
+  collectionPath?: string;
+  childrenStorage?: Array<string>;
+  children?: Array<CascadeDeleteOption|never>;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -27,9 +35,13 @@ export abstract class CommonService {
   async update(path: string, content: any): Promise<void> {
     return this.firestore.doc(path).update(JSON.parse(JSON.stringify(content)));
   }
-  async delete(path = '', {
-    parentKeyName = null, collectionPath = '', childrenStorage = [], children = []
-  }): Promise<void> {
+  async delete(path = '', cascadeDeleteOption: CascadeDeleteOption): Promise<void> {
+    const {
+      parentKeyName,
+      collectionPath,
+      childrenStorage = [],
+      children = [],
+    } = cascadeDeleteOption;
     const splitedPath = path.split(/\//g);
     const docId = splitedPath[splitedPath.length - 1];
     if (childrenStorage.length !== 0) {
@@ -44,16 +56,18 @@ export abstract class CommonService {
     }
     await this.firestore.doc(path).delete();
     children.forEach(async (child) => {
-      const tmpObserver = this.firestore.collection(child.collectionPath,
-        ref => ref.where(new FieldPath(child.parentKeyName), '==', docId)
-      ).valueChanges();
-      const tmpSubscriber = tmpObserver.subscribe(async (childContents: Array<any>) => {
-        for (const childContent of childContents) {
-          const nextPath = `${child.collectionPath}/${childContent.id}`;
-          await this.delete(nextPath, child);
-        }
-        tmpSubscriber?.unsubscribe();
-      });
+      if (child.collectionPath) {
+        const tmpObserver = this.firestore.collection(child.collectionPath,
+          ref => ref.where(new FieldPath(child?.parentKeyName || ''), '==', docId)
+        ).valueChanges();
+        const tmpSubscriber = tmpObserver.subscribe(async (childContents: Array<any>) => {
+          for (const childContent of childContents) {
+            const nextPath = `${child.collectionPath}/${childContent.id}`;
+            await this.delete(nextPath, child);
+          }
+          tmpSubscriber?.unsubscribe();
+        });
+      }
     });
   }
   async create(path: string, content: any): Promise<void> {

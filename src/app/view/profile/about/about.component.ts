@@ -10,11 +10,11 @@ export type UserNameValidationError = {
 @Component({
   selector: 'app-profile-about',
   templateUrl: './about.component.html',
-  styleUrls: ['../profile.component.css', './about.component.css']
+  styleUrls: ['../profile.component.scss', './about.component.scss']
 })
 export class AboutComponent implements OnInit {
-  @Input() aboutContent: AboutContent;
-  @Input() isEditing: boolean;
+  @Input() aboutContent?: AboutContent;
+  @Input() isEditing?: boolean;
   @Input() profileForm: any;
   @Output() validateUserName: EventEmitter<any> = new EventEmitter();
 
@@ -36,16 +36,17 @@ export class AboutComponent implements OnInit {
     };
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+
   }
 
-  async handleValidateUserName(event): Promise<void> {
+  async handleValidateUserName(event: any): Promise<any> {
     this.userNameValidationError.hasUserNameCollisionError = false;
     this.userNameValidationError.hasUserNameCharacterError
     = !/^[0-9a-zA-Z-_]{6,30}$/g.test(this.profileForm.value.userName);
 
     if (event.target.value) {
-      await new Promise((resolve) => {
+      await new Promise<void>((resolve) => {
         const tmpSubscription = this.profileService.getUserNameCollisionObserver(event.target.value).subscribe(
           ([profileContent]) => {
             if (profileContent && profileContent?.ownerId !== this.profileForm.value.ownerId){

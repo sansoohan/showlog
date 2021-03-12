@@ -4,11 +4,11 @@ import { InterestsContent } from './interests.content';
 @Component({
   selector: 'app-profile-interests',
   templateUrl: './interests.component.html',
-  styleUrls: ['../profile.component.css', '../profile.component.css']
+  styleUrls: ['../profile.component.scss', './interests.component.scss']
 })
 export class InterestsComponent implements OnInit {
-  @Input() interestsContent: InterestsContent;
-  @Input() isEditing: boolean;
+  @Input() interestsContent?: InterestsContent;
+  @Input() isEditing?: boolean;
   @Input() profileForm: any;
   public newDescription: string;
 
@@ -16,6 +16,7 @@ export class InterestsComponent implements OnInit {
     this.newDescription = '';
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+
   }
 }

@@ -2,14 +2,14 @@
   <button
     class="btn btn-sm btn-outline-secondary col-6 add-remove-button"
     (click)="removeInput()"
-    [hidden]="targetArrayForm.length === 0"
+    [hidden]="targetArrayForm?.length === 0"
   >
     <i class="fa fa-trash"></i>
   </button>
   <button
     class="btn btn-sm btn-outline-success col-6 add-remove-button"
     (click)="addInput()"
-    [hidden]="targetArrayForm.length-1 !== targetArrayIndex && targetArrayForm.length !== 0"
+    [hidden]="targetArrayForm?.length !== (targetArrayIndex+1) && targetArrayForm?.length !== 0"
   >
     <i class="fa fa-plus"></i>
   </button>

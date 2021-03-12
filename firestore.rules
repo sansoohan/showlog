@@ -1,6 +1,10 @@
 // rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {  
+  match /databases/{database}/documents {
+  	allow read;
+    allow create: if isSignedIn();
+    allow update: if isOwner();
+    allow delete: if isOwner();
     // Default Collection Functions (can be overrided)
     function isOwner() {
       return resource.data.ownerId == request.auth.uid;

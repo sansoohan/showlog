@@ -8,6 +8,8 @@ import { ProfileContent } from '../view/profile/profile.content';
 import { BlogContent } from '../view/blog/blog.content';
 import { TalkContent } from '../view/talk/talk.content';
 import { CategoryContent } from '../view/blog/category/category.content';
+import * as firebase from 'firebase';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -40,11 +42,11 @@ export class AuthService {
     }
   }
 
-  getAuthUserObserver(): Observable<firebase.User> {
+  getAuthUserObserver(): Observable<any> {
     return this.afAuth.authState;
   }
 
-  getAuthUser(): Promise<firebase.User> {
+  getAuthUser(): Promise<any> {
     return this.afAuth.currentUser;
   }
 
@@ -69,38 +71,43 @@ export class AuthService {
     }
   }
 
-  async signInSuccess(event): Promise<void> {
-    const profile: any = await this.firestore.doc(`profiles/${event.uid}`).get().toPromise();
+  async signInSuccess(event: any): Promise<void> {
+    if (!event?.user) {
+      return;
+    }
+
+    const profile: any = await this.firestore.doc(`profiles/${event.user.uid}`).get().toPromise();
+    console.log(profile);
     const currentUser = {
-      providerData: event.providerData,
-      email: event.email,
-      emailVerified: event.emailVerified,
-      phoneNumber: event.phoneNumber,
-      photoURL: event.photoURL,
-      displayName: event.displayName,
-      uid: event.uid,
-      userName: profile.data()?.userName || event.uid,
+      providerData: event.user.providerData,
+      email: event.user.email,
+      emailVerified: event.user.emailVerified,
+      phoneNumber: event.user.phoneNumber,
+      photoURL: event.user.photoURL,
+      displayName: event.user.displayName,
+      uid: event.user.uid,
+      userName: profile.data()?.userName || event.user.uid,
     };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    await this.makeCollectionIfNotExist(event.uid);
-    this.toastHelper.showSuccess(`Hello ${currentUser.userName}`, null);
+    await this.makeCollectionIfNotExist(event.user.uid);
+    this.toastHelper.showSuccess(`Hello ${currentUser.userName}`, '');
     this.router.navigate(['/profile', currentUser.userName]);
   }
 
   getCurrentUser(): any {
-    return JSON.parse(localStorage.getItem('currentUser') || null);
+    return JSON.parse(localStorage.getItem('currentUser') || '');
   }
 
-  signInFailed(event): void {
+  signInFailed(event: any): void {
     this.toastHelper.showError('Sign In failed', event.toast);
   }
 
   signUpSuccess(): void {
-    this.toastHelper.showSuccess('Sign Up Success', null);
+    this.toastHelper.showSuccess('Sign Up Success', '');
     this.router.navigate(['/sign-in']);
   }
 
-  signUpFailed(event): void {
+  signUpFailed(event: any): void {
     if (event.code){
       this.toastHelper.showError('Sign up failed', event.toast);
     }
@@ -125,17 +132,8 @@ export class AuthService {
     return autoId;
   }
 
-  async create(path: string, content: any): Promise<void> {
-    content.ownerId = this.getCurrentUser()?.uid;
-    return this.firestore.collection(path).add(JSON.parse(JSON.stringify(content)))
-    .then(async (collection) => {
-      content.id = collection.id;
-      return collection.update(JSON.parse(JSON.stringify(content)));
-    });
-  }
-
   async set(path: string, content: any): Promise<void> {
-    const {uid, userName} = this.getCurrentUser() || {};
+    const {uid, userName} = await this.getAuthUser() || {};
     content.id = uid;
     content.ownerId = uid;
     content.userName = userName || uid;
@@ -144,8 +142,8 @@ export class AuthService {
 
   async isExists(path: string): Promise<boolean> {
     return new Promise(async (resolve) => {
-      const content = await this.firestore.doc(path).get().toPromise();
-      resolve(content.exists);
+      const exists = (await this.firestore.doc(path).get().toPromise()).exists;
+      resolve(exists);
     });
   }
 }

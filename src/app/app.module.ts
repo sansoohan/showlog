@@ -29,6 +29,7 @@ import { environment } from 'src/environments/environment';
 // ngx module
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { MarkdownModule } from 'ngx-markdown';
+import { NgxFileDropModule } from 'ngx-file-drop';
 
 // View
 import { AppComponent } from 'src/app/app.component';
@@ -44,6 +45,7 @@ import { SignUpComponent } from 'src/app/view/sign-up/sign-up.component';
 // Moudles
 import { EmbededGooglemapModule } from 'src/app/modules/embeded-googlemap/embeded-googlemap.module';
 import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
+import { AngularFireModule } from '@angular/fire';
 
 @NgModule({
   declarations: [
@@ -62,11 +64,11 @@ import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
     BrowserAnimationsModule,
     SweetAlert2Module.forRoot(),
     AppRoutingModule,
-    BrowserAnimationsModule,
     HttpClientModule,
     MarkdownModule.forRoot({
       sanitize: SecurityContext.NONE,
     }),
+    NgxFileDropModule,
     MatButtonModule,
     MatIconModule,
     MatTabsModule,
@@ -89,13 +91,14 @@ import { NotFoundModule } from 'src/app/modules/not-found/not-found.module';
         // Plus protected routes are still protected even though user is connected.
         guardProtectedRoutesUntilEmailIsVerified: true,
         enableEmailVerification: true, // default: true
+        useRawUserCredential: true
       }
     ),
     ProfileModule,
     BlogModule,
     TalkModule,
+    AngularFireModule.initializeApp(environment.firebase),
     AngularFireAnalyticsModule,
-    AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireStorageModule,
     AppRoutingModule,

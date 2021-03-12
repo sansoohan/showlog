@@ -1,21 +1,26 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ProjectsContent, ProjectDescription } from './projects.content';
+import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 
 @Component({
   selector: 'app-profile-projects',
   templateUrl: './projects.component.html',
-  styleUrls: ['../profile.component.css', './projects.component.css']
+  styleUrls: ['../profile.component.scss', './projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-  @Input() projectsContent: ProjectsContent;
-  @Input() isEditing: boolean;
+  @Input() projectsContent?: ProjectsContent;
+  @Input() isEditing?: boolean;
   @Input() profileForm: any;
-  public newTaskDescription: '';
+  public newTaskDescription: string;
   public newProjectDescription: ProjectDescription = new ProjectDescription();
 
-  constructor() { }
+  constructor(
+    public dataTransferHelper: DataTransferHelper,
+  ) {
+    this.newTaskDescription = '';
+  }
 
-  ngOnInit() {
+  ngOnInit(): void {
 
   }
 }

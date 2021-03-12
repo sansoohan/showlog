@@ -1,23 +1,23 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import * as moment from 'moment';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-modules-monthpicker',
   templateUrl: './monthpicker.component.html',
-  styleUrls: ['./monthpicker.component.css']
+  styleUrls: ['./monthpicker.component.scss']
 })
 export class MonthpickerComponent implements OnInit {
-  @Input() control: FormControl;
+  @Input()
+  control!: FormControl;
 
-  constructor(){
-
-  }
-  ngOnInit(){
+  constructor() {
 
   }
+  ngOnInit(): void {
 
-  resetValue(){
+  }
+
+  resetValue(): void {
     this.control?.setValue(null);
   }
 }

@@ -21,17 +21,17 @@ export class ImageStorage extends CommonStorage {
   }
 
   async addImage(file: File, path: string, content: ImageContent): Promise<ImageContent> {
-    if (!this.authService.isSignedIn()) {
-      return;
-    }
-
-    const MB = 1024 * 1024;
-    if (file.size > 10 * MB) {
-      this.toastHelper.showError('Image', 'Please Upload under 10MB');
-      return;
-    }
-
     return new Promise(async (resolve, reject) => {
+      if (!this.authService.isSignedIn()) {
+        reject('SignIn Error');
+      }
+
+      const MB = 1024 * 1024;
+      if (file.size > 10 * MB) {
+        this.toastHelper.showError('Image', 'Please Upload under 10MB');
+        reject('Please Upload under 10MB');
+      }
+
       content.ownerId = this.authService.getCurrentUser()?.uid;
       content.id = this.newId();
       const filePath = `${path}/${content.id}`;
@@ -42,7 +42,7 @@ export class ImageStorage extends CommonStorage {
     });
   }
 
-  getImageContentsObserver(path): Observable<any[]> {
+  getImageContentsObserver(path: string): Observable<any[]> {
     return this.firestore.collection<ImageContent>(path).valueChanges();
   }
 }

@@ -11,26 +11,28 @@ import { CategoryContent } from '../category/category.content';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import { ImageContent, ImageHelper } from 'src/app/helper/image.helper';
 import Swal from 'sweetalert2';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-blog-left-sidebar',
   templateUrl: './left-sidebar.component.html',
-  styleUrls: ['../blog.component.css', './left-sidebar.component.css']
+  styleUrls: ['../blog.component.scss', './left-sidebar.component.scss']
 })
 export class LeftSidebarComponent implements OnInit, OnDestroy {
-  @Input() isEditingPost: boolean;
-  @Input() canEdit: boolean;
-  @Input() imageContents: Array<ImageContent>;
-  @Input() blogContents: Array<BlogContent>;
+  @Input() isEditingPost?: boolean;
+  @Input() canEdit?: boolean;
+  @Input() imageContents?: Array<ImageContent>;
+  @Input() blogContents?: Array<BlogContent>;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
   @Output() clickEditPostImage: EventEmitter<ImageContent> = new EventEmitter();
   @Output() updateCategory: EventEmitter<string> = new EventEmitter();
 
-  editingCategoryId: string;
+  editingCategoryId?: string;
   paramSub: Subscription;
   params: any;
-  isPage: boolean;
-  newCategory: CategoryContent;
+  newCategory?: CategoryContent;
+
+  isPage = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -43,85 +45,8 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     private toastHelper: ToastHelper,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
-      this.isPage = true;
       this.params = params;
     });
-  }
-
-  moveUpCategory(
-    categoryContentGroupBId: string,
-    categoryContentsArray: any,
-  ): void {
-    const categoryContentGroupB = categoryContentsArray.controls
-    .find((category) => category.value.id === categoryContentGroupBId);
-    const categoryContentGroupA =
-    categoryContentsArray.controls[categoryContentGroupB.value.categoryNumber - 1];
-    const deepCountA = this.blogService.getCategoryDeepCount(
-      categoryContentGroupA, categoryContentsArray.controls
-    );
-    const minDeepCountB = this.blogService.getCategoryDeepCount(
-      categoryContentGroupB, categoryContentsArray.controls
-    );
-    const childrenCategoryWithB = [
-      categoryContentGroupB,
-      ...this.formHelper
-      .getChildContentsRecusively(categoryContentsArray.controls, categoryContentGroupB)
-    ];
-
-    if (!categoryContentGroupA) {
-      return;
-    }
-
-    if (!categoryContentGroupB) {
-      categoryContentGroupA.controls.parentId.setValue(null);
-    }
-    else if (categoryContentGroupB.value.parentId === categoryContentGroupA.value.id) {
-      const tmpCategoryANubmer = categoryContentGroupA.value.categoryNumber;
-      const categoryBSize = childrenCategoryWithB.length;
-      for (let i = tmpCategoryANubmer; i <= tmpCategoryANubmer + categoryBSize; i++){
-        if (i === tmpCategoryANubmer) {
-          categoryContentsArray.controls[i].controls.categoryNumber
-          .setValue(tmpCategoryANubmer + categoryBSize);
-          continue;
-        }
-
-        if (i === tmpCategoryANubmer + 1) {
-          categoryContentsArray.controls[i].controls.categoryNumber
-          .setValue(i - 1);
-          categoryContentsArray.controls[i].controls.parentId
-          .setValue(categoryContentGroupA.value.parentId || null);
-          continue;
-        }
-
-        categoryContentsArray.controls[i].controls.categoryNumber
-        .setValue(i - 1);
-      }
-    }
-    else if (
-      categoryContentGroupB.value.parentId === categoryContentGroupA.value.parentId
-    ) {
-      categoryContentGroupB.controls.parentId.setValue(categoryContentGroupA.value.id);
-    } else {
-      categoryContentGroupB.controls.parentId.setValue(categoryContentGroupA.value.parentId);
-    }
-
-    categoryContentsArray.patchValue(
-      categoryContentsArray.value.sort((a, b) => a.categoryNumber - b.categoryNumber)
-    );
-
-    const maxDeepCountB = Math.max(...childrenCategoryWithB.map((category) => {
-      return this.blogService.getCategoryDeepCount(
-        category, categoryContentsArray.controls
-      );
-    })) - 1;
-
-    categoryContentsArray.patchValue(
-      categoryContentsArray.value.sort((a, b) => a.categoryNumber - b.categoryNumber)
-    );
-
-    if (maxDeepCountB >= 4){
-      this.moveUpCategory(categoryContentGroupBId, categoryContentsArray);
-    }
   }
 
   handleClickStartUploadPostImageSrc(): void {
@@ -132,23 +57,26 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     this.clickEditPostImage.emit(imageContent);
   }
 
-  handleSelectCategory(categoryId): void {
+  handleSelectCategory(categoryId: string): void {
     this.routerHelper.goToBlogCategory(this.params, categoryId);
   }
-  handleSortCategory(categoryMap): void {
+  handleSortCategory(categoryMap: any): void {
+    if (!this.blogContents) {
+      return;
+    }
     this.blogContents[0].categoryMap = categoryMap;
     this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0])
     .catch(() => {
       this.toastHelper.showSuccess('Category Map', 'Updating Category Map is failed');
     });
   }
-  handleEditCategory(categoryId): void {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+  handleEditCategory(categoryId: string): void {
+    const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
     this.toastHelper.askUpdateDelete('Edit Category', 'Category Name', category.name)
     .then(async (data) => {
       if (data.value) {
         category.name = data.value;
-        this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0])
+        this.blogService.update(`blogs/${this.blogContents?.[0].id}`, this.blogContents?.[0])
         .then(() => {
           this.toastHelper.showSuccess('Category Name', 'Category Name is updated');
         })
@@ -158,7 +86,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       }
       else if (data.dismiss === Swal.DismissReason.cancel) {
         this.toastHelper.askYesNo('Remove Category', 'Are you sure?').then(result => {
-          if (result.value) {
+          if (result.value && this.blogContents) {
             const blogId = this.blogContents[0].id;
             this.blogContents[0].categoryMap = this.deleteCategory(
               blogId, categoryId, this.blogContents[0].categoryMap
@@ -178,24 +106,24 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       }
     });
   }
-  handleAddCategory(categoryId): void {
+  handleAddCategory(categoryId?: string): void {
     const categoryContent = new CategoryContent();
     categoryContent.id = this.blogService.newId();
 
-    if (!categoryId) {
+    if (!categoryId && this.blogContents) {
       this.blogContents[0].categoryMap = [
         categoryContent,
         ...this.blogContents[0].categoryMap,
       ];
     } else {
-      const [category] = this.blogService.getCategory(categoryId, this.blogContents[0].categoryMap);
+      const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
       category.children = [
         categoryContent,
         ...category.children,
       ];
     }
 
-    this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0]);
+    this.blogService.update(`blogs/${this.blogContents?.[0].id}`, this.blogContents?.[0]);
   }
 
   getCategoryPageList(category: CategoryContent): Array<number> {

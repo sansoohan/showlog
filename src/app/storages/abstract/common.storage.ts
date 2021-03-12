@@ -34,7 +34,7 @@ export class CommonStorage {
     });
   }
 
-  deleteFolderContents(path) {
+  deleteFolderContents(path: string): void {
     this.storage
     .ref(path).listAll().toPromise()
     .then(dir => {

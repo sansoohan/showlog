@@ -11,16 +11,16 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 @Component({
   selector: 'app-talk-room-entrance',
   templateUrl: './entrance.component.html',
-  styleUrls: ['./entrance.component.css']
+  styleUrls: ['./entrance.component.scss']
 })
 export class EntranceComponent implements OnInit, OnDestroy {
-  @Output() clickRemoveRoom: EventEmitter<string> = new EventEmitter();
-  @Input() roomContents: Array<RoomContent>;
+  @Output() clickRemoveRoom: EventEmitter<string|undefined> = new EventEmitter();
+  @Input() roomContents?: Array<RoomContent>;
 
   params: any;
   paramSub: Subscription;
   talkRoomsObserver: any;
-  talkRoomsSub: Subscription;
+  talkRoomsSub?: Subscription;
 
   constructor(
     private router: Router,
@@ -32,11 +32,11 @@ export class EntranceComponent implements OnInit, OnDestroy {
     });
   }
 
-  handleClickRemoveRoom(roomId: string): void {
+  handleClickRemoveRoom(roomId?: string): void {
     this.clickRemoveRoom.emit(roomId);
   }
 
-  goToRoom(roomId: string) {
+  goToRoom(roomId: string): void {
     if (!roomId) {
       return;
     }

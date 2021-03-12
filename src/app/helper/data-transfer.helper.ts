@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as firebase from 'firebase/app';
 
+const Timestamp = firebase.default.firestore.Timestamp;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,20 +15,21 @@ export class DataTransferHelper {
     return new Array(input);
   }
 
-  range = (start, stop, step) =>
-    Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
+  range = (start: number, stop: number, step: number) =>
+    Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
   markDownPreprocess(input: string): string {
     const lines = input.split('\n');
-    const codeLineStartEndIndexes = lines.map((line, i) =>
+    const codeLineStartEndIndexes: Array<any> = lines.map((line, i) =>
       line.split('```').length % 2 === 0
         ? i
-        : null).filter((num) => num !== null);
+        : null
+      ).filter((num) => num !== null);
 
     if (codeLineStartEndIndexes.length % 2 === 1) {
       codeLineStartEndIndexes.pop();
     }
-    let codeLineNumbers = [];
+    let codeLineNumbers: Array<number> = [];
     for (let i = 0; i < codeLineStartEndIndexes.length; i += 2) {
       codeLineNumbers = [
         ...codeLineNumbers,
@@ -54,7 +57,7 @@ export class DataTransferHelper {
   }
 
   preProcessEmoji(inputString: string): string {
-    const preProcessEmojiList = {
+    const preProcessEmojiList: {[key: string]: any} = {
       ':smiling_face_with_three_hearts:': ':smiling_face_with_3_hearts:',
       ':hand_over_mouth:': ':face_with_hand_over_mouth:',
       ':hugs:': ':hugging:',
@@ -193,23 +196,19 @@ export class DataTransferHelper {
     };
 
     if (/:(\w+):/g.test(inputString)) {
-      // tslint:disable-next-line: no-string-literal
-      let searchList = [...inputString['matchAll'](/:(\w+)_man:/g)];
+      let searchList = [...inputString.matchAll(/:(\w+)_man:/g)];
       for (const search of searchList){
         inputString = inputString.replace(new RegExp(search[0], 'g'), `:man_${search[1]}:`);
       }
-      // tslint:disable-next-line: no-string-literal
-      searchList = [...inputString['matchAll'](/:(\w+)_woman:/g)];
+      searchList = [...inputString.matchAll(/:(\w+)_woman:/g)];
       for (const search of searchList){
         inputString = inputString.replace(new RegExp(search[0], 'g'), `:woman_${search[1]}:`);
       }
-      // tslint:disable-next-line: no-string-literal
-      searchList = [...inputString['matchAll'](/:(\w+)_person:/g)];
+      searchList = [...inputString.matchAll(/:(\w+)_person:/g)];
       for (const search of searchList){
         inputString = inputString.replace(new RegExp(search[0], 'g'), `:person_${search[1]}:`);
       }
-      // tslint:disable-next-line: no-string-literal
-      searchList = [...inputString['matchAll'](/:(\w+):/g)];
+      searchList = [...inputString.matchAll(/:(\w+):/g)];
       for (const search of searchList) {
         const searchedEmoji = preProcessEmojiList[search[0]];
         if (searchedEmoji) {
@@ -236,10 +235,11 @@ export class DataTransferHelper {
     const date = new Date(input);
     return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`;
   }
+
   replaceToDateRecursively(content: any): any{
     if (content instanceof Array){
       for (let i = 0; i < content.length; i++){
-        if (content[i] instanceof firebase.firestore.Timestamp){
+        if (content[i] instanceof Timestamp){
           content[i] = content[i].toDate();
         }
         else{
@@ -250,7 +250,7 @@ export class DataTransferHelper {
     else if (content instanceof Object) {
       for (const key in content){
         if (key){
-          if (content[key] instanceof firebase.firestore.Timestamp){
+          if (content[key] instanceof Timestamp){
             content[key] = content[key].toDate();
           }
           else{
@@ -273,5 +273,6 @@ export class DataTransferHelper {
 
       return orderA - orderB;
     }
+    return 0;
   }
 }

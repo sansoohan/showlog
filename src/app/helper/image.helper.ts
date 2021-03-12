@@ -11,9 +11,7 @@ export class ImageHelper {
     const attributeNames: Array<string> = Object.keys(imageContent.attributes);
     return [
       '<img',
-      ...attributeNames.map((attributeName) => {
-        return `${attributeName}="${imageContent.attributes[attributeName]}"`;
-      }),
+      ...attributeNames.map((attributeName) => `${attributeName}="${imageContent.attributes[attributeName]}"`),
       '/>',
     ].join(' ');
   }
@@ -22,7 +20,7 @@ export class ImageHelper {
     return Number(width) < Number(height);
   }
   getImageStyle(imageContent: ImageContent): any {
-    const imageContentStyle = {};
+    const imageContentStyle: {[key: string]: any} = {};
     const splitedStyle = imageContent.attributes.style.split(/;/g);
     for (const s of splitedStyle) {
       const [key, value] = s.split(/:/g);

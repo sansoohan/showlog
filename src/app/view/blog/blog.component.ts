@@ -11,16 +11,16 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 @Component({
   selector: 'app-blog',
   templateUrl: './blog.component.html',
-  styleUrls: ['./blog.component.css']
+  styleUrls: ['./blog.component.scss']
 })
 export class BlogComponent implements OnInit, OnDestroy {
-  blogContentsObserver: Observable<BlogContent[]>;
-  blogContents: BlogContent[];
-  blogContensSub: Subscription;
+  blogContentsObserver?: Observable<BlogContent[]>;
+  blogContents?: BlogContent[];
+  blogContensSub?: Subscription;
 
-  blogId: string;
-  isPage: boolean;
-  canEdit: boolean;
+  blogId?: string;
+  isPage = true;
+  canEdit = false;
 
   paramSub: Subscription;
   params: any;
@@ -34,12 +34,10 @@ export class BlogComponent implements OnInit, OnDestroy {
     public authService: AuthService,
   ) {
     this.paramSub = this.route.params.subscribe(params => {
-      this.isPage = true;
       this.params = params;
 
-      this.blogContentsObserver = this.blogService.getBlogContentsObserver({params});
+      this.blogContentsObserver = this.blogService.getBlogContentsObserver(params);
       this.blogContensSub = this.blogContentsObserver?.subscribe(async (blogContents) => {
-        this.blogContents = blogContents;
         this.blogContents = blogContents;
         if (this.blogContents.length === 0) {
           const currentUser = this.authService.getCurrentUser();
@@ -61,11 +59,11 @@ export class BlogComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void  {
 
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.blogContensSub?.unsubscribe();
     this.paramSub?.unsubscribe();
   }

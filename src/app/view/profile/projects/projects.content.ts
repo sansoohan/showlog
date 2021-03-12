@@ -1,5 +1,8 @@
 export class ProjectsContent {
   projects: Array<ProjectDescription>;
+
+  public newProjectDescription: ProjectDescription = new ProjectDescription();
+
   constructor(
     projects: Array<ProjectDescription> = [
       new ProjectDescription(
@@ -25,16 +28,16 @@ export class ProjectDescription {
   projectName: string;
   memberNum: number;
   position: string;
-  startedAt: string;
-  finishedAt: string;
+  startedAt: string|null;
+  finishedAt: string|null;
   taskDescriptions: Array<string>;
   constructor(
     organization: string = '',
     projectName: string = '',
     memberNum: number = 0,
     position: string = '',
-    startedAt: string = null,
-    finishedAt: string = null,
+    startedAt: string|null = null,
+    finishedAt: string|null = null,
     taskDescriptions: Array<string> = ['']
   ){
     this.organization = organization;

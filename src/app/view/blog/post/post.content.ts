@@ -6,7 +6,7 @@ export class PostContent {
   postTitle: string;
   postMarkdown: string;
   postImageSrcs: any;
-  selectedIamgeIndex?: number;
+  selectedIamgeIndex?: number|null;
   likes: any;
   ownerId: string;
   constructor(
@@ -17,7 +17,7 @@ export class PostContent {
     postTitle: string = '',
     postMarkdown: string = '',
     postImageSrcs: any = [],
-    selectedIamgeIndex: number = null,
+    selectedIamgeIndex: number|null = null,
     likes: any = [],
     ownerId: string = '',
   ){

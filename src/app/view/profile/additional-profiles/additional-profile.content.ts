@@ -41,10 +41,10 @@ export class AdditaionProfileContent {
 }
 
 export class LargeGroup {
-  largeGroupName: string;
+  largeGroupName: string|null;
   smallGroups: Array<SmallGroup>;
   constructor(
-    largeGroupName: string = '',
+    largeGroupName: string|null = '',
     smallGroups: Array<SmallGroup> = [new SmallGroup()]
   ){
     this.largeGroupName = largeGroupName;

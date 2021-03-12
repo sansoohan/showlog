@@ -11,19 +11,19 @@ export class ToastHelper {
     private imageHelper: ImageHelper,
   ) { }
 
-  showError(title: string, text: string) {
+  showError(title: string, text: string): void {
     Swal.fire({ title, text, icon: 'error' });
   }
 
-  showInfo(title: string, text: string) {
+  showInfo(title: string, text: string): void {
     Swal.fire({ title, text, icon: 'info' });
   }
 
-  showWarning(title: string, text: string){
+  showWarning(title: string, text: string): void {
     Swal.fire({ title, text, icon: 'warning' });
   }
 
-  showSuccess(title: string, text: string) {
+  showSuccess(title: string, text: string): void {
     Swal.fire({
       position: 'top-end',
       title,
@@ -37,8 +37,12 @@ export class ToastHelper {
     });
   }
 
-  async showPrompt(title: string, inputPlaceholder: string, inputValue?: string){
-    return await Swal.fire({
+  async showPrompt(
+    title: string,
+    inputPlaceholder: string,
+    inputValue?: string
+  ): Promise<SweetAlertResult<any>> {
+    return Swal.fire({
       title,
       input: 'text',
       inputValue,
@@ -48,6 +52,7 @@ export class ToastHelper {
         if (!value) {
           return 'You need to write something!';
         }
+        return '';
       }
     });
   }
@@ -103,7 +108,7 @@ export class ToastHelper {
       cancelButtonText: 'Remove Image',
       cancelButtonColor: '#d33',
       inputAttributes: {
-        // tslint:disable-next-line:object-literal-key-quotes
+        // eslint-disable-next-line quote-props
         'accept': 'image/*',
         'aria-label': 'Upload your profile picture'
       }
@@ -111,7 +116,7 @@ export class ToastHelper {
   }
 
   async editImage(
-    title,
+    title: string,
     imageContent: ImageContent
   ): Promise<SweetAlertResult> {
     const imageStyle = this.imageHelper.getImageStyle(imageContent);
@@ -152,14 +157,12 @@ export class ToastHelper {
           </div>
         </div>
       `,
-      preConfirm: () => {
-        return new Promise((resolve) => {
+      preConfirm: () => new Promise((resolve) => {
           resolve({
             width: (document.getElementById('swal-input1') as HTMLInputElement).value,
             height: (document.getElementById('swal-input2') as HTMLInputElement).value,
           });
-        });
-      },
+        }),
       showCancelButton: true,
       showCloseButton: true,
       confirmButtonText: 'Update',
