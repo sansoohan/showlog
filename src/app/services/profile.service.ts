@@ -21,29 +21,4 @@ export class ProfileService extends CommonService {
   ) {
     super(authService, firestore, storage);
   }
-
-  getUserEmailCollisionObserver(userEmail: string): Observable<ProfileContent[]> {
-    return this.firestore
-    .collection<ProfileContent>('profiles', ref => ref
-    .where(new FieldPath('email'), '==', userEmail))
-    .valueChanges();
-  }
-
-  getUserNameCollisionObserver(userName: string): Observable<ProfileContent[]> {
-    return this.firestore
-    .collection<ProfileContent>('profiles', ref => ref
-    .where(new FieldPath('userName'), '==', userName))
-    .valueChanges();
-  }
-
-  getProfileContentsObserver(params: any): Observable<ProfileContent[]>|undefined {
-    const queryUserName = params?.userName;
-    if (!queryUserName) {
-      return;
-    }
-    return this.firestore
-    .collection<ProfileContent>('profiles', ref => ref
-    .where(new FieldPath('userName'), '==', queryUserName))
-    .valueChanges();
-  }
 }

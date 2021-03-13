@@ -11,14 +11,14 @@
     *ngIf="isCreatingPost"
     [isEditingPost]="true"
     [isCreatingPost]="true"
-    [blogContents]="blogContents"
+    [blogContent]="blogContent"
   ></app-blog-category-new-post>
   
   <div *ngIf="!isCreatingPost">
     <app-blog-left-sidebar
       [isEditingPost]="false"
       [canEdit]="canEdit"
-      [blogContents]="blogContents"
+      [blogContent]="blogContent"
     ></app-blog-left-sidebar>
     <div
       class="blog-category"

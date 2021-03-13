@@ -8,7 +8,9 @@ import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
-// import 'moment/locale/de';
+import * as firebase from 'firebase/app';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
   selector: 'app-blog-prologue',
@@ -51,28 +53,37 @@ export class PrologueComponent implements OnInit, OnDestroy {
   }
 
   @Input()
-  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>|undefined) {
-    if (!blogContents || blogContents.length === 0) {
+  get blogContent(): BlogContent|undefined { return this._blogContent; }
+  set blogContent(blogContent: BlogContent|undefined) {
+    if (!blogContent) {
       this.isEmptyBlog = true;
       this.isLoading = false;
       return;
     }
-    this._blogContents = blogContents;
-    this.blogId = blogContents[0].id;
+    this._blogContent = blogContent;
+    this.blogId = blogContent.id;
 
-    this.postListObserver = this.blogService.getProloguePostListObserver(this.blogId);
+    this.postListObserver = this.blogService.select<PostContent>(
+      `blogs/${this.blogId}/posts`,
+      {
+        orderBy: [{
+          fieldPath: new FieldPath('createdAt'),
+          direction: 'desc',
+        }],
+        limit: 10,
+      } as CollectionSelect
+    );
     this.postListSub = this.postListObserver?.subscribe(postList => {
       this.postList = postList;
       this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
       this.isLoading = false;
     });
   }
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
-  private _blogContents?: Array<BlogContent>;
+  // tslint:disable-next-line: variable-name
+  private _blogContent?: BlogContent;
 
   getCategoryTitle(categoryId: string): string {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
+    const [category] = this.blogService.getCategory(categoryId, this.blogContent?.categoryMap);
     return category?.name || '';
   }
 

@@ -22,7 +22,7 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   @Input() isEditingPost?: boolean;
   @Input() canEdit?: boolean;
   @Input() imageContents?: Array<ImageContent>;
-  @Input() blogContents?: Array<BlogContent>;
+  @Input() blogContent?: BlogContent;
   @Output() clickStartUploadPostImageSrc: EventEmitter<null> = new EventEmitter();
   @Output() clickEditPostImage: EventEmitter<ImageContent> = new EventEmitter();
   @Output() updateCategory: EventEmitter<string> = new EventEmitter();
@@ -61,22 +61,22 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     this.routerHelper.goToBlogCategory(this.params, categoryId);
   }
   handleSortCategory(categoryMap: any): void {
-    if (!this.blogContents) {
+    if (!this.blogContent) {
       return;
     }
-    this.blogContents[0].categoryMap = categoryMap;
-    this.blogService.update(`blogs/${this.blogContents[0].id}`, this.blogContents[0])
+    this.blogContent.categoryMap = categoryMap;
+    this.blogService.update(`blogs/${this.blogContent.id}`, this.blogContent)
     .catch(() => {
       this.toastHelper.showSuccess('Category Map', 'Updating Category Map is failed');
     });
   }
   handleEditCategory(categoryId: string): void {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
+    const [category] = this.blogService.getCategory(categoryId, this.blogContent?.categoryMap);
     this.toastHelper.askUpdateDelete('Edit Category', 'Category Name', category.name)
     .then(async (data) => {
       if (data.value) {
         category.name = data.value;
-        this.blogService.update(`blogs/${this.blogContents?.[0].id}`, this.blogContents?.[0])
+        this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent)
         .then(() => {
           this.toastHelper.showSuccess('Category Name', 'Category Name is updated');
         })
@@ -86,12 +86,12 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       }
       else if (data.dismiss === Swal.DismissReason.cancel) {
         this.toastHelper.askYesNo('Remove Category', 'Are you sure?').then(result => {
-          if (result.value && this.blogContents) {
-            const blogId = this.blogContents[0].id;
-            this.blogContents[0].categoryMap = this.deleteCategory(
-              blogId, categoryId, this.blogContents[0].categoryMap
+          if (result.value && this.blogContent) {
+            const blogId = this.blogContent.id;
+            this.blogContent.categoryMap = this.deleteCategory(
+              blogId, categoryId, this.blogContent.categoryMap
             );
-            this.blogService.update(`blogs/${blogId}`, this.blogContents[0])
+            this.blogService.update(`blogs/${blogId}`, this.blogContent)
             .then(() => {
               this.toastHelper.showSuccess('Remove Category', 'Category is removed');
             })
@@ -110,20 +110,20 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     const categoryContent = new CategoryContent();
     categoryContent.id = this.blogService.newId();
 
-    if (!categoryId && this.blogContents) {
-      this.blogContents[0].categoryMap = [
+    if (!categoryId && this.blogContent) {
+      this.blogContent.categoryMap = [
         categoryContent,
-        ...this.blogContents[0].categoryMap,
+        ...this.blogContent.categoryMap,
       ];
     } else {
-      const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
+      const [category] = this.blogService.getCategory(categoryId, this.blogContent?.categoryMap);
       category.children = [
         categoryContent,
         ...category.children,
       ];
     }
 
-    this.blogService.update(`blogs/${this.blogContents?.[0].id}`, this.blogContents?.[0]);
+    this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent);
   }
 
   getCategoryPageList(category: CategoryContent): Array<number> {
