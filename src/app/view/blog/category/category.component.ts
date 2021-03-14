@@ -98,14 +98,17 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   changePageList(event: any): void {
+    console.log(event);
     if (event) {
       this.pageIndex = event?.pageIndex;
       this.pageSize = event?.pageSize;
     }
+
     if (this.postListSub) {
       this.postListSub.unsubscribe();
     }
-    const selectedCreatedAtList = this.postCreatedAtList
+    console.log(this.pageIndex * this.pageSize, this.pageSize);
+    const selectedCreatedAtList = Object.assign([], this.postCreatedAtList)
     .sort((createdA, createdB) => createdA - createdB)
     .splice(this.pageIndex * this.pageSize, this.pageSize);
     this.postListObserver = this.blogService.select<PostContent>(
