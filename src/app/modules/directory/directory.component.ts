@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { debounce } from '@agentepsilon/decko';
 
 export interface DropInfo {
-  targetId: string;
+  targetId: string|null;
   action?: string;
 }
 
@@ -26,18 +26,18 @@ export class DirectoryComponent {
     this._nodes = nodes;
     this.prepareDragDrop(nodes);
   }
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
+  // tslint:disable-next-line: variable-name
   private _nodes?: Array<any>;
 
   // ids for connected drop lists
-  dropTargetIds: Array<string> = [];
-  nodeLookup: {[index: string]: any} = {};
-  dropActionTodo: DropInfo|null = null;
+  dropTargetIds: Array<any> = [];
+  nodeLookup: {[key: string]: any} = {};
+  dropActionTodo?: DropInfo;
 
   constructor(@Inject(DOCUMENT) private document: Document) {
   }
 
-  prepareDragDrop(nodes?: Array<{[index: string]: any}>): void {
+  prepareDragDrop(nodes?: Array<any>): void {
     nodes?.forEach(node => {
       this.dropTargetIds.push(node.id);
       this.nodeLookup[node.id] = node;
@@ -61,19 +61,9 @@ export class DirectoryComponent {
       this.clearDragInfo();
       return;
     }
-    if (!this.dropActionTodo) {
-      return;
-    }
-
-    const targetId = container.getAttribute('data-id');
-    if (!targetId) {
-      return;
-    }
-
     this.dropActionTodo = {
-      targetId
+      targetId: container.getAttribute('data-id')
     };
-
     const targetRect = container.getBoundingClientRect();
     const oneThird = targetRect.height / 3;
 
@@ -90,6 +80,7 @@ export class DirectoryComponent {
     this.showDragInfo();
   }
 
+
   drop(event: any): void {
     if (!this.dropActionTodo) { return; }
 
@@ -100,23 +91,23 @@ export class DirectoryComponent {
       return;
     }
 
-    // eslint-disable-next-line no-console
+    // tslint:disable-next-line: no-console
     console.log(
       '\nmoving\n[' + draggedItemId + '] from list [' + parentItemId + ']',
       '\n[' + this.dropActionTodo.action + ']\n[' + this.dropActionTodo.targetId + '] from list [' + targetListId + ']');
 
     const draggedItem = this.nodeLookup[draggedItemId];
 
-    const oldItemContainer: Array<{[index: string]: any}> = parentItemId !== 'main' ? this.nodeLookup[parentItemId].children : this.nodes;
-    const newContainer: Array<{[index: string]: any}> = targetListId !== 'main' ? this.nodeLookup[targetListId].children : this.nodes;
+    const oldItemContainer = parentItemId !== 'main' ? this.nodeLookup[parentItemId].children : this.nodes;
+    const newContainer = targetListId !== 'main' ? this.nodeLookup[targetListId].children : this.nodes;
 
-    const i = oldItemContainer.findIndex(c => c.id === draggedItemId);
+    const i = oldItemContainer.findIndex((c: {[key: string]: any}) => c.id === draggedItemId);
     oldItemContainer.splice(i, 1);
 
     switch (this.dropActionTodo.action) {
       case 'before':
       case 'after':
-        const targetIndex = newContainer.findIndex(c => c.id === this.dropActionTodo?.targetId);
+        const targetIndex = newContainer.findIndex((c: {[key: string]: any}) => c.id === this.dropActionTodo?.targetId);
         if (this.dropActionTodo.action === 'before') {
           newContainer.splice(targetIndex, 0, draggedItem);
         } else {
@@ -125,33 +116,36 @@ export class DirectoryComponent {
         break;
 
       case 'inside':
-        this.nodeLookup[this.dropActionTodo.targetId].children.push(draggedItem);
-        this.nodeLookup[this.dropActionTodo.targetId].isExpanded = true;
+        if (this.dropActionTodo.targetId) {
+          this.nodeLookup[this.dropActionTodo.targetId].children.push(draggedItem);
+          this.nodeLookup[this.dropActionTodo.targetId].isExpanded = true;
+        }
         break;
     }
 
     this.clearDragInfo(true);
     this.handleSortCategory();
   }
-  getParentNodeId(id: string, nodesToSearch: any, parentId: string): string|null {
+  getParentNodeId(id: string|null, nodesToSearch: any, parentId: string): string|undefined {
     for (const node of nodesToSearch) {
       if (node.id === id) { return parentId; }
       const ret = this.getParentNodeId(id, node.children, node.id);
       if (ret) { return ret; }
     }
 
-    return null;
+    return;
   }
+
   showDragInfo(): void {
     this.clearDragInfo();
     if (this.dropActionTodo?.targetId) {
-      const document = this.document as any;
-      document.getElementById('node-' + this.dropActionTodo.targetId).classList.add('drop-' + this.dropActionTodo.action);
+      this.document.getElementById('node-' + this.dropActionTodo.targetId)?.classList.add('drop-' + this.dropActionTodo.action);
     }
   }
+
   clearDragInfo(dropped = false): void {
     if (dropped) {
-      this.dropActionTodo = null;
+      delete this.dropActionTodo;
     }
     this.document
     .querySelectorAll('.drop-before')

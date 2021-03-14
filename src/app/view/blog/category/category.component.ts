@@ -85,8 +85,12 @@ export class CategoryComponent implements OnInit, OnDestroy {
   private _blogContent?: BlogContent;
 
   getCategoryPageList(category: CategoryContent): Array<number> {
-    let results: Array<number> = [...(category?.postCreatedAtList || [])];
-    for (const child of category.children) {
+    if (category?.postCreatedAtList instanceof firebase.default.firestore.FieldValue) {
+      return [];
+    }
+
+    let results: Array<number> = [...(category?.postCreatedAtList as number[] || [])];
+    for (const child of category?.children || []) {
       results = [...results, ...this.getCategoryPageList(child)];
     }
     return results;
@@ -98,17 +102,14 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   changePageList(event: any): void {
-    console.log(event);
     if (event) {
       this.pageIndex = event?.pageIndex;
       this.pageSize = event?.pageSize;
     }
-
     if (this.postListSub) {
       this.postListSub.unsubscribe();
     }
-    console.log(this.pageIndex * this.pageSize, this.pageSize);
-    const selectedCreatedAtList = Object.assign([], this.postCreatedAtList)
+    const selectedCreatedAtList = this.postCreatedAtList
     .sort((createdA, createdB) => createdA - createdB)
     .splice(this.pageIndex * this.pageSize, this.pageSize);
     this.postListObserver = this.blogService.select<PostContent>(
@@ -117,7 +118,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
         where: [{
           fieldPath: new FieldPath('createdAt'),
           operator: 'in',
-          value: selectedCreatedAtList,
+          value: selectedCreatedAtList.length ? selectedCreatedAtList : [-1],
         }]
       } as CollectionSelect
     );
