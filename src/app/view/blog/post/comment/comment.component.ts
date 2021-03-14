@@ -11,8 +11,8 @@ import { ToastHelper } from 'src/app/helper/toast.helper';
 import Swal from 'sweetalert2';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { AuthService } from 'src/app/services/auth.service';
-import * as firebase from 'firebase/app';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
+import * as firebase from 'firebase/app';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
@@ -39,6 +39,10 @@ export class CommentComponent implements OnInit, OnDestroy {
   isShowingComment = false;
   hasNullCommentContentError = false;
 
+  pageSize = 0;
+  pageIndex = 0;
+  postCreatedAtList: Array<number> = [];
+
   constructor(
     public profileService: ProfileService,
     private toastHelper: ToastHelper,
@@ -58,6 +62,7 @@ export class CommentComponent implements OnInit, OnDestroy {
   @Input()
   get blogContent(): BlogContent|undefined { return this._blogContent; }
   set blogContent(blogContent: BlogContent|undefined) {
+    this.isEditingCommentIds = [];
     this.isPage = true;
     if (!blogContent){
       this.isPage = false;
@@ -79,10 +84,6 @@ export class CommentComponent implements OnInit, OnDestroy {
 
     this.commentContentsSub = this.commentContentsObserver?.subscribe(commentContents => {
       this.commentContents = commentContents;
-      if (commentContents.length === 0) {
-        this.isPage = false;
-        return;
-      }
       // this.commentContents.sort((categoryA: CommentContent, categoryB: CommentContent) =>
       //   categoryA.commentNumber - categoryB.commentNumber);
 

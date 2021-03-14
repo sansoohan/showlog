@@ -1,5 +1,5 @@
 <div *ngIf="!isEditingPost">
-  <div class="blog-comment" *ngIf="!isEditingPost">
+  <div class="blog-comment">
     <section
       *ngIf="isEditingCommentIds"
       class="p-3 d-flex flex-column"
@@ -138,6 +138,17 @@
           </div>
         </div>
       </form>
+
+      <!-- <div class="d-flex">
+        <mat-paginator
+          class="mx-auto pt-3 post-page-list"
+          [length]="postCreatedAtList.length"
+          [pageIndex]="pageIndex"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[1, 5, 10, 20]"
+          (page)="changePageList($event)">
+        </mat-paginator> -->
+      </div>
     </section>
   </div>
 
