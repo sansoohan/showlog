@@ -73,9 +73,7 @@ export class PostComponent implements OnInit, OnDestroy {
           this.postContentObserver = this.blogService.observe<PostContent>(
             `blogs/${this.blogId}/posts/${this.postId}`
           );
-          console.log(this.postContentObserver);
           this.postContentSub = this.postContentObserver?.subscribe(postContent => {
-            console.log(postContent);
             if (!postContent) {
               this.isPage = false;
               return;
@@ -269,7 +267,6 @@ export class PostComponent implements OnInit, OnDestroy {
           ...selectedCategory.postCreatedAtList,
           newPost.createdAt,
         ];
-        console.log(newPost);
 
         Promise.all([
           this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent),

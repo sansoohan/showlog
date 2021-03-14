@@ -15,6 +15,7 @@ const FieldPath = firebase.default.firestore.FieldPath;
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
+
 export class HeaderComponent {
   params: any;
   paramSub?: Subscription;
