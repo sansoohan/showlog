@@ -10,7 +10,7 @@ export class NewPostComponent implements OnInit {
   @Input() isEditingPost?: boolean;
   @Input() isCreatingPost?: boolean;
   @Input() canEdit?: boolean;
-  @Input() blogContents?: Array<BlogContent>;
+  @Input() blogContent?: BlogContent;
 
   constructor() { }
 

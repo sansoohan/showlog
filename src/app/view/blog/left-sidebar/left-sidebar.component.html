@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="sideNav" *ngIf="blogContents">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="sideNav" *ngIf="blogContent">
   <!-- Collapse button -->
   <div class="fixed-top">
     <button
@@ -39,7 +39,7 @@
     <ul class="navbar-nav blog-navbar" *ngIf="!isEditingPost">
       <div class="nav-item">
         <app-modules-directory
-          [nodes]="blogContents[0].categoryMap || []"
+          [nodes]="blogContent.categoryMap || []"
           [canEdit]="canEdit"
           (selectCategory)="handleSelectCategory($event)"
           (editCategory)="handleEditCategory($event)"

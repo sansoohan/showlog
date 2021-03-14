@@ -21,25 +21,4 @@ export class TalkService extends CommonService {
   ) {
     super(authService, firestore, storage);
   }
-
-  getTalkContentsObserver(params: any): Observable<TalkContent[]>|undefined {
-    const queryUserName = params?.userName;
-    if (!queryUserName) {
-      return;
-    }
-    return this.firestore
-    .collection<TalkContent>('talks', ref => ref
-    .where(new FieldPath('userName'), '==', queryUserName))
-    .valueChanges();
-  }
-
-  getRoomsObserver(talkId: string): Observable<RoomContent[]>|undefined {
-    if (!talkId){
-      return;
-    }
-
-    return this.firestore
-    .collection<TalkContent>('talks').doc(talkId)
-    .collection<RoomContent>('rooms').valueChanges();
-  }
 }

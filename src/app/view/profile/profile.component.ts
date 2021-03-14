@@ -12,6 +12,9 @@ import { ToastHelper } from 'src/app/helper/toast.helper';
 import { BlogService } from 'src/app/services/blog.service';
 import { TalkService } from 'src/app/services/talk.service';
 import { UserNameValidationError } from './about/about.component';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
+import * as firebase from 'firebase/app';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
   selector: 'app-profile',
@@ -19,7 +22,7 @@ import { UserNameValidationError } from './about/about.component';
   styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-  profileContentsObserver?: Observable<ProfileContent[]>|null = null;
+  profileContentsObserver?: Observable<ProfileContent[]>;
   profileContents?: ProfileContent[];
   userNameValidationError?: UserNameValidationError;
   paramSub: Subscription;
@@ -45,7 +48,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.params = params;
-      this.profileContentsObserver = this.profileService.getProfileContentsObserver(params);
+      this.profileContentsObserver = this.profileService.select<ProfileContent>(
+        `profiles`,
+        {
+          where: [{
+            fieldPath: new FieldPath('userName'),
+            operator: '==',
+            value: params?.userName,
+          }]
+        } as CollectionSelect
+      );
       this.profileSub = this.profileContentsObserver?.subscribe((profileContents) => {
         this.profileContents = profileContents;
 

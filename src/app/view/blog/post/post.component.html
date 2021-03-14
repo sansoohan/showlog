@@ -8,13 +8,13 @@
   <app-blog-left-sidebar
     [isEditingPost]="isEditingPost"
     [canEdit]="canEdit"
-    [blogContents]="blogContents"
+    [blogContent]="blogContent"
     [imageContents]="imageContents"
     (clickStartUploadPostImageSrc)="handleClickStartUploadPostImageSrc()"
     (clickEditPostImage)="handleClickEditPostImage($event)"
   ></app-blog-left-sidebar>
   <div class="blog-post">
-    <form *ngIf="postContentsForm" [formGroup]="postContentsForm">
+    <form *ngIf="postContentForm" [formGroup]="postContentForm">
       <section class="post-section">
         <div *ngIf="isCreatingPost">
           <Button
@@ -56,7 +56,7 @@
             <Button
               class="btn btn-sm btn-warning ms-auto"
               *ngIf="authService.isSignedIn() && !isEditingPost"
-              (click)="routerHelper.goToBlogCategoryNewPost(params,postContentsForm.value.categoryId)"
+              (click)="routerHelper.goToBlogCategoryNewPost(params,postContentForm.value.categoryId)"
             >Create New Post</Button>
           </div>
         </div>
@@ -66,20 +66,20 @@
             <div class="col-9">
               <span
                 class="post-show-title-col blog-link"
-                (click)="routerHelper.goToBlogPost(params,postContentsForm.controls.id.value)"
+                (click)="routerHelper.goToBlogPost(params,postContentForm.controls.id.value)"
               >
-                {{postContentsForm.controls.postTitle.value}}
+                {{postContentForm.controls.postTitle.value}}
               </span>
               <span>| </span>
               <span
                 class="post-show-title-category-col blog-link"
                 style="font-size: 0.8rem;"
-                (click)="routerHelper.goToBlogCategory(params,postContentsForm.controls.categoryId.value)"
-              >{{getCategoryTitle(postContentsForm.controls.categoryId.value)}}</span>
+                (click)="routerHelper.goToBlogCategory(params,postContentForm.controls.categoryId.value)"
+              >{{getCategoryTitle(postContentForm.controls.categoryId.value)}}</span>
             </div>
             <div class="col-3">
               <div class="post-show-title-date">
-                {{dataTransferHelper.numberToDateString(postContentsForm.controls.createdAt.value)}}
+                {{dataTransferHelper.numberToDateString(postContentForm.controls.createdAt.value)}}
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@
                 emoji
                 lineNumbers
                 ngPreserveWhitespaces
-                data={{dataTransferHelper.markDownPreprocess(postContentsForm.controls.postMarkdown.value)}}
+                data={{dataTransferHelper.markDownPreprocess(postContentForm.controls.postMarkdown.value)}}
               >
               </markdown>
             </div>
@@ -135,14 +135,14 @@
           <div class="post-edit-preview-col">
             <div
               class="post-edit-title-col post-link"
-            >{{postContentsForm.controls.postTitle.value}}</div>
+            >{{postContentForm.controls.postTitle.value}}</div>
 
             <div class="post-edit-content-col">
               <markdown
                 emoji
                 lineNumbers
                 ngPreserveWhitespaces
-                data={{dataTransferHelper.markDownPreprocess(postContentsForm.controls.postMarkdown.value)}}
+                data={{dataTransferHelper.markDownPreprocess(postContentForm.controls.postMarkdown.value)}}
               >
               </markdown>
             </div>
@@ -154,6 +154,6 @@
   <app-comment
     *ngIf="params?.postId"
     [isEditingPost]="isEditingPost"
-    [blogContents]="blogContents"
+    [blogContent]="blogContent"
   ></app-comment>
 </div>

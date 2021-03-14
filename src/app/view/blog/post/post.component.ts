@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
-import { CategoryContent } from '../category/category.content';
 import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
@@ -34,18 +33,17 @@ export class PostComponent implements OnInit, OnDestroy {
     private formHelper: FormHelper,
     private imageStorage: ImageStorage,
   ) {
+    this.isPage = true;
     this.paramSub = this.route.params.subscribe(params => {
     });
     this.queryParamSub = this.route.queryParams.subscribe(queryParams => {
     });
-
-    this.isPage = true;
   }
 
   @Input()
-  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>|undefined) {
-    if (!blogContents || blogContents.length === 0) {
+  get blogContent(): BlogContent|undefined { return this._blogContent; }
+  set blogContent(blogContent: BlogContent|undefined) {
+    if (!blogContent) {
       return;
     }
 
@@ -56,13 +54,13 @@ export class PostComponent implements OnInit, OnDestroy {
         this.isEditingPost = this.isCreatingPost;
 
         this.params = params;
-        this.postContents = [new PostContent()];
-        this.postContents[0].id = this.blogService.newId();
-        this.postId = this.params.postId || this.postContents[0].id;
-        this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
+        this.postContent = new PostContent();
+        this.postContent.id = this.blogService.newId();
+        this.postId = this.params.postId || this.postContent.id;
+        this.postContentForm = this.formHelper.buildFormRecursively(this.postContent);
 
-        this._blogContents = blogContents;
-        this.blogId = blogContents[0].id;
+        this._blogContent = blogContent;
+        this.blogId = blogContent.id;
 
         this.imageContentsObserver = this.imageStorage.getImageContentsObserver(
           `blogs/${this.blogId}/posts/${this.postId}/images`
@@ -72,20 +70,17 @@ export class PostComponent implements OnInit, OnDestroy {
         });
 
         if (!this.isCreatingPost) {
-          this.postContentsObserver = this.blogService.getPostContentsObserver({
-            params: {
-              postId: this.postId,
-              blogId: this.blogId,
-            }
-          }, this.blogId);
-          this.postContentsSub = this.postContentsObserver?.subscribe(postContents => {
-            this.postContents = postContents;
-            if (postContents.length === 0) {
+          this.postContentObserver = this.blogService.observe<PostContent>(
+            `blogs/${this.blogId}/posts/${this.postId}`
+          );
+          this.postContentSub = this.postContentObserver?.subscribe(postContent => {
+            if (!postContent) {
               this.isPage = false;
               return;
             }
-            this.postContents[0].postMarkdown = this.postContents[0]?.postMarkdown.replace(/\\n/g, '\n');
-            this.postContentsForm = this.formHelper.buildFormRecursively(this.postContents[0]);
+            this.postContent = postContent;
+            this.postContent.postMarkdown = postContent.postMarkdown.replace(/\\n/g, '\n');
+            this.postContentForm = this.formHelper.buildFormRecursively(this.postContent);
           });
         }
         this.isLoading = false;
@@ -98,19 +93,14 @@ export class PostComponent implements OnInit, OnDestroy {
   @Input() canEdit?: boolean;
   @Input() isCreatingPost?: boolean;
 
-  // categoryContentsObserver: Observable<CategoryContent[]>;
-  // categoryContents: CategoryContent[];
-  // categoryContentsSub: Subscription;
-  // categoryContentsForm: any;
-
   imageContentsObserver?: Observable<ImageContent[]>;
   imageContents?: ImageContent[];
   imageContentsSub?: Subscription;
 
-  postContentsObserver?: Observable<PostContent[]>;
-  postContents?: PostContent[];
-  postContentsSub?: Subscription;
-  postContentsForm: any;
+  postContentObserver?: Observable<PostContent|undefined>;
+  postContent?: PostContent;
+  postContentSub?: Subscription;
+  postContentForm: any;
   hasNullPostTitleError = false;
 
   postId = '';
@@ -123,16 +113,15 @@ export class PostComponent implements OnInit, OnDestroy {
   paramSub: Subscription;
   queryParams: any;
   params: any;
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
-  private _blogContents?: Array<BlogContent>;
+  // tslint:disable-next-line: variable-name
+  private _blogContent?: BlogContent;
 
   public files: NgxFileDropEntry[] = [];
 
   async updateRemovedImage(): Promise<void> {
-    const inputString = this.postContentsForm.controls.postMarkdown.value;
+    const inputString: string = this.postContentForm.controls.postMarkdown.value;
     for (const postImageContent of this.imageContents || []) {
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
+      const imageTagAttributesList: Array<Array<string>> = [...inputString.matchAll(/(<img (.+?)\/>)/g)];
       const imageTagAttributes = imageTagAttributesList.map((tagAttribute) => {
         const imageTagAttribute: ImageContent = new ImageContent();
         tagAttribute[2].split(' ').filter(Boolean).forEach((a) => {
@@ -148,8 +137,7 @@ export class PostComponent implements OnInit, OnDestroy {
         `images/${postImageContent.id}`,
       ].join('/');
 
-      // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-      let isImage: boolean = false;
+      let isImage = false;
       for (const tagAttribute of imageTagAttributes) {
         isImage = tagAttribute?.attributes.id === postImageContent.id;
         if (isImage) {
@@ -190,10 +178,10 @@ export class PostComponent implements OnInit, OnDestroy {
           const endPosition = this.postTextArea?.nativeElement.selectionEnd;
           // Check if you've selected text
           if (startPosition === endPosition) {
-            const markDownAddedImage = this.postContentsForm.controls.postMarkdown.value.slice(0, startPosition)
+            const markDownAddedImage = this.postContentForm.controls.postMarkdown.value.slice(0, startPosition)
               + this.imageHelper.getImageString(postImageContent)
-              + this.postContentsForm.controls.postMarkdown.value.slice(startPosition);
-            this.postContentsForm.controls.postMarkdown.setValue(markDownAddedImage);
+              + this.postContentForm.controls.postMarkdown.value.slice(startPosition);
+            this.postContentForm.controls.postMarkdown.setValue(markDownAddedImage);
           }
         };
       }
@@ -209,9 +197,9 @@ export class PostComponent implements OnInit, OnDestroy {
       `posts/${this.postId}`,
       `images/${postImageContent.id}`,
     ].join('/');
-    let inputString = this.postContentsForm.controls.postMarkdown.value;
+    let inputString = this.postContentForm.controls.postMarkdown.value;
     // eslint-disable-next-line @typescript-eslint/dot-notation
-    const imageTagAttributesList: Array<Array<string>> = [...inputString['matchAll'](/(<img (.+?)\/>)/g)];
+    const imageTagAttributesList: Array<Array<string>> = [...inputString.matchAll(/(<img (.+?)\/>)/g)];
     const imageTag = imageTagAttributesList.find((tagAttribute) => {
       const imageTagAttribute: ImageContent = new ImageContent();
       tagAttribute[2].split(' ').filter(Boolean).forEach((a) => {
@@ -233,19 +221,18 @@ export class PostComponent implements OnInit, OnDestroy {
         imageTagString,
         this.imageHelper.getImageString(postImageContent),
       );
-      this.postContentsForm.controls.postMarkdown.setValue(inputString);
+      this.postContentForm.controls.postMarkdown.setValue(inputString);
       await this.blogService.update(path, postImageContent);
     } else if (result.dismiss === Swal.DismissReason.cancel) {
       inputString = inputString.replace(imageTagString, '');
-      this.postContentsForm.controls.postMarkdown.setValue(inputString);
+      this.postContentForm.controls.postMarkdown.setValue(inputString);
       await this.imageStorage.delete(path);
       await this.blogService.delete(path, {});
     }
   }
 
   getCategoryTitle(categoryId: string): string {
-    const [blogContent] = this.blogContents || [];
-    const [category] = this.blogService.getCategory(categoryId, blogContent.categoryMap);
+    const [category] = this.blogService.getCategory(categoryId, this.blogContent?.categoryMap);
     return category?.name;
   }
 
@@ -258,59 +245,69 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   getPostMarkdownLines(): number {
-    return this.postContentsForm?.controls?.postMarkdown?.value?.match(/\n/g)?.length + 2 || 3;
+    return this.postContentForm?.controls?.postMarkdown?.value?.match(/\n/g)?.length + 2 || 3;
   }
 
   async handleClickEditPostCreateUpdate(): Promise<void> {
+    if (this.isEditingPost){
+      this.hasNullPostTitleError = false;
+      if (!this.postContentForm.value.postTitle){
+        this.hasNullPostTitleError = true;
+        return;
+      }
+
+      const newPost = this.postContentForm.value;
+      newPost.categoryId = this.params.categoryId;
+      newPost.createdAt = Number(new Date());
+      const [selectedCategory] = this.blogService.getCategory(
+        newPost.categoryId, this.blogContent?.categoryMap
+      ) || [];
+      if (selectedCategory) {
+        selectedCategory.postCreatedAtList = [
+          ...selectedCategory.postCreatedAtList,
+          newPost.createdAt,
+        ];
+
+        Promise.all([
+          this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent),
+          this.blogService.set(`blogs/${this.blogContent?.id}/posts/${newPost.id}`, newPost),
+          this.updateRemovedImage(),
+        ]).then(() => {
+          this.toastHelper.showSuccess('Post Update', 'Success!');
+          setTimeout(() => {
+            this.routerHelper.goToBlogPost(this.params, newPost.id);
+          }, 500);
+        }).catch(e => {
+          this.toastHelper.showWarning('Post Update Failed.', e);
+        });
+      }
+    }
   }
 
-  // async handleClickEditPostCreateUpdate(): Promise<void> {
-  //   if (this.isEditingPost){
-  //     this.hasNullPostTitleError = false;
-  //     if (!this.postContentsForm.value.postTitle){
-  //       this.hasNullPostTitleError = true;
-  //       return;
-  //     }
-
-  //     const newPost = this.postContentsForm.value;
-  //     newPost.categoryId = this.params.categoryId;
-  //     newPost.createdAt = Number(new Date());
-  //     const selectedCategory: CategoryContent|undefined = this.categoryContents.find((categoryContent) =>
-  //       categoryContent.id === newPost.categoryId
-  //     );
-  //     if (selectedCategory) {
-  //       selectedCategory.postCreatedAtList = [
-  //         ...selectedCategory.postCreatedAtList,
-  //         newPost.createdAt,
-  //       ];
-  //       this.blogService.update(
-  //         `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
-  //         selectedCategory
-  //       ).then(async () => {
-  //         await this.blogService.set(`blogs/${this.blogContents[0].id}/posts/${newPost.id}`, newPost);
-  //         await this.updateRemovedImage();
-  //         this.toastHelper.showSuccess('Post Update', 'Success!');
-  //         this.routerHelper.goToBlogPost(this.params, newPost.id);
-  //       })
-  //       .catch(e => {
-  //         this.toastHelper.showWarning('Post Update Failed.', e);
-  //       });
-  //     }
-  //   }
-  // }
-
   handleClickEditPostCreateCancel(): void {
+    const newPost = this.postContentForm.value;
+    this.blogService.delete(
+      `blogs/${this.blogContent?.id}/posts/${newPost.id}`, {
+        parentKeyName: null,
+        collectionPath: `blogs/${this.blogContent?.id}/posts`,
+        childrenStorage: ['images'],
+        children: [{
+          parentKeyName: 'postId',
+          collectionPath: `blogs/${this.blogContent?.id}/comments`,
+          children: []
+        }]
+      }
+    );
     this.routerHelper.goToBlogCategory(this.params, this.params.categoryId);
   }
 
   async handleClickEditPostUpdate(): Promise<void> {
     if (this.isEditingPost){
       await this.updateRemovedImage();
-      const [blogContent] = this.blogContents || [];
       this.blogService
       .update(
-        `blogs/${blogContent.id}/posts/${this.postContentsForm.value.id}`,
-        this.postContentsForm.value
+        `blogs/${this.blogContent?.id}/posts/${this.postContentForm.value.id}`,
+        this.postContentForm.value
       )
       .then(() => {
         this.toastHelper.showSuccess('Post Update', 'Success!');
@@ -323,53 +320,45 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   async handleClickEditPostDelete(): Promise<void> {
+    this.toastHelper.askYesNo('Remove Post', 'Are you sure?').then((result) => {
+      if (result.value) {
+        this.isLoading = true;
+        const targetCreatedAt = this.postContentForm.value.createdAt;
+
+        const [selectedCategory] = this.blogService.getCategory(
+          this.postContent?.categoryId, this.blogContent?.categoryMap
+        ) || [];
+
+        if (selectedCategory) {
+          selectedCategory.postCreatedAtList = selectedCategory.postCreatedAtList
+            .filter((createdAt) => createdAt !== targetCreatedAt);
+
+          Promise.all([
+            this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent),
+            this.blogService.delete(
+              `blogs/${this.blogContent?.id}/posts/${this.postContentForm.value.id}`, {
+                parentKeyName: null,
+                collectionPath: `blogs/${this.blogContent?.id}/posts`,
+                childrenStorage: ['images'],
+                children: [{
+                  parentKeyName: 'postId',
+                  collectionPath: `blogs/${this.blogContent?.id}/comments`,
+                  children: []
+                }]
+              }
+            )
+          ]).then(() => {
+            this.toastHelper.showSuccess('Post Delete', 'OK');
+            this.routerHelper.goToBlogCategory(this.params, this.postContentForm.value.categoryId);
+          }).catch(e => {
+            this.toastHelper.showWarning('Post Delete Failed.', e);
+          });
+        }
+      }
+      else if (result.dismiss === Swal.DismissReason.cancel) {
+      }
+    });
   }
-  // async handleClickEditPostDelete(): Promise<void> {
-  //   this.toastHelper.askYesNo('Remove Post', 'Are you sure?').then((result) => {
-  //     if (result.value) {
-  //       this.isLoading = true;
-  //       const targetCreatedAt = this.postContentsForm.value.createdAt;
-
-  //       const selectedCategory: CategoryContent = this.categoryContents.find((categoryContent) =>
-  //         categoryContent.id === this.postContentsForm.value.categoryId
-  //       );
-
-  //       if (selectedCategory) {
-  //         selectedCategory.postCreatedAtList = selectedCategory.postCreatedAtList
-  //           .filter((createdAt) => createdAt !== targetCreatedAt);
-  //         this.blogService.update(
-  //           `blogs/${this.blogContents[0].id}/categories/${selectedCategory.id}`,
-  //           selectedCategory
-  //         ).then(() => {
-  //           this.blogService.delete(
-  //             `blogs/${this.blogContents[0].id}/posts/${this.postContentsForm.value.id}`, {
-  //               parentKeyName: null,
-  //               collectionPath: `blogs/${this.blogContents[0].id}/posts`,
-  //               childrenStorage: ['images'],
-  //               children: [{
-  //                 parentKeyName: 'postId',
-  //                 collectionPath: `blogs/${this.blogContents[0].id}/comments`,
-  //                 children: []
-  //               }]
-  //             }
-  //           )
-  //           .then(() => {
-  //             this.toastHelper.showSuccess('Post Delete', 'OK');
-  //             this.routerHelper.goToBlogCategory(this.params, this.postContentsForm.value.categoryId);
-  //           })
-  //           .catch(e => {
-  //             this.toastHelper.showWarning('Post Delete Failed.', e);
-  //           });
-  //         })
-  //         .catch(e => {
-  //           this.toastHelper.showWarning('Post Delete Failed.', e);
-  //         });
-  //       }
-  //     }
-  //     else if (result.dismiss === Swal.DismissReason.cancel) {
-  //     }
-  //   });
-  // }
 
   public dropped(files: NgxFileDropEntry[]): void {
     this.files = files;
@@ -404,8 +393,7 @@ export class PostComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
-    this.postContentsSub?.unsubscribe();
-    // this.categoryContentsSub?.unsubscribe();
+    this.postContentSub?.unsubscribe();
     this.imageContentsSub?.unsubscribe();
   }
 }

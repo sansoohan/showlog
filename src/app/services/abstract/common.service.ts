@@ -4,8 +4,27 @@ import { AuthService } from '../auth.service';
 import * as firebase from 'firebase/app';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { CommonStorage } from 'src/app/storages/abstract/common.storage';
+import { Observable } from 'rxjs';
 
 const FieldPath = firebase.default.firestore.FieldPath;
+
+
+export interface CollectionSelect {
+  where: Array<CollectionWhere>;
+  orderBy: Array<CollectionOrderBy>;
+  limit: number;
+}
+
+interface CollectionWhere {
+  fieldPath?: firebase.default.firestore.FieldPath;
+  operator?: any;
+  value?: any;
+}
+
+interface CollectionOrderBy {
+  fieldPath: firebase.default.firestore.FieldPath;
+  direction: string;
+}
 
 export interface CascadeDeleteOption {
   parentKeyName?: string|null;
@@ -31,6 +50,36 @@ export abstract class CommonService {
     this.firestore = firestore;
     this.storage = storage;
     this.commonStorage = new CommonStorage(storage);
+  }
+  select<T>(path: string, clause?: CollectionSelect): Observable<T[]> {
+    return this.firestore
+    .collection<T>(path, ref => {
+      let nextRef: any = ref;
+
+      for (const where of clause?.where || []) {
+        nextRef = nextRef.where(
+          where.fieldPath,
+          where.operator,
+          where.value,
+        );
+      }
+      for (const orderBy of clause?.orderBy || []) {
+        nextRef = nextRef.orderBy(
+          orderBy.fieldPath,
+          orderBy.direction,
+        );
+      }
+      if (clause?.limit) {
+        nextRef.limit(clause.limit);
+      }
+
+      return nextRef;
+    }
+    ).valueChanges();
+  }
+  observe<T>(path: string): Observable<T|undefined> {
+    console.log(path);
+    return this.firestore.doc<T>(path).valueChanges();
   }
   async update(path: string, content: any): Promise<void> {
     return this.firestore.doc(path).update(JSON.parse(JSON.stringify(content)));

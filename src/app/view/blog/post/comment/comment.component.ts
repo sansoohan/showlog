@@ -11,6 +11,9 @@ import { ToastHelper } from 'src/app/helper/toast.helper';
 import Swal from 'sweetalert2';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { AuthService } from 'src/app/services/auth.service';
+import * as firebase from 'firebase/app';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
   selector: 'app-comment',
@@ -53,18 +56,27 @@ export class CommentComponent implements OnInit, OnDestroy {
 
   @Input() isEditingPost?: boolean;
   @Input()
-  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>|undefined) {
+  get blogContent(): BlogContent|undefined { return this._blogContent; }
+  set blogContent(blogContent: BlogContent|undefined) {
     this.isPage = true;
-    if (!blogContents || blogContents.length === 0){
+    if (!blogContent){
       this.isPage = false;
       return;
     }
-    this._blogContents = blogContents;
-    this.blogId = blogContents[0].id;
+    this._blogContent = blogContent;
+    this.blogId = blogContent.id;
 
-    this.commentContentsObserver =
-      this.blogService.getCommentContentsObserver(this.blogId, this.params.postId);
+    this.commentContentsObserver = this.blogService.select(
+      `blogs/${this.blogId}/comments`,
+      {
+        where: [{
+          fieldPath: new FieldPath('postId'),
+          operator: '==',
+          value: this.params.postId,
+        }]
+      } as CollectionSelect
+    );
+
     this.commentContentsSub = this.commentContentsObserver?.subscribe(commentContents => {
       this.commentContents = commentContents;
       if (commentContents.length === 0) {
@@ -80,8 +92,8 @@ export class CommentComponent implements OnInit, OnDestroy {
       this.isShowingComment = true;
     });
   }
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
-  private _blogContents?: Array<BlogContent>;
+  // tslint:disable-next-line: variable-name
+  private _blogContent?: BlogContent;
 
   isOwner(commentOwnerId: string): boolean {
     if (!this.authService.isSignedIn()){
@@ -127,7 +139,7 @@ export class CommentComponent implements OnInit, OnDestroy {
 
     this.creatingCommentForm = this.formHelper.buildFormRecursively(newComment);
     this.blogService
-    .create(`blogs/${this.blogContents?.[0].id}/comments`, newComment)
+    .create(`blogs/${this.blogContent?.id}/comments`, newComment)
     .then(() => {
       this.toastHelper.showSuccess('Comment Update', 'Success!');
       this.isCreatingComment = false;
@@ -158,7 +170,7 @@ export class CommentComponent implements OnInit, OnDestroy {
 
       this.blogService
       .update(
-        `blogs/${this.blogContents?.[0].id}/comments/${commentForm.value.id}`,
+        `blogs/${this.blogContent?.id}/comments/${commentForm.value.id}`,
         commentForm.value
       )
       .then(() => {
@@ -176,7 +188,7 @@ export class CommentComponent implements OnInit, OnDestroy {
     this.toastHelper.askYesNo('Remove Profile Category', 'Are you sure?').then((result) => {
       if (result.value && commentContent.value.id) {
         this.blogService.delete(
-          `blogs/${this.blogContents?.[0].id}/comments/${commentContent.value.id}`,
+          `blogs/${this.blogContent?.id}/comments/${commentContent.value.id}`,
           {}
         )
         .then(() => {

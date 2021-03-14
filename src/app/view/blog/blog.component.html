@@ -12,16 +12,16 @@
     *ngIf="params.postId"
     [isCreatingPost]="false"
     [canEdit]="canEdit"
-    [blogContents]="blogContents"
+    [blogContent]="blogContent"
   ></app-blog-post>
   <app-blog-category
     *ngIf="params.categoryId"
     [canEdit]="canEdit"
-    [blogContents]="blogContents"
+    [blogContent]="blogContent"
   ></app-blog-category>
   <app-blog-prologue
     *ngIf="!params.postId && !params.categoryId"
     [canEdit]="canEdit"
-    [blogContents]="blogContents"
+    [blogContent]="blogContent"
   ></app-blog-prologue>
 </div>

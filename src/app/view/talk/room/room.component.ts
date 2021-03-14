@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import * as firebase from 'firebase';
 import { RoomContent } from './room.content';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
 
 @Component({
   selector: 'app-talk-room',
@@ -42,7 +43,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   @ViewChild ('localVideoGroup') public localVideoGroup?: ElementRef;
   @ViewChild ('remoteVideoGroup') public remoteVideoGroup?: ElementRef;
 
-  roomsObserver?: Observable<RoomContent[]>;
+  roomContentsObserver?: Observable<RoomContent[]>;
   roomContents?: Array<RoomContent>;
   isHorizontalVideo?: boolean;
   localCanvasInterval?: any;
@@ -83,8 +84,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   @Input()
-  get talkContents(): Array<TalkContent>|undefined { return this._talkContents; }
-  set talkContents(talkContents: Array<TalkContent>|undefined) {
+  get talkContent(): TalkContent|undefined { return this._talkContent; }
+  set talkContent(talkContent: TalkContent|undefined) {
     this.isPage = true;
     this.isLoading = true;
     this.isLocalVideoOn = true;
@@ -98,7 +99,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.isFullScreen = false;
     this.isShowingLocalControl = false;
     this.isShowingRemoteControl = false;
-    this._talkContents = talkContents;
+    this._talkContent = talkContent;
     this.localCanvasZoom = 1;
     this.sessionStorage = window.sessionStorage;
     this.mediaContraints = {
@@ -142,13 +143,16 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
 
     this.paramSub = this.route.params.subscribe(params => {
-      if (!talkContents || talkContents.length === 0) {
+      if (!talkContent) {
         this.isPage = false;
         return;
       }
 
-      this.roomsObserver = this.talkService.getRoomsObserver(talkContents[0].id);
-      this.roomSub = this.roomsObserver?.subscribe(async (roomContents) => {
+      this.roomContentsObserver = this.talkService.select<RoomContent>(
+        `talks/${talkContent.id}/rooms`,
+        {} as CollectionSelect
+      );
+      this.roomSub = this.roomContentsObserver?.subscribe(async (roomContents) => {
         this.roomContents = roomContents;
 
         // Run on First Rendering
@@ -193,7 +197,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
   // tslint:disable-next-line: variable-name
-  _talkContents?: Array<TalkContent>;
+  _talkContent?: TalkContent;
 
   setMediaStatus(stream: MediaStream, mediaType: string, status: boolean): void {
     if (mediaType === 'Audio') {
@@ -287,7 +291,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   handleClickCreateRoom(): void {
     this.firestore
-    .collection('talks').doc(this.talkContents?.[0].id)
+    .collection('talks').doc(this.talkContent?.id)
     .collection('rooms').add({}).then(async (roomDoc) => {
       await roomDoc.update({
         id: roomDoc.id,
@@ -308,7 +312,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.isInRoom = true;
     this.isCaller = isCaller;
     const roomDoc: AngularFirestoreDocument<RoomContent> = this.firestore
-    .collection<TalkContent>('talks').doc(this.talkContents?.[0].id)
+    .collection<TalkContent>('talks').doc(this.talkContent?.id)
     .collection<RoomContent>('rooms').doc(`${roomId}`);
     const roomRef = roomDoc.ref;
     // eslint-disable-next-line no-console
@@ -417,7 +421,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       return;
     }
     this.talkService.delete(
-      `talks/${this.talkContents?.[0].id}/rooms/${roomId}`, {});
+      `talks/${this.talkContent?.id}/rooms/${roomId}`, {});
   }
 
   collectIceCandidates(
@@ -454,7 +458,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     const navi: any = navigator;
     this.mediaDevices = navigator.mediaDevices ||
     ((navi.mozGetUserMedia || navi.webkitGetUserMedia) ? {
-      // eslint-disable-next-line
+      // tslint:disable-next-line: typedef
       getUserMedia(c: any) {
         return new Promise((y, n) => {
           (navi.mozGetUserMedia ||
@@ -500,7 +504,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   async onDisconnect(roomId: string, isCaller: boolean, data: any): Promise<void[]> {
     const removePromise = [];
     const roomDoc = this.firestore
-    .collection('talks').doc(this.talkContents?.[0].id)
+    .collection('talks').doc(this.talkContent?.id)
     .collection('rooms').doc(roomId);
 
     roomDoc.collection(

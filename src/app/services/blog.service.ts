@@ -29,38 +29,6 @@ export class BlogService extends CommonService {
     super(authService, firestore, storage);
   }
 
-  getBlogContentsObserver(params: any): Observable<BlogContent[]>|undefined {
-    const queryUserName = params?.userName;
-    if (!queryUserName) {
-      return;
-    }
-    return this.firestore
-    .collection<BlogContent>('blogs', ref => ref
-    .where(new FieldPath('userName'), '==', queryUserName))
-    .valueChanges();
-  }
-
-  getPostContentsObserver(params: any, blogId: string): Observable<PostContent[]>|undefined {
-    const postId = params?.postId;
-    if (!blogId || !postId){
-      return;
-    }
-    return this.firestore
-      .collection<BlogContent>('blogs').doc(blogId)
-      .collection<PostContent>('posts', ref => ref.where('id', '==', postId))
-      .valueChanges();
-  }
-
-  getProloguePostListObserver(blogId: string): Observable<PostContent[]>|undefined {
-    if (!blogId){
-      return;
-    }
-    return this.firestore
-      .collection<BlogContent>('blogs').doc(blogId)
-      .collection<PostContent>('posts', ref => ref.orderBy('createdAt', 'desc').limit(10))
-      .valueChanges();
-  }
-
   getCategory(categoryId?: string, categories?: Array<CategoryContent>): Array<CategoryContent> {
     let results: Array<CategoryContent> = [];
     for (const category of categories || []) {
@@ -70,27 +38,7 @@ export class BlogService extends CommonService {
         results = [...this.getCategory(categoryId, category.children), ...results];
       }
     }
-
     return results.filter(Boolean);
-  }
-
-  getCategoryPostListObserver(
-    blogId?: string,
-    postCreatedAtList?: Array<number>,
-  ): Observable<PostContent[]>|undefined {
-    if (!blogId){
-      return;
-    }
-    if (postCreatedAtList?.length === 0) {
-      postCreatedAtList = [-1];
-    }
-
-    return this.firestore
-      .collection<BlogContent>('blogs').doc(blogId)
-      .collection<PostContent>('posts', ref => ref
-        .where('createdAt', 'in', postCreatedAtList)
-      )
-      .valueChanges();
   }
 
   removeCategoryPosts(
@@ -123,31 +71,5 @@ export class BlogService extends CommonService {
         `blogs/${blogId}/posts/${postDoc.id}`, cascade
       );
     }));
-  }
-
-  getCommentContentsObserver(
-    blogId: string,
-    postId: string,
-  ): Observable<CommentContent[]>|undefined {
-    if (!blogId || !postId) {
-      return;
-    }
-    return this.firestore
-    .collection<BlogContent>('blogs').doc(blogId)
-    .collection<CommentContent>('comments', ref => ref.where('postId', '==', postId))
-    .valueChanges();
-  }
-
-  getCategoryDeepCount(
-    categoryContent: any,
-    categoryContents: Array<any>,
-  ): number {
-    if (!categoryContent?.value.parentId) {
-      return 1;
-    }
-    const parentCategory = categoryContents
-    .find((category) => category.value.id === categoryContent.value.parentId);
-
-    return 1 + this.getCategoryDeepCount(parentCategory, categoryContents);
   }
 }

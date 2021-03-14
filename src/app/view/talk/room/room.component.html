@@ -19,7 +19,7 @@
     (clickStopScreenSharing)="handleClickStopScreenSharing()"
   ></app-talk-left-sidebar>
   <app-talk-room-entrance
-    *ngIf="!isInRoom && talkContents"
+    *ngIf="!isInRoom && talkContent"
     [roomContents]="roomContents"
     (clickRemoveRoom)="handleClickRemoveRoom($event)"
   ></app-talk-room-entrance>

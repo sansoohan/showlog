@@ -9,6 +9,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
+import * as firebase from 'firebase/app';
+import { CommentContent } from '../post/comment/comment.content';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
   selector: 'app-blog-category',
@@ -60,25 +64,25 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   @Input()
-  get blogContents(): Array<BlogContent>|undefined { return this._blogContents; }
-  set blogContents(blogContents: Array<BlogContent>|undefined) {
-    if (!blogContents || blogContents.length === 0){
+  get blogContent(): BlogContent|undefined { return this._blogContent; }
+  set blogContent(blogContent: BlogContent|undefined) {
+    if (!blogContent){
       return;
     }
     this.isPage = true;
     this.isLoading = true;
-    this._blogContents = blogContents;
-    this.blogId = blogContents[0].id;
+    this._blogContent = blogContent;
+    this.blogId = blogContent.id;
 
     if (this.params.categoryId){
-      const [category] = this.blogService.getCategory(this.params.categoryId, blogContents[0].categoryMap);
+      const [category] = this.blogService.getCategory(this.params.categoryId, blogContent.categoryMap);
       this.selectedCategory = category;
       this.postCreatedAtList = this.getCategoryPageList(category);
       this.changePageList(null);
     }
   }
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
-  private _blogContents?: Array<BlogContent>;
+  // tslint:disable-next-line: variable-name
+  private _blogContent?: BlogContent;
 
   getCategoryPageList(category: CategoryContent): Array<number> {
     let results: Array<number> = [...(category?.postCreatedAtList || [])];
@@ -89,7 +93,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   getCategoryTitle(categoryId: string): string {
-    const [category] = this.blogService.getCategory(categoryId, this.blogContents?.[0].categoryMap);
+    const [category] = this.blogService.getCategory(categoryId, this.blogContent?.categoryMap);
     return category.name;
   }
 
@@ -104,8 +108,15 @@ export class CategoryComponent implements OnInit, OnDestroy {
     const selectedCreatedAtList = this.postCreatedAtList
     .sort((createdA, createdB) => createdA - createdB)
     .splice(this.pageIndex * this.pageSize, this.pageSize);
-    this.postListObserver = this.blogService.getCategoryPostListObserver(
-      this.blogId, selectedCreatedAtList
+    this.postListObserver = this.blogService.select<PostContent>(
+      `blogs/${this.blogId}/posts`,
+      {
+        where: [{
+          fieldPath: new FieldPath('createdAt'),
+          operator: 'in',
+          value: selectedCreatedAtList,
+        }]
+      } as CollectionSelect
     );
     this.postListSub = this.postListObserver?.subscribe(postList => {
       this.postList = postList;

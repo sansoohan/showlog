@@ -7,6 +7,9 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
+import * as firebase from 'firebase/app';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
   selector: 'app-blog',
@@ -15,8 +18,8 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 })
 export class BlogComponent implements OnInit, OnDestroy {
   blogContentsObserver?: Observable<BlogContent[]>;
-  blogContents?: BlogContent[];
-  blogContensSub?: Subscription;
+  blogContentsSub?: Subscription;
+  blogContent?: BlogContent;
 
   blogId?: string;
   isPage = true;
@@ -35,24 +38,29 @@ export class BlogComponent implements OnInit, OnDestroy {
   ) {
     this.paramSub = this.route.params.subscribe(params => {
       this.params = params;
-
-      this.blogContentsObserver = this.blogService.getBlogContentsObserver(params);
-      this.blogContensSub = this.blogContentsObserver?.subscribe(async (blogContents) => {
-        this.blogContents = blogContents;
-        if (this.blogContents.length === 0) {
+      this.blogContentsObserver = this.blogService.select<BlogContent>(
+        `blogs`,
+        {
+          where: [{
+            fieldPath: new FieldPath('userName'),
+            operator: '==',
+            value: params.userName,
+          }]
+        } as CollectionSelect
+      );
+      this.blogContentsSub = this.blogContentsObserver?.subscribe((blogContents) => {
+        if (!blogContents || blogContents.length === 0) {
           const currentUser = this.authService.getCurrentUser();
           this.routerHelper.goToBlogPrologue({userName: currentUser?.userName || 'sansoohan'});
           return;
         }
 
-        this.canEdit = false;
+        this.blogContent = blogContents[0];
         this.authService.getAuthUser().then((authUser) => {
           this.canEdit = authUser?.uid === blogContents[0].ownerId;
         });
-
-        this.blogId = this.blogContents[0].id;
       });
-      if (!this.blogContensSub) {
+      if (!this.blogContentsSub) {
         const currentUser = this.authService.getCurrentUser();
         this.routerHelper.goToBlogPrologue({userName: currentUser?.userName || 'sansoohan'});
       }
@@ -64,7 +72,7 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.blogContensSub?.unsubscribe();
+    this.blogContentsSub?.unsubscribe();
     this.paramSub?.unsubscribe();
   }
 }

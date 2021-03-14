@@ -5,6 +5,9 @@ import { Subscription, Observable } from 'rxjs';
 import { TalkContent } from './talk.content';
 import { AuthService } from 'src/app/services/auth.service';
 import { RouterHelper } from 'src/app/helper/router.helper';
+import * as firebase from 'firebase/app';
+import { CollectionSelect } from 'src/app/services/abstract/common.service';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
   selector: 'app-talk',
@@ -17,8 +20,8 @@ export class TalkComponent implements OnInit, OnDestroy {
   params: any;
 
   talkContentsObserver?: Observable<TalkContent[]>;
-  talkContents: Array<TalkContent> = [];
-  talkSub?: Subscription;
+  talkContentsSub?: Subscription;
+  talkContent?: TalkContent;
 
   isPage = true;
   isLoading = true;
@@ -31,18 +34,28 @@ export class TalkComponent implements OnInit, OnDestroy {
   ) {
     this.paramSub = this.route.params.subscribe((params) => {
       this.params = params;
-      this.talkContentsObserver = this.talkService.getTalkContentsObserver(params);
-      this.talkSub = this.talkContentsObserver?.subscribe(async (talkContents) => {
-        this.talkContents = talkContents;
-        if (this.talkContents.length === 0) {
+      this.talkContentsObserver = this.talkService.select<TalkContent>(
+        `talks`,
+        {
+          where: [{
+            fieldPath: new FieldPath('userName'),
+            operator: '==',
+            value: params?.userName,
+          }]
+        } as CollectionSelect
+      );
+      this.talkContentsSub = this.talkContentsObserver?.subscribe((talkContents) => {
+        if (talkContents.length === 0) {
           this.isPage = false;
           const currentUser = this.authService.getCurrentUser();
           this.routerHelper.goToTalk({userName: currentUser?.userName || 'sansoohan'});
           return;
         }
+
+        this.talkContent = talkContents[0];
         this.isLoading = false;
       });
-      if (!this.talkSub) {
+      if (!this.talkContentsSub) {
         const currentUser = this.authService.getCurrentUser();
         this.routerHelper.goToTalk({userName: currentUser?.userName || 'sansoohan'});
         return;
@@ -55,6 +68,6 @@ export class TalkComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
-    this.talkSub?.unsubscribe();
+    this.talkContentsSub?.unsubscribe();
   }
 }
