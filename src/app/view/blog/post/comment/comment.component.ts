@@ -37,6 +37,7 @@ export class CommentComponent implements OnInit, OnDestroy {
   isPage = true;
   isLoading = true;
   isCreatingComment = false;
+  editingCommentId?: string;
   isShowingComment = false;
   hasNullCommentContentError = false;
 
@@ -129,12 +130,12 @@ export class CommentComponent implements OnInit, OnDestroy {
     });
   }
 
-  clickCommentEdit(): void {
-    this.isCreatingComment = true
+  clickCommentEdit(commentId: string): void {
+    this.editingCommentId = commentId
   }
 
   clickCommentEditCancel(): void {
-    this.isCreatingComment = false
+    delete this.editingCommentId;
   }
 
   handleClickEditCommentUpdate(commentForm: any): void {
@@ -160,10 +161,17 @@ export class CommentComponent implements OnInit, OnDestroy {
   handleClickEditCommentDelete(commentContent: any): void {
     this.toastHelper.askYesNo('Remove Profile Category', 'Are you sure?').then((result) => {
       if (result.value && commentContent.value.id) {
-        this.blogService.delete(
-          `blogs/${this.postContent?.id}/comments/${commentContent.value.id}`,
-          {}
-        )
+        const commentCreatedAtList = this.commentCreatedAtList
+        .filter((createdAt) => commentContent.value.createdAt !== createdAt)
+        Promise.all([
+          this.blogService.delete(
+            `blogs/${this.postContent?.blogId}/comments/${commentContent.value.id}`,
+            {}
+          ),
+          this.blogService.update(`blogs/${this.postContent?.blogId}/posts/${this.postContent?.id}`, {
+            commentCreatedAtList
+          }),    
+        ])
         .then(() => {
           this.toastHelper.showSuccess('Comment Delete', 'OK');
         })
