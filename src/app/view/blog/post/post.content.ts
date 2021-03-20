@@ -1,5 +1,6 @@
 export class PostContent {
   id: string;
+  blogId: string;
   categoryId: string;
   commentCount: number;
   createdAt: number;
@@ -9,8 +10,10 @@ export class PostContent {
   selectedIamgeIndex?: number|null;
   likes: any;
   ownerId: string;
+  commentCreatedAtList: Array<number>;
   constructor(
     id: string = '',
+    blogId: string = '',
     categoryId: string = '',
     commentCount: number = 0,
     createdAt: number = Number(new Date()),
@@ -20,8 +23,10 @@ export class PostContent {
     selectedIamgeIndex: number|null = null,
     likes: any = [],
     ownerId: string = '',
+    commentCreatedAtList: Array<number> = [],
   ){
     this.id = id;
+    this.blogId = blogId;
     this.categoryId = categoryId;
     this.commentCount = commentCount;
     this.createdAt = createdAt,
@@ -31,5 +36,6 @@ export class PostContent {
     this.selectedIamgeIndex = selectedIamgeIndex;
     this.likes = likes;
     this.ownerId = ownerId;
+    this.commentCreatedAtList = commentCreatedAtList;
   }
 }

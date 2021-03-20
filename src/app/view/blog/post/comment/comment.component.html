@@ -1,11 +1,10 @@
 <div *ngIf="!isEditingPost">
   <div class="blog-comment">
     <section
-      *ngIf="isEditingCommentIds"
       class="p-3 d-flex flex-column"
       id="comment-edit"
-      [class.comment-section]="isEditingCommentIds.length===0"
-      [class.comment-editing-section]="isEditingCommentIds.length!==0"
+      [class.comment-section]="!isEditingComment"
+      [class.comment-editing-section]="isEditingComment"
     >
       <div class="d-flex">
         <div>Comments</div>
@@ -25,76 +24,43 @@
             *ngFor="let commentContent of commentContentsForm.controls.commentContents.controls; let i=index"
           >
             <div
-              *ngIf="!commentContent.controls.hidden.value"
               class="comment-list-row"
               [formGroupName]="i"
             >
               <div
                 class="container-flex comment-list-col-container"
-                [style]="'margin-left:'+commentContent.controls.deepCount.value*1.5+'rem'"
               >
                 <div class="row">
                   <span class="col-7">{{commentContent.value.userName}}
                     <span
-                      *ngIf="!isEditingCommentIds.includes(commentContent.value.id) && isOwner(commentContent.value.ownerId)"
+                      *ngIf="!isEditingComment"
                       (click)="clickCommentEdit(commentContent.value.id)"
                       class="btn btn-warning comment-edit-button"
                     >Edit</span>
                     <span
-                      *ngIf="isEditingCommentIds.includes(commentContent.value.id)"
+                      *ngIf="isEditingComment"
                       (click)="handleClickEditCommentUpdate(commentContent)"
                       class="btn btn-outline-secondary comment-edit-button"
                     >Update</span>
                     <span
-                      *ngIf="isEditingCommentIds.includes(commentContent.value.id)"
+                      *ngIf="isEditingComment"
                       (click)="clickCommentEditCancel(commentContent.value.id)"
                       class="btn btn-outline-secondary comment-edit-button"
                     >Cancel</span>
                     <span
-                      *ngIf="isEditingCommentIds.includes(commentContent.value.id)"
+                      *ngIf="isEditingComment"
                       (click)="handleClickEditCommentDelete(commentContent)"
                       class="btn btn-outline-secondary comment-edit-button"
                     >Delete</span>
                   </span>
-                  <span class="col-4" style="text-align: right;">
+                  <span class="col-5" style="text-align: right;">
                     {{dataTransferHelper.numberToDateString(commentContent.value.createdAt)}}
                   </span>
-                  
-                  <div
-                    class="blog-link col-1"
-                  >
-                    <span>
-                      <i
-                        *ngIf="isCreatingComment && creatingCommentParentId===commentContent.value.id"
-                        class="fa fa-commenting-o"
-                      ></i>
-                      <i
-                        *ngIf="!isCreatingComment && commentContent.controls.deepCount.value < 4"
-                        class="fa fa-commenting"
-                        (click)="clickCommnetNew(commentContent.value.id)"
-                      ></i>
-                    </span>
-
-                    <span
-                      class="ms-3"
-                      *ngIf="formHelper.countChildContent(commentContentsForm.controls.commentContents['controls'],commentContent)!==0"
-                      (click)="formHelper.toggleCollapse(commentContentsForm.controls.commentContents['controls'],commentContent)"
-                    >
-                      <i
-                        *ngIf="commentContent.controls.collapsed.value"
-                        class="fa fa-caret-down"
-                      ></i>
-                      <i
-                        *ngIf="!commentContent.controls.collapsed.value"
-                        class="fa fa-caret-up"
-                      ></i>  
-                    </span>
-                  </div>
                 </div>
                 <div class="row">
                   <div class="col-12 comment-list-col">
                     <markdown
-                      *ngIf=!isEditingCommentIds.includes(commentContent.value.id)
+                      *ngIf="!isEditingComment"
                       emoji
                       lineNumbers
                       ngPreserveWhitespaces
@@ -103,7 +69,7 @@
                   </div>
 
                   <div
-                    *ngIf="isEditingCommentIds.includes(commentContent.value.id)"
+                    *ngIf="isEditingComment"
                     class="d-flex flex-wrap"
                     style="width:100%"
                   >
@@ -139,16 +105,16 @@
         </div>
       </form>
 
-      <!-- <div class="d-flex">
+      <div class="d-flex">
         <mat-paginator
-          class="mx-auto pt-3 post-page-list"
-          [length]="postCreatedAtList.length"
+          class="mx-auto pt-3 comment-page-list"
+          [length]="commentCreatedAtList.length"
           [pageIndex]="pageIndex"
           [pageSize]="pageSize"
           [pageSizeOptions]="[1, 5, 10, 20]"
           (page)="changePageList($event)">
         </mat-paginator>
-      </div> -->
+      </div>
     </section>
   </div>
 
