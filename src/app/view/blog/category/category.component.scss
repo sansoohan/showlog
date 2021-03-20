@@ -69,4 +69,27 @@ section.category-section {
 .post-page-list {
   background-color: #333333;
   color: white;
+  background-color: #333333;
+  color: white;
+  ::ng-deep .mat-paginator-page-size-select {
+    width: 2rem !important
+  }
+  ::ng-deep .mat-form-field-appearance-legacy .mat-form-field-underline {
+    background-color: #333333;
+  }
+  ::ng-deep .mat-select-value {
+    color: white;
+  }
+  ::ng-deep .mat-select-arrow {
+    color: white;
+  }
+  ::ng-deep .mat-option{
+    padding: 0!important;
+  }
+  ::ng-deep .mat-option-text {
+    text-align: right;
+  }
+  ::ng-deep .mat-paginator-icon {
+    color: white;
+  }
 }

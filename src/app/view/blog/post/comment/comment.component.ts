@@ -5,7 +5,6 @@ import { CommentContent } from './comment.content';
 import { BlogService } from 'src/app/services/blog.service';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
-import { BlogContent } from '../../blog.content';
 import { ProfileService } from 'src/app/services/profile.service';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import Swal from 'sweetalert2';
@@ -13,10 +12,11 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 import { AuthService } from 'src/app/services/auth.service';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
 import * as firebase from 'firebase/app';
+import { PostContent } from '../post.content';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
-  selector: 'app-comment',
+  selector: 'app-post-comment',
   templateUrl: './comment.component.html',
   styleUrls: ['../../blog.component.scss', './comment.component.scss']
 })
@@ -24,7 +24,7 @@ export class CommentComponent implements OnInit, OnDestroy {
   creatingCommentParentId?: string;
   creatingCommentForm: any;
   blogId?: string;
-  isEditingCommentIds?: Array<string>;
+  postId?: string;
 
   commentContents?: CommentContent[];
   commentContentsSub?: Subscription;
@@ -35,13 +35,14 @@ export class CommentComponent implements OnInit, OnDestroy {
   params: any;
 
   isPage = true;
+  isLoading = true;
   isCreatingComment = false;
   isShowingComment = false;
   hasNullCommentContentError = false;
 
   pageSize = 0;
   pageIndex = 0;
-  postCreatedAtList: Array<number> = [];
+  commentCreatedAtList: Array<number> = [];
 
   constructor(
     public profileService: ProfileService,
@@ -60,41 +61,22 @@ export class CommentComponent implements OnInit, OnDestroy {
 
   @Input() isEditingPost?: boolean;
   @Input()
-  get blogContent(): BlogContent|undefined { return this._blogContent; }
-  set blogContent(blogContent: BlogContent|undefined) {
-    this.isEditingCommentIds = [];
-    this.isPage = true;
-    if (!blogContent){
+  get postContent(): PostContent|undefined { return this._postContent; }
+  set postContent(postContent: PostContent|undefined) {
+    if (!postContent){
       this.isPage = false;
       return;
     }
-    this._blogContent = blogContent;
-    this.blogId = blogContent.id;
-
-    this.commentContentsObserver = this.blogService.select(
-      `blogs/${this.blogId}/comments`,
-      {
-        where: [{
-          fieldPath: new FieldPath('postId'),
-          operator: '==',
-          value: this.params.postId,
-        }]
-      } as CollectionSelect
-    );
-
-    this.commentContentsSub = this.commentContentsObserver?.subscribe(commentContents => {
-      this.commentContents = commentContents;
-      // this.commentContents.sort((categoryA: CommentContent, categoryB: CommentContent) =>
-      //   categoryA.commentNumber - categoryB.commentNumber);
-
-      this.commentContents.sort(this.dataTransferHelper.compareByOrderRecursively);
-      this.commentContentsForm =
-        this.formHelper.buildFormRecursively({commentContents: this.commentContents});
-      this.isShowingComment = true;
-    });
+    this.isPage = true;
+    this.isLoading = true;
+    this._postContent = postContent;
+    this.postId = postContent.id;
+    this.blogId = postContent.blogId;
+    this.commentCreatedAtList = postContent.commentCreatedAtList;
+    this.changePageList(null);
   }
   // tslint:disable-next-line: variable-name
-  private _blogContent?: BlogContent;
+  private _postContent?: PostContent;
 
   isOwner(commentOwnerId: string): boolean {
     if (!this.authService.isSignedIn()){
@@ -125,22 +107,17 @@ export class CommentComponent implements OnInit, OnDestroy {
     const newComment = this.creatingCommentForm.value;
     newComment.postId = this.params.postId;
     newComment.userName = this.authService.getCurrentUser()?.userName;
-    const parentComment: CommentContent|undefined = this.commentContents?.find(
-      (commentContent) => commentContent.id === this.creatingCommentParentId);
 
     const createdAt = Number(new Date());
     newComment.createdAt = createdAt;
-    newComment.order = [createdAt];
-
-    if (parentComment) {
-      newComment.parentId = parentComment.id;
-      newComment.deepCount = parentComment?.deepCount || 0 + 1;
-      newComment.order = [...parentComment.order, createdAt];
-    }
 
     this.creatingCommentForm = this.formHelper.buildFormRecursively(newComment);
-    this.blogService
-    .create(`blogs/${this.blogContent?.id}/comments`, newComment)
+    Promise.all([
+      this.blogService.create(`blogs/${this.postContent?.blogId}/comments`, newComment),
+      this.blogService.update(`blogs/${this.postContent?.blogId}/posts/${this.postContent?.id}`, {
+        commentCreatedAtList: [...this.commentCreatedAtList, createdAt]
+      }),
+    ])
     .then(() => {
       this.toastHelper.showSuccess('Comment Update', 'Success!');
       this.isCreatingComment = false;
@@ -152,44 +129,39 @@ export class CommentComponent implements OnInit, OnDestroy {
     });
   }
 
-  clickCommentEdit(commentId: string): void {
-    this.isEditingCommentIds?.push(commentId);
+  clickCommentEdit(): void {
+    this.isCreatingComment = true
   }
 
-  clickCommentEditCancel(commentId: string): void {
-    this.isEditingCommentIds = this.isEditingCommentIds || []
-    .filter((isEditingCommentId) => isEditingCommentId !== commentId);
+  clickCommentEditCancel(): void {
+    this.isCreatingComment = false
   }
 
   handleClickEditCommentUpdate(commentForm: any): void {
-    if (this.isEditingCommentIds?.includes(commentForm.value.id)){
-      this.hasNullCommentContentError = false;
-      if (!commentForm.value.commentMarkdown){
-        this.hasNullCommentContentError = true;
-        return;
-      }
-
-      this.blogService
-      .update(
-        `blogs/${this.blogContent?.id}/comments/${commentForm.value.id}`,
-        commentForm.value
-      )
-      .then(() => {
-        this.toastHelper.showSuccess('Comment Update', 'Success!');
-        this.isEditingCommentIds = this.isEditingCommentIds || []
-        .filter((isEditingCommentId) => isEditingCommentId !== commentForm.value.id);
-      })
-      .catch(e => {
-        this.toastHelper.showWarning('Comment Update Failed.', e);
-      });
+    this.hasNullCommentContentError = false;
+    if (!commentForm.value.commentMarkdown){
+      this.hasNullCommentContentError = true;
+      return;
     }
+
+    this.blogService
+    .update(
+      `blogs/${this.postContent?.id}/comments/${commentForm.value.id}`,
+      commentForm.value
+    )
+    .then(() => {
+      this.toastHelper.showSuccess('Comment Update', 'Success!');
+    })
+    .catch(e => {
+      this.toastHelper.showWarning('Comment Update Failed.', e);
+    });
   }
 
   handleClickEditCommentDelete(commentContent: any): void {
     this.toastHelper.askYesNo('Remove Profile Category', 'Are you sure?').then((result) => {
       if (result.value && commentContent.value.id) {
         this.blogService.delete(
-          `blogs/${this.blogContent?.id}/comments/${commentContent.value.id}`,
+          `blogs/${this.postContent?.id}/comments/${commentContent.value.id}`,
           {}
         )
         .then(() => {
@@ -201,6 +173,37 @@ export class CommentComponent implements OnInit, OnDestroy {
       }
       else if (result.dismiss === Swal.DismissReason.cancel) {
       }
+    });
+  }
+
+  changePageList(event: any): void {
+    this.pageIndex = 0;
+    this.pageSize = 20;
+    if (event) {
+      this.pageIndex = event.pageIndex;
+      this.pageSize = event.pageSize;
+    }
+
+    if (this.commentContentsSub) {
+      this.commentContentsSub.unsubscribe();
+    }
+    const selectedCreatedAtList = Object.assign([], this.commentCreatedAtList)
+    .sort((createdA, createdB) => createdA - createdB)
+    .splice(this.pageIndex * this.pageSize, this.pageSize);
+    this.commentContentsObserver = this.blogService.select<CommentContent>(
+      `blogs/${this.blogId}/comments`,
+      {
+        where: [{
+          fieldPath: new FieldPath('createdAt'),
+          operator: 'in',
+          value: selectedCreatedAtList.length ? selectedCreatedAtList : [-1],
+        }]
+      } as CollectionSelect
+    );
+    this.commentContentsSub = this.commentContentsObserver?.subscribe(commentContents => {
+      console.log(commentContents);
+      this.commentContents = commentContents;
+      this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
     });
   }
 

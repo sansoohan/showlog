@@ -56,6 +56,7 @@ export class PostComponent implements OnInit, OnDestroy {
         this.params = params;
         this.postContent = new PostContent();
         this.postContent.id = this.blogService.newId();
+        this.postContent.blogId = blogContent.id;
         this.postId = this.params.postId || this.postContent.id;
         this.postContentForm = this.formHelper.buildFormRecursively(this.postContent);
 

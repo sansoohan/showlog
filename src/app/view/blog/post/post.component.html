@@ -151,9 +151,9 @@
       </section>
     </form>
   </div>
-  <app-comment
+  <app-post-comment
     *ngIf="params?.postId"
     [isEditingPost]="isEditingPost"
-    [blogContent]="blogContent"
-  ></app-comment>
+    [postContent]="postContent"
+  ></app-post-comment>
 </div>
