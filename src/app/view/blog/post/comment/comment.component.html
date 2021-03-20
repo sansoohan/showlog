@@ -3,8 +3,8 @@
     <section
       class="p-3 d-flex flex-column"
       id="comment-edit"
-      [class.comment-section]="!isEditingComment"
-      [class.comment-editing-section]="isEditingComment"
+      [class.comment-section]="!editingCommentId"
+      [class.comment-editing-section]="editingCommentId"
     >
       <div class="d-flex">
         <div>Comments</div>
@@ -33,22 +33,22 @@
                 <div class="row">
                   <span class="col-7">{{commentContent.value.userName}}
                     <span
-                      *ngIf="!isEditingComment"
+                      *ngIf="!editingCommentId && isOwner(commentContent.value.ownerId)"
                       (click)="clickCommentEdit(commentContent.value.id)"
                       class="btn btn-warning comment-edit-button"
                     >Edit</span>
                     <span
-                      *ngIf="isEditingComment"
+                      *ngIf="editingCommentId === commentContent.value.id"
                       (click)="handleClickEditCommentUpdate(commentContent)"
                       class="btn btn-outline-secondary comment-edit-button"
                     >Update</span>
                     <span
-                      *ngIf="isEditingComment"
-                      (click)="clickCommentEditCancel(commentContent.value.id)"
+                      *ngIf="editingCommentId === commentContent.value.id"
+                      (click)="clickCommentEditCancel()"
                       class="btn btn-outline-secondary comment-edit-button"
                     >Cancel</span>
                     <span
-                      *ngIf="isEditingComment"
+                      *ngIf="editingCommentId === commentContent.value.id"
                       (click)="handleClickEditCommentDelete(commentContent)"
                       class="btn btn-outline-secondary comment-edit-button"
                     >Delete</span>
@@ -60,7 +60,7 @@
                 <div class="row">
                   <div class="col-12 comment-list-col">
                     <markdown
-                      *ngIf="!isEditingComment"
+                      *ngIf="editingCommentId !== commentContent.value.id"
                       emoji
                       lineNumbers
                       ngPreserveWhitespaces
@@ -69,7 +69,7 @@
                   </div>
 
                   <div
-                    *ngIf="isEditingComment"
+                    *ngIf="editingCommentId === commentContent.value.id"
                     class="d-flex flex-wrap"
                     style="width:100%"
                   >
