@@ -5,5 +5,13 @@
   <div *ngIf="isLoading">
     <app-modules-page-loading></app-modules-page-loading>
   </div>
-  <app-talk-room [talkContent]="talkContent"></app-talk-room>
+  <app-talk-entrance
+    *ngIf="!params.roomId"
+    [talkContent]="talkContent"
+  >
+  </app-talk-entrance>
+  <app-talk-room
+    *ngIf="params.roomId"
+    [talkContent]="talkContent"
+  ></app-talk-room>
 </div>

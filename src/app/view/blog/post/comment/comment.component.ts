@@ -131,7 +131,7 @@ export class CommentComponent implements OnInit, OnDestroy {
   }
 
   clickCommentEdit(commentId: string): void {
-    this.editingCommentId = commentId
+    this.editingCommentId = commentId;
   }
 
   clickCommentEditCancel(): void {
@@ -162,7 +162,7 @@ export class CommentComponent implements OnInit, OnDestroy {
     this.toastHelper.askYesNo('Remove Profile Category', 'Are you sure?').then((result) => {
       if (result.value && commentContent.value.id) {
         const commentCreatedAtList = this.commentCreatedAtList
-        .filter((createdAt) => commentContent.value.createdAt !== createdAt)
+        .filter((createdAt) => commentContent.value.createdAt !== createdAt);
         Promise.all([
           this.blogService.delete(
             `blogs/${this.postContent?.blogId}/comments/${commentContent.value.id}`,
@@ -170,7 +170,7 @@ export class CommentComponent implements OnInit, OnDestroy {
           ),
           this.blogService.update(`blogs/${this.postContent?.blogId}/posts/${this.postContent?.id}`, {
             commentCreatedAtList
-          }),    
+          }),
         ])
         .then(() => {
           this.toastHelper.showSuccess('Comment Delete', 'OK');

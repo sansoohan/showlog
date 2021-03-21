@@ -16,7 +16,7 @@ export class DataTransferHelper {
   }
 
   range = (start: number, stop: number, step: number) =>
-    Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+    Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step))
 
   markDownPreprocess(input: string): string {
     const lines = input.split('\n');
@@ -260,19 +260,5 @@ export class DataTransferHelper {
       }
     }
     return content;
-  }
-
-  compareByOrderRecursively(contentA: any, contentB: any): number {
-    const recursiveDeepCount: number = Math.max(contentA.order.length, contentB.order.length);
-    for (let orderIndex = 0; orderIndex < recursiveDeepCount; orderIndex++) {
-      const orderA: number = contentA.order[orderIndex] || 0;
-      const orderB: number = contentB.order[orderIndex] || 0;
-      if (orderA === orderB && orderA !== 0) {
-        continue;
-      }
-
-      return orderA - orderB;
-    }
-    return 0;
   }
 }

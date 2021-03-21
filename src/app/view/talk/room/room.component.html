@@ -5,81 +5,46 @@
   *ngIf="isPage"
   class="talks"
 >
-  <div *ngIf="isLoading">
-    <app-modules-page-loading></app-modules-page-loading>
-  </div>
   <app-talk-left-sidebar
-    [isInRoom]="isInRoom"
+    [isInRoom]="true"
     [isMobileDevice]="isMobileDevice"
     [isScreenSharing]="isScreenSharing"
-    (clickCreateRoom)="handleClickCreateRoom()"
-    (clickJoinRoom)="handleClickJoinRoom()"
+    [isRecording]="isRecording"
+    [isFinishedRecording]="isFinishedRecording"
     (clickLeaveRoom)="handleClickLeaveRoom()"
     (clickStartScreenSharing)="handleClickStartScreenSharing()"
     (clickStopScreenSharing)="handleClickStopScreenSharing()"
+    (clickStartRecording)="handleClickStartRecording()"
+    (clickStopRecording)="handleClickStopRecording()"
+    (clickDownloadRecord)="handleClickDownloadRecord()"
   ></app-talk-left-sidebar>
-  <app-talk-room-entrance
-    *ngIf="!isInRoom && talkContent"
-    [roomContents]="roomContents"
-    (clickRemoveRoom)="handleClickRemoveRoom($event)"
-  ></app-talk-room-entrance>
   <div class="copy-to-clipboard">
     <button
       *ngIf="isInRoom"
       class="btn btn-secondary"
       (click)="copyToClipboard(createdRoomUrl)"
-    >Copy to Clipboard</button>
+    >Copy Room URL</button>
     <span
       *ngIf="isCopiedToClipboard"
-      class="badge bg-success ms-2"
-    ><i class="fa fa-check-circle me-1"></i>Copied!</span>
-    <p>{{createdRoomUrl}}</p>
+      class="badge badge-success me-2"
+    ><i class="fa fa-check-circle ms-1"></i>Copied!</span>
   </div>
 
-
-  <video
-    id="localVideo"
-    class="hidden-video"
-    #localVideo
-    autoplay
-    playsinline
-  ></video>
-  <div
-    *ngIf="isInRoom"
-    id="videos"
-    #videos
-    [class.horizontal]="isHorizontalVideo"
-  > 
-    <div
-      id="localVideoGroup"
-      #localVideoGroup
-      [class.horizontal]="isHorizontalVideo"
-    >
-      <canvas
-        id="localCanvas"
-        [ngStyle]="{'zoom': localCanvasZoom}"
-        [hidden]="!isMobileDevice"
-        #localCanvas
-      ></canvas>
-      <video
-        id="canvasVideo"
-        #canvasVideo
-        [class.horizontal]="isHorizontalVideo"
-        [class.full-screen-zoom]="isFullScreen"
-        [class.hidden-video]="isMobileDevice"
-      >
-      </video>
-      <span
-        class="container"
-        [class.horizontal]="isHorizontalVideo"
-        [class.full-screen-zoom]="isFullScreen"
-      >
-        <div
-          class="video-button-group"
-          [class.video-button-group-min]="isVideoButtonGroupHeightMininum"
+  <video id="localVideo" #localVideo class="hidden-video" autoplay playsinline></video>
+  <div id="videoBackground" #videoBackground>
+    <div id="videoContainer" #videoContainer>
+      <div id="localVideoGroup" #localVideoGroup class="d-flex">
+        <video id="canvasVideo" #canvasVideo autoplay playsinline 
+          [class.full-screen-zoom]="isFullScreen"
+        ></video>
+        <canvas id="localCanvas" #localCanvas
+          [class.full-screen-zoom]="isFullScreen"
+        ></canvas>
+        <div id="localButtonGroup" #localButtonGroup class="video-button-group"
+          [class.full-screen-zoom]="isFullScreen"
         >
           <button
-            class="btn video-button fa"
+            class="btn video-button fa mt-auto"
             [class.btn-danger]="isLocalVideoOn"
             [class.fa-eye-slash]="isLocalVideoOn"
             [class.btn-secondary]="!isLocalVideoOn"
@@ -87,7 +52,7 @@
             (click)="clickLocalVideoToggle()"
           ></button>
           <button
-            class="btn video-button fa"
+            class="btn video-button fa mt-auto"
             [class.btn-danger]="isLocalAudioOn"
             [class.fa-microphone-slash]="isLocalAudioOn"
             [class.btn-secondary]="!isLocalAudioOn"
@@ -95,65 +60,12 @@
             (click)="clickLocalAudioToggle()"
           ></button>
           <button
-            class="btn btn-secondary video-button fa fa-expand"
+            class="btn btn-secondary video-button fa fa-expand mt-auto"
             [class.fa-compress]="isFullScreen"
             (click)="toggleFullScreen(localVideoGroup)"
           ></button>
         </div>
-      </span>
-    </div>
-
-    <div
-      id="remoteVideoGroup"
-      #remoteVideoGroup
-      [class.horizontal]="isHorizontalVideo"
-    >
-      <video
-        id="remoteVideo"
-        #remoteVideo
-        autoplay
-        playsinline
-        [class.horizontal]="isHorizontalVideo"
-        [class.full-screen-zoom]="isFullScreen"
-      >
-      </video>
-      <span
-        class="container"
-        [class.horizontal]="isHorizontalVideo"
-        [class.full-screen-zoom]="isFullScreen"
-        (click)="isShowingRemoteControl=!isShowingRemoteControl"
-        (mouseenter)="isShowingRemoteControl=true"
-        (mouseleave)="isShowingRemoteControl=false"
-      >
-        <div
-          *ngIf="isShowingRemoteControl && hasRemoteConnection"
-          class="video-button-group"
-          [class.video-button-group-min]="isVideoButtonGroupHeightMininum"
-        >
-          <button
-            class="btn video-button fa"
-            [class.btn-danger]="isRemoteVideoOn"
-            [class.fa-eye-slash]="isRemoteVideoOn"
-            [class.btn-secondary]="!isRemoteVideoOn"
-            [class.fa-eye]="!isRemoteVideoOn"
-            (click)="clickRemoteVideoToggle()"
-          ></button>
-          <button
-            class="btn video-button fa"
-            [class.btn-danger]="isRemoteAudioOn"
-            [class.fa-microphone-slash]="isRemoteAudioOn"
-            [class.btn-secondary]="!isRemoteAudioOn"
-            [class.fa-microphone]="!isRemoteAudioOn"
-            (click)="clickRemoteAudioToggle()"
-          ></button>
-          <button
-            class="btn btn-secondary video-button fa"
-            [class.fa-expand]="!isFullScreen"
-            [class.fa-compress]="isFullScreen"
-            (click)="toggleFullScreen(remoteVideoGroup)"
-          ></button>
-        </div>
-      </span>
+      </div>
     </div>
   </div>
 </div>

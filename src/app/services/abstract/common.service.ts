@@ -124,7 +124,7 @@ export abstract class CommonService {
     return this.firestore.collection(path).add(JSON.parse(JSON.stringify(content)))
     .then(async (collection) => {
       content.id = collection.id;
-      return collection.update(JSON.parse(JSON.stringify(content)));
+      await collection.update(JSON.parse(JSON.stringify(content)));
     });
   }
   newId(): string {

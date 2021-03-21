@@ -108,8 +108,7 @@ export class ToastHelper {
       cancelButtonText: 'Remove Image',
       cancelButtonColor: '#d33',
       inputAttributes: {
-        // eslint-disable-next-line quote-props
-        'accept': 'image/*',
+        accept: 'image/*',
         'aria-label': 'Upload your profile picture'
       }
     });
