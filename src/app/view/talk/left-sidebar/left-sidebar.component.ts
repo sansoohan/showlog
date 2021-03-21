@@ -14,23 +14,28 @@ import { ProfileService } from 'src/app/services/profile.service';
   styleUrls: ['../talk.component.scss', './left-sidebar.component.scss']
 })
 export class LeftSidebarComponent implements OnInit, OnDestroy {
+  // In Entrance
   @Output() clickCreateRoom: EventEmitter<null> = new EventEmitter();
-  @Output() clickJoinRoom: EventEmitter<null> = new EventEmitter();
+
+  // In Room
   @Output() clickLeaveRoom: EventEmitter<null> = new EventEmitter();
   @Output() clickStartScreenSharing: EventEmitter<null> = new EventEmitter();
   @Output() clickStopScreenSharing: EventEmitter<null> = new EventEmitter();
-
+  @Output() clickStartRecording: EventEmitter<null> = new EventEmitter();
+  @Output() clickStopRecording: EventEmitter<null> = new EventEmitter();
+  @Output() clickDownloadRecord: EventEmitter<null> = new EventEmitter();
   @Input() isInRoom?: boolean;
   @Input() isScreenSharing?: boolean;
+  @Input() isRecording?: boolean;
+  @Input() isFinishedRecording?: boolean;
   @Input() isMobileDevice?: boolean;
 
   paramSub: Subscription;
   params: any;
+  isPage?: boolean;
+  isLoading?: boolean;
   talkContent?: TalkContent;
   sessionStorage: Storage;
-
-  isPage = true;
-  isLoading = true;
 
   constructor(
     public profileService: ProfileService,
@@ -51,14 +56,12 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
+  // In Entrance
   handleClickCreateRoom(): void {
     this.clickCreateRoom.emit();
   }
 
-  handleClickJoinRoom(): void {
-    this.clickJoinRoom.emit();
-  }
-
+  // In Room
   handleClickLeaveRoom(): void {
     this.clickLeaveRoom.emit();
   }
@@ -71,11 +74,16 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     this.clickStopScreenSharing.emit();
   }
 
-  clickBackToRoom(): void {
-    const roomId = sessionStorage.getItem('beforeRoomId');
-    this.routerHelper.goToUrl(
-      `${window.location.origin}/#/talk/${this.params.userName}/room/${roomId}`
-    );
+  handleClickStartRecording(): void {
+    this.clickStartRecording.emit();
+  }
+
+  handleClickStopRecording(): void {
+    this.clickStopRecording.emit();
+  }
+
+  handleClickDownloadRecord(): void {
+    this.clickDownloadRecord.emit();
   }
 
   ngOnInit(): void {

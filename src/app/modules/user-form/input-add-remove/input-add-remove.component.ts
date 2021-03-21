@@ -55,7 +55,7 @@ export class InputAddRemoveComponent implements OnInit {
     swalWithBootstrapButtons.fire({
       title: 'Are you sure?',
       // eslint-disable-next-line @typescript-eslint/quotes
-      text: "Remove this data",
+      text: 'Remove this data',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
