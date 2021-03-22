@@ -1,0 +1,63 @@
+<app-talk-left-sidebar
+  [isInRoom]="false"
+  (clickCreateRoom)="handleClickCreateRoom()"
+></app-talk-left-sidebar>
+<div class="talks">
+  <div class="talk-entrance container">
+    <div class="entrance-title-row">
+      <span class="entrance-title-col">Talk Rooms</span>
+    </div>
+    <div class="room-list-top-row">
+      <span class="col-6 room-list-top-col">Join Room</span>
+      <div class="col-2 room-list-top-col d-flex">
+        <span>Status</span>
+      </div>
+      <div class="col-3 room-list-top-col d-flex">
+        <span class="ms-auto">Created</span>
+      </div>
+    </div>
+    <div *ngFor="let roomContent of roomContents; index as i">
+      <div
+        *ngIf="roomContent.id"
+        class="room-list-row"
+      >
+        <div class="room-list-col col-6 d-flex m-auto">
+          <button
+            class="btn btn-sm p-1"
+            [class.btn-outline-warning]="roomContent.broadcastIds?.length < 2"
+            [class.btn-outline-secondary]="roomContent.broadcastIds?.length === 2"
+            [disabled]="roomContent.broadcastIds?.length === 2"
+            (click)="goToRoom(roomContent.id)"
+          >{{roomContent.id}}</button>
+        </div>
+        <div class="room-list-col col-2 d-flex">
+          <span
+            *ngIf="roomContent.broadcastIds?.length === 0"
+            class="badge bg-light text-dark user-in-room my-auto"
+          >Empty</span>
+          <span
+            *ngIf="roomContent.broadcastIds?.length === 1"
+            class="badge bg-success user-in-room my-auto"
+          >Waiting</span>
+          <span
+            *ngIf="roomContent.broadcastIds?.length === 2"
+            class="badge bg-secondary user-in-room my-auto"
+          >Full</span>
+        </div>
+        <div class="room-list-col col-3 d-flex my-auto">
+          <span
+            class="ms-auto"
+          >{{dataTransferHelper.numberToDateString(roomContent.createdAt||0)}}</span>
+        </div>
+        <div class="room-list-col col-1 d-flex my-auto">
+          <span class="ms-auto">
+            <button
+              class="btn btn-sm btn-danger user-in-room"
+              (click)="clickRemoveRoom(roomContent)"
+            ><i class="fa fa-trash"></i></button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,9 +1,23 @@
+.talks {
+  font-family: 'Open Sans', serif;
+  color: white;
+  background-color: #333333;
+}
+
+@media (min-width: 992px) {
+  .talks {
+    padding-left: 17rem;
+  }
+}
+
 .talk-entrance {
   font-family: 'Open Sans', serif;
   padding: 1rem;
   color: white;
   background-color: #333333;
   border-bottom: 1px solid #dee2e6;
+  width: 100%;
+  height: calc(100vh - 56px);
 }
 
 .entrance-title-row {
