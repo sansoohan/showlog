@@ -194,10 +194,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  copyToClipboard(str: string): void{
+  copyToClipboard(str?: string): void{
     this.isCopiedToClipboard = true;
     const el = document.createElement('textarea');
-    el.value = str;
+    el.value = str || '';
     el.setAttribute('readonly', '');
     el.style.position = 'absolute';
     el.style.left = '-9999px';

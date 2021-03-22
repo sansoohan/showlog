@@ -24,7 +24,7 @@
         <div class="room-list-col col-6 d-flex m-auto">
           <button
             class="btn btn-sm p-1"
-            [class.btn-outline-warning]="roomContent.broadcastIds?.length < 2"
+            [class.btn-outline-warning]="roomContent.broadcastIds && roomContent.broadcastIds.length < 2"
             [class.btn-outline-secondary]="roomContent.broadcastIds?.length === 2"
             [disabled]="roomContent.broadcastIds?.length === 2"
             (click)="goToRoom(roomContent.id)"
@@ -58,6 +58,17 @@
           </span>
         </div>
       </div>
+    </div>
+
+    <div class="d-flex">
+      <mat-paginator
+        class="mx-auto pt-3 room-page-list"
+        [length]="roomCreatedAtList.length"
+        [pageIndex]="pageIndex"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[1, 5, 10, 20]"
+        (page)="changePageList($event)">
+      </mat-paginator>
     </div>
   </div>
 </div>
