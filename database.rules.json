@@ -1,10 +1,51 @@
 {
   "rules": {
-    "meeting": {
-      "room": {
-      	".read": true,
-      	".write": true
+    ".read": false,
+    ".write": false,
+
+  	"dev": {
+      "developers": {
+        "talks": {
+          ".read": true,
+          ".write": true
+        }
+			},
+      "teams": {
+        "meetings": {
+          ".read": true,
+          ".write": true
+        }
       }
-    }
+		},
+
+    "stage": {
+      "developers": {
+        "talks": {
+          ".read": true,
+          ".write": true
+        }
+			},
+      "teams": {
+        "meetings": {
+          ".read": true,
+          ".write": true
+        }
+      }
+		},
+
+  	"prod": {
+      "developers": {
+        "talks": {
+          ".read": true,
+          ".write": true
+        }
+			},
+      "teams": {
+        "meetings": {
+          ".read": true,
+          ".write": true
+        }
+      }
+		}
   }
 }

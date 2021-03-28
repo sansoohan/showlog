@@ -130,7 +130,6 @@ export class EntranceComponent implements OnInit, OnDestroy {
       } as CollectionSelect
     );
     this.roomContentsSub = this.roomContentsObserver?.subscribe((roomContents: any) => {
-      console.log(roomContents);
       this.roomContents = roomContents;
     });
   }

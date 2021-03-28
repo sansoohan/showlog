@@ -7,6 +7,7 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 import { ActivatedRoute } from '@angular/router';
 import { TalkContent } from '../talk.content';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import { environment } from 'src/environments/environment';
 
 declare var MediaRecorder: any;
 
@@ -101,7 +102,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.paramSub = this.route.params.subscribe((params) => {
       this.params = params;
       this.talkId = talkContent.id;
-      this.databaseRoot = `talks/${this.talkId}/rooms/`;
+      this.databaseRoot = environment.rootPath + `talks/${this.talkId}/rooms/`;
       this.isPage = true;
       this._talkContent = talkContent;
       this.startMeeting(this.params);

@@ -8,6 +8,7 @@ import { CommentContent } from '../view/blog/post/comment/comment.content';
 import { AuthService } from './auth.service';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { CommonService } from './abstract/common.service';
+import { environment } from 'src/environments/environment';
 import * as firebase from 'firebase/app';
 
 const FieldPath = firebase.default.firestore.FieldPath;
@@ -53,7 +54,7 @@ export class BlogService extends CommonService {
     }
 
     return this.firestore
-    .collection<BlogContent>('blogs').doc(blogId)
+    .collection<BlogContent>(environment.rootPath + 'blogs').doc(blogId)
     .collection<PostContent>('posts', ref => ref
       .where('createdAt', 'in', postCreatedAtList)
     ).get().toPromise().then(posts => posts.forEach(postDoc => {

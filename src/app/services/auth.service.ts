@@ -8,7 +8,7 @@ import { ProfileContent } from '../view/profile/profile.content';
 import { BlogContent } from '../view/blog/blog.content';
 import { TalkContent } from '../view/talk/talk.content';
 import { CategoryContent } from '../view/blog/category/category.content';
-import * as firebase from 'firebase';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -76,7 +76,7 @@ export class AuthService {
       return;
     }
 
-    const profile: any = await this.firestore.doc(`profiles/${event.user.uid}`).get().toPromise();
+    const profile: any = await this.firestore.doc(environment.rootPath + `profiles/${event.user.uid}`).get().toPromise();
     console.log(profile);
     const currentUser = {
       providerData: event.user.providerData,
