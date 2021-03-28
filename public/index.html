@@ -66,6 +66,8 @@
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
         try {
+          window.firestore = firebase.default.firestore()
+
           let app = firebase.app();
           let features = [
             'auth', 

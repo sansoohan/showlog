@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { ToastHelper } from '../helper/toast.helper';
-import { ProfileContent } from '../view/profile/profile.content';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase/app';
 import { CommonService } from './abstract/common.service';

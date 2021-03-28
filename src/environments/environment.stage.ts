@@ -1,6 +1,7 @@
 
 export const environment = {
   production: true,
+  rootPath: 'stage/developers/',
   firebase: {
     apiKey: 'AIzaSyDsi6bLD3hv4ceK43-OMxwaCdqDF9CWMyY',
     authDomain: 'developers-8a830.firebaseapp.com',
@@ -10,5 +11,5 @@ export const environment = {
     messagingSenderId: '494786199163',
     appId: '1:494786199163:web:716334e4456f51d41a2cde',
     measurementId: 'G-4G1YZBBS7G',
-  }
+  },
 };
