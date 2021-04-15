@@ -142,12 +142,12 @@ export class RoomComponent implements OnInit, OnDestroy {
           urls: [
             'stun:stun1.l.google.com:19302',
             'stun:stun2.l.google.com:19302',
-            'stun:socket.sansoohan.ga:443',
+            'stun:socket.showlog.me:443',
           ],
         },
         {
           urls: [
-            'turn:socket.sansoohan.ga:443?transport=udp',
+            'turn:socket.showlog.me:443?transport=udp',
           ],
           username: '1608961376:sansoohan',
           credential: 'kznEtvX/flyC+5+WRpYELPa5Yz0=',
