@@ -19,14 +19,11 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 // Firebase
-import { AngularFireAuthModule, USE_EMULATOR as AUTH_EMULATOR } from '@angular/fire/auth';
 import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 import { AngularFireStorageModule } from '@angular/fire/storage';
-import { AngularFirestoreModule, USE_EMULATOR as FIRESTORE_EMULATOR } from '@angular/fire/firestore';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { NgxAuthFirebaseUIModule } from 'ngx-auth-firebaseui';
 import { environment } from 'src/environments/environment';
-import { USE_EMULATOR as DATABASE_EMULATOR } from '@angular/fire/database';
-import { USE_EMULATOR as FUNCTIONS_EMULATOR } from '@angular/fire/functions';
 
 // ngx module
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
@@ -116,22 +113,6 @@ import { AngularFireModule } from '@angular/fire';
     {
       provide: APP_BASE_HREF,
       useValue: '/',
-    },
-    {
-      provide: AUTH_EMULATOR,
-      useValue: environment.production ? undefined : ['localhost', 4270],
-    },
-    {
-      provide: FIRESTORE_EMULATOR,
-      useValue: environment.production ? undefined : ['localhost', 4220],
-    },
-    {
-      provide: DATABASE_EMULATOR,
-      useValue: environment.production ? undefined : ['localhost', 4240],
-    },
-    {
-      provide: FUNCTIONS_EMULATOR,
-      useValue: environment.production ? undefined : ['localhost', 4230],
     },
   ],
   bootstrap: [AppComponent]
