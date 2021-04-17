@@ -4,7 +4,7 @@
     ".write": false,
 
   	"dev": {
-      "developers": {
+      "showlog": {
         "talks": {
           ".read": true,
           ".write": true
@@ -19,7 +19,7 @@
 		},
 
     "stage": {
-      "developers": {
+      "showlog": {
         "talks": {
           ".read": true,
           ".write": true
@@ -34,7 +34,7 @@
 		},
 
   	"prod": {
-      "developers": {
+      "showlog": {
         "talks": {
           ".read": true,
           ".write": true

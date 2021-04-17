@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "developers": {
+    "showlog": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -24,7 +24,7 @@
               "identicon.js",
               "@agentepsilon/decko"
             ],
-            "outputPath": "dist/developers",
+            "outputPath": "dist/showlog",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -75,18 +75,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "developers:build"
+            "browserTarget": "showlog:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "developers:build:production"
+              "browserTarget": "showlog:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "developers:build"
+            "browserTarget": "showlog:build"
           }
         },
         "test": {
@@ -120,11 +120,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "developer:serve"
+            "devServerTarget": "showlog:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "developer:serve:production"
+              "devServerTarget": "showlog:serve:production"
             }
           }
         },
@@ -147,7 +147,7 @@
         }
       }
     },
-    "developers-staging": {
+    "showlog-staging": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -161,7 +161,7 @@
               "identicon.js",
               "@agentepsilon/decko"
             ],
-            "outputPath": "dist/developers-staging",
+            "outputPath": "dist/showlog-staging",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -212,18 +212,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "developers:build"
+            "browserTarget": "showlog:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "developers:build:production"
+              "browserTarget": "showlog:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "developers:build"
+            "browserTarget": "showlog:build"
           }
         },
         "test": {
@@ -257,11 +257,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "developer:serve"
+            "devServerTarget": "showlog:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "developer:serve:production"
+              "devServerTarget": "showlog:serve:production"
             }
           }
         },
@@ -284,7 +284,7 @@
         }
       }
     },
-    "developers-e2e": {
+    "showlog-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "architect": {
@@ -292,11 +292,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "developers:serve"
+            "devServerTarget": "showlog:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "developers:serve:production"
+              "devServerTarget": "showlog:serve:production"
             }
           }
         },
@@ -312,7 +312,7 @@
       }
     }
   },
-  "defaultProject": "developers",
+  "defaultProject": "showlog",
   "cli": {
     "analytics": "fb6154bc-e9da-49cf-8467-ba44f8a43f07"
   }

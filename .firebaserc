@@ -2,16 +2,16 @@
   "targets": {
     "developers-8a830": {
       "hosting": {
-        "developers": [
-          "developers-8a830"
+        "showlog": [
+          "showlog-7367e"
         ],
-        "developers-staging": [
-          "developers-8a830-staging"
+        "showlog-staging": [
+          "showlog-7367e-stage"
         ]
       }
     }
   },
   "projects": {
-    "default": "developers-8a830"
+    "default": "showlog-7367e"
   }
 }
