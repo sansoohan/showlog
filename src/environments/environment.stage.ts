@@ -1,6 +1,7 @@
 
 export const environment = {
   production: true,
+  emulator: false,
   rootPath: 'stage/showlog/',
   firebase: {
     apiKey: 'AIzaSyDsi6bLD3hv4ceK43-OMxwaCdqDF9CWMyY',
