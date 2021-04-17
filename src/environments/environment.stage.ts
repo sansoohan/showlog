@@ -1,7 +1,7 @@
 
 export const environment = {
   production: true,
-  rootPath: 'stage/developers/',
+  rootPath: 'stage/showlog/',
   firebase: {
     apiKey: 'AIzaSyDsi6bLD3hv4ceK43-OMxwaCdqDF9CWMyY',
     authDomain: 'developers-8a830.firebaseapp.com',

@@ -12,8 +12,8 @@
   },
   "hosting": [
     {
-      "target": "developers",
-      "public": "dist/developers",
+      "target": "showlog",
+      "public": "dist/showlog",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -34,8 +34,8 @@
       }]
     },
     {
-      "target": "developers-staging",
-      "public": "dist/developers-staging",
+      "target": "showlog-staging",
+      "public": "dist/showlog-staging",
       "ignore": [
         "firebase.json",
         "**/.*",
