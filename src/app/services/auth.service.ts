@@ -51,23 +51,23 @@ export class AuthService {
   }
 
   async makeCollectionIfNotExist(uid: string): Promise<void> {
-    const isExists = await this.isExists(`profiles/${uid}`);
+    const isExists = await this.isExists(environment.rootPath + `profiles/${uid}`);
     if (!isExists) {
       const authUser = await this.getAuthUser();
 
       // Init Profile Data
-      await this.set(`profiles/${authUser.uid}`, new ProfileContent());
+      await this.set(environment.rootPath + `profiles/${authUser.uid}`, new ProfileContent());
 
       // Init Profile Data
-      await this.set(`talks/${authUser.uid}`, new TalkContent());
+      await this.set(environment.rootPath + `talks/${authUser.uid}`, new TalkContent());
 
       // Init Blog Data
-      await this.set(`blogs/${authUser.uid}`, new BlogContent());
+      await this.set(environment.rootPath + `blogs/${authUser.uid}`, new BlogContent());
       const newCategoryContent = new CategoryContent();
       newCategoryContent.id = this.newId();
       const newBlogContent = new BlogContent();
       newBlogContent.categoryMap = [newCategoryContent];
-      await this.set(`blogs/${authUser.uid}`, newBlogContent);
+      await this.set(environment.rootPath + `blogs/${authUser.uid}`, newBlogContent);
     }
   }
 
