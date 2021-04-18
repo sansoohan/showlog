@@ -4,4 +4,5 @@ admin.initializeApp({
   databaseURL: "https://developers-8a830.firebaseio.com"
 });
 
-export { showlogTalkRoomMemberCreate, showlogTalkRoomMemberDelete } from './talk/room/room.action';
+export { showlogTalkRoomCreateMember } from './talk/room/createMember';
+export { showlogTalkRoomDeleteMember } from './talk/room/deleteMember';

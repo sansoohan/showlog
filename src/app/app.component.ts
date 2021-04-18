@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { Subscription } from 'rxjs';
 import * as firebase from 'firebase/app';
-window.firebase = firebase
+window.firebase = firebase;
 import { environment } from 'src/environments/environment';
 
 @Component({

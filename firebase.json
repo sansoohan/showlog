@@ -58,29 +58,5 @@
   ],
   "storage": {
     "rules": "storage.rules"
-  },
-  "emulators": {
-    "ui": {
-      "enabled": true,
-      "port": 4210
-    },
-    "firestore": {
-      "port": 4220
-    },
-    "functions": {
-      "port": 4230
-    },
-    "database": {
-      "port": 4240
-    },
-    "pubsub": {
-      "port": 4250
-    },
-    "hosting": {
-      "port": 4260
-    },
-    "auth": {
-      "port": 4270
-    }
   }
 }
