@@ -12,8 +12,8 @@ export const environment = {
     projectId: 'developers-8a830',
     storageBucket: 'developers-8a830.appspot.com',
     messagingSenderId: '494786199163',
-    appId: '1:494786199163:web:716334e4456f51d41a2cde',
-    measurementId: 'G-4G1YZBBS7G',
+    appId: '1:494786199163:web:ae05edd8745969301a2cde',
+    measurementId: 'G-3KS8LEC152'
   }
 };
 

@@ -11,6 +11,8 @@ export class PostContent {
   likes: any;
   ownerId: string;
   commentCreatedAtList: Array<number>;
+  slack: any;
+  postUrl: string;
   constructor(
     id: string = '',
     blogId: string = '',
@@ -24,6 +26,8 @@ export class PostContent {
     likes: any = [],
     ownerId: string = '',
     commentCreatedAtList: Array<number> = [],
+    slack: any = {},
+    postUrl: string = '',
   ){
     this.id = id;
     this.blogId = blogId;
@@ -37,5 +41,7 @@ export class PostContent {
     this.likes = likes;
     this.ownerId = ownerId;
     this.commentCreatedAtList = commentCreatedAtList;
+    this.slack = slack;
+    this.postUrl = postUrl;
   }
 }

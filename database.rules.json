@@ -2,50 +2,47 @@
   "rules": {
     ".read": false,
     ".write": false,
-
-  	"dev": {
+    "dev": {
       "showlog": {
         "talks": {
           ".read": true,
           ".write": true
         }
-			},
+      },
       "teams": {
         "meetings": {
           ".read": true,
           ".write": true
         }
       }
-		},
-
+    },
     "stage": {
       "showlog": {
         "talks": {
           ".read": true,
           ".write": true
         }
-			},
+      },
       "teams": {
         "meetings": {
           ".read": true,
           ".write": true
         }
       }
-		},
-
-  	"prod": {
+    },
+    "prod": {
       "showlog": {
         "talks": {
           ".read": true,
           ".write": true
         }
-			},
+      },
       "teams": {
         "meetings": {
           ".read": true,
           ".write": true
         }
       }
-		}
+    }
   }
 }

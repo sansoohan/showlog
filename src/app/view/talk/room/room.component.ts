@@ -86,9 +86,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.recordType = `${this.supportsRecording('video/mp4') ? 'video/mp4' : 'video/webm;codecs=h264'}`;
     this.paramSub = this.route.params.subscribe((params) => {
       this.params = params;
-      if (params?.roomId) {
-        this.startMeeting(params);
-      }
+      // if (params?.roomId) {
+      //   this.startMeeting(params);
+      // }
     });
   }
 
@@ -1166,6 +1166,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       console.warn('NO tracks');
       return;
     }
+    console.log(tracks);
 
     for (const track of tracks) {
       track.stop();
