@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { AdditaionProfileContent, LargeGroup, SmallGroup, SmallGroupDescription } from './additional-profile.content';
+import { AdditionalProfileContent, LargeGroup, SmallGroup, SmallGroupDescription } from './additional-profile.content';
 
 @Component({
   selector: 'app-profile-additional-profiles',
@@ -7,7 +7,7 @@ import { AdditaionProfileContent, LargeGroup, SmallGroup, SmallGroupDescription 
   styleUrls: ['../profile.component.scss', './additional-profiles.component.scss']
 })
 export class AdditionalProfilesComponent implements OnInit {
-  @Input() additaionProfilesContent?: Array<AdditaionProfileContent>;
+  @Input() additionalProfilesContent?: Array<AdditionalProfileContent>;
   @Input() isEditing?: boolean;
   @Input() profileForm: any;
   public newSmallGroupDescription = new SmallGroupDescription();

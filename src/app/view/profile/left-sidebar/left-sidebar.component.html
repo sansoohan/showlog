@@ -61,14 +61,14 @@
               <a class="nav-link" (click)="routerHelper.scrollToIdElement('interests')">Interests</a>
             </div>
             <div *ngIf="!isEditing">
-              <li *ngFor="let additaionProfileContent of profileForm.value.additaionProfilesContent" class="nav-item">
-                <a class="nav-link" (click)="routerHelper.scrollToIdElement(additaionProfileContent.title)">{{additaionProfileContent.title}}</a>
+              <li *ngFor="let additionalProfileContent of profileForm.value.additionalProfilesContent" class="nav-item">
+                <a class="nav-link" (click)="routerHelper.scrollToIdElement(additionalProfileContent.title)">{{additionalProfileContent.title}}</a>
               </li>  
             </div>
 
             <div *ngIf="isEditing">
-              <div formGroupName="additaionProfilesContent">
-                <div *ngFor="let additaionProfile of additaionProfilesContent.controls; let i=index">
+              <div formGroupName="additionalProfilesContent">
+                <div *ngFor="let additionalProfile of additionalProfilesContent.controls; let i=index">
                   <div class="row" [formGroupName]="i" style="margin: 0;">
                     <div class="col-8">
                       <input type="text" class="form-control form-control-sm" placeholder="Title" formControlName="title">
@@ -83,7 +83,7 @@
                         </button>
                         <button
                           class="btn btn-sm btn-secondary col-6"
-                          (click)="routerHelper.scrollToIdElement(additaionProfile.value.title)"
+                          (click)="routerHelper.scrollToIdElement(additionalProfile.value.title)"
                         >
                           <i class="fa fa-arrow-right"></i>
                         </button>

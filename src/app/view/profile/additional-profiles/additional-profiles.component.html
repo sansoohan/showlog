@@ -1,10 +1,10 @@
 <div *ngIf="!isEditing">
-  <div *ngFor="let additaionProfileContent of additaionProfilesContent">
-    <section class="profile-section p-3 p-lg-5 d-flex flex-column" id="{{additaionProfileContent.title}}">
+  <div *ngFor="let additionalProfileContent of additionalProfilesContent">
+    <section class="profile-section p-3 p-lg-5 d-flex flex-column" id="{{additionalProfileContent.title}}">
       <div class="my-auto">
-        <h2 class="mb-5">{{additaionProfileContent.title}}</h2>
+        <h2 class="mb-5">{{additionalProfileContent.title}}</h2>
 
-        <div *ngFor="let largeGroup of additaionProfileContent.largeGroups" class="profile-item d-flex flex-column flex-md-row mb-1 mb-5">
+        <div *ngFor="let largeGroup of additionalProfileContent.largeGroups" class="profile-item d-flex flex-column flex-md-row mb-1 mb-5">
           <div class="profile-content me-auto">
             <h3 class="mb-0">{{largeGroup.largeGroupName}}</h3>
             <div *ngFor="let smallGroup of largeGroup.smallGroups">
@@ -22,12 +22,12 @@
   </div>
 </div>
 <div *ngIf="isEditing" [formGroup]="profileForm">
-  <div formArrayName='additaionProfilesContent'>
-    <div *ngFor="let additaionProfile of profileForm.controls.additaionProfilesContent.controls; let i=index">
+  <div formArrayName='additionalProfilesContent'>
+    <div *ngFor="let additionalProfile of profileForm.controls.additionalProfilesContent.controls; let i=index">
       <div [formGroupName]="i">
-        <section class="profile-section p-3 p-lg-5 d-flex flex-column" id="{{additaionProfile.value.title}}">
+        <section class="profile-section p-3 p-lg-5 d-flex flex-column" id="{{additionalProfile.value.title}}">
           <div class="my-auto">
-            <h2 class="mb-5">{{additaionProfile.value.title}}</h2>
+            <h2 class="mb-5">{{additionalProfile.value.title}}</h2>
 
             <div class="container">
               <div class="row mb-1">
@@ -42,19 +42,19 @@
 
             <div class="container" formArrayName='largeGroups'>
 
-              <div *ngIf="additaionProfile.controls.largeGroups.controls.length === 0">
+              <div *ngIf="additionalProfile.controls.largeGroups.controls.length === 0">
                 <div class="row mb-1">
                   <div class="col-11"></div>
                   <div class="col-1" style="padding: 0;">
                     <app-modules-user-form-input-add-remove
-                      [targetArrayForm]="additaionProfile.controls.largeGroups"
+                      [targetArrayForm]="additionalProfile.controls.largeGroups"
                       [newObject]="newLargeGroup"
                     ></app-modules-user-form-input-add-remove>
                   </div>
                 </div>
               </div>
 
-              <div *ngFor="let largeGroup of additaionProfile.controls.largeGroups.controls; let j=index">
+              <div *ngFor="let largeGroup of additionalProfile.controls.largeGroups.controls; let j=index">
                 <div [formGroupName]="j">
                   <div class="row mb-1">
                     <div class="col-11">
@@ -62,7 +62,7 @@
                     </div>
                     <div class="col-1" style="padding: 0;">
                       <app-modules-user-form-input-add-remove
-                        [targetArrayForm]="additaionProfile.controls.largeGroups"
+                        [targetArrayForm]="additionalProfile.controls.largeGroups"
                         [targetArrayIndex]="j" [newObject]="newLargeGroup"
                       ></app-modules-user-form-input-add-remove>
                     </div>

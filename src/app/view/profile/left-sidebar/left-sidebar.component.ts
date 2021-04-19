@@ -156,8 +156,8 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  get additaionProfilesContent(): FormArray {
-    return this.profileForm?.get('additaionProfilesContent') as FormArray;
+  get additionalProfilesContent(): FormArray {
+    return this.profileForm?.get('additionalProfilesContent') as FormArray;
   }
 
   ngOnInit(): void {

@@ -5,7 +5,7 @@ import { ProfileService } from 'src/app/services/profile.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ProfileContent } from './profile.content';
 import Swal from 'sweetalert2';
-import { AdditaionProfileContent } from './additional-profiles/additional-profile.content';
+import { AdditionalProfileContent } from './additional-profiles/additional-profile.content';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { ToastHelper } from 'src/app/helper/toast.helper';
@@ -34,7 +34,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isPage = true;
   isLoading = true;
 
-  public newAdditaionProfileContent: AdditaionProfileContent = new AdditaionProfileContent();
+  public newAdditionalProfileContent: AdditionalProfileContent = new AdditionalProfileContent();
 
   constructor(
     public profileService: ProfileService,
@@ -94,15 +94,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   handleAddAdditionalProfile(): void {
-    this.profileForm?.controls.additaionProfilesContent.push(
-      this.formHelper.buildFormRecursively(this.newAdditaionProfileContent)
+    this.profileForm?.controls.additionalProfilesContent.push(
+      this.formHelper.buildFormRecursively(this.newAdditionalProfileContent)
     );
   }
 
   handleRemoveAdditionalProfile(index: number): void{
     this.toastHelper.askYesNo('Remove Profile Category', 'Are you sure?').then((result) => {
       if (result.value) {
-        this.profileForm?.controls.additaionProfilesContent.removeAt(index);
+        this.profileForm?.controls.additionalProfilesContent.removeAt(index);
       }
       else if (result.dismiss === Swal.DismissReason.cancel) {
       }

@@ -1,5 +1,5 @@
 import { AboutContent } from './about/about.content';
-import { AdditaionProfileContent } from './additional-profiles/additional-profile.content';
+import { AdditionalProfileContent } from './additional-profiles/additional-profile.content';
 import { SkillsContent } from './skills/skills.content';
 import { ProjectsContent } from './projects/projects.content';
 import { InterestsContent } from './interests/interests.content';
@@ -16,7 +16,7 @@ export class ProfileContent {
   interestsContent: InterestsContent;
   projectsContent: ProjectsContent;
   skillsContent: SkillsContent;
-  additaionProfilesContent: Array<AdditaionProfileContent>;
+  additionalProfilesContent: Array<AdditionalProfileContent>;
   constructor(
     id: string = '',
     ownerId: string = '',
@@ -28,7 +28,7 @@ export class ProfileContent {
     interestsContent: InterestsContent = new InterestsContent(),
     projectsContent: ProjectsContent = new ProjectsContent(),
     skillsContent: SkillsContent = new SkillsContent(),
-    additaionProfilesContent: Array<AdditaionProfileContent> = [new AdditaionProfileContent()],
+    additionalProfilesContent: Array<AdditionalProfileContent> = [new AdditionalProfileContent()],
   ) {
     this.id = id;
     this.ownerId = ownerId;
@@ -40,6 +40,6 @@ export class ProfileContent {
     this.interestsContent = interestsContent;
     this.projectsContent = projectsContent;
     this.skillsContent = skillsContent;
-    this.additaionProfilesContent = additaionProfilesContent;
+    this.additionalProfilesContent = additionalProfilesContent;
   }
 }
