@@ -140,7 +140,10 @@ export abstract class CommonService {
   async set(path: string, content: any): Promise<void> {
     const {uid} = this.authService.getCurrentUser() || {};
     content.ownerId = uid;
-    return await this.firestore.doc(environment.rootPath + path).set(JSON.parse(JSON.stringify(content)));
+    await this.firestore.doc(environment.rootPath + path).set(JSON.parse(JSON.stringify(content)));
+  }
+  async get(path: string): Promise<any> {
+    return this.firestore.doc(environment.rootPath + path).get().toPromise();
   }
   async isExists(path: string): Promise<boolean> {
     return new Promise(async (resolve) => {

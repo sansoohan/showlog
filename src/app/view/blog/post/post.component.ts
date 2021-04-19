@@ -260,8 +260,11 @@ export class PostComponent implements OnInit, OnDestroy {
       const newPost = this.postContentForm.value;
       newPost.categoryId = this.params.categoryId;
       newPost.createdAt = Number(new Date());
-      newPost.slack.token = 'xoxb-849230574501-1967822064902-QCfSWM5B3rA4yTxQ36l3wuU5';
-      newPost.slack.channel = 'C017YKRQUPQ';
+
+      const slackSyncs = await this.authService.getSlackSyncs();
+      const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
+      newPost.slack = selectedSlackSync;
+
       const { userName } = this.authService.getCurrentUser();
       newPost.postUrl = `${location.origin}/#/blog/${userName}/post/${newPost.id}`;
       const [selectedCategory] = this.blogService.getCategory(
@@ -309,10 +312,15 @@ export class PostComponent implements OnInit, OnDestroy {
   async handleClickEditPostUpdate(): Promise<void> {
     if (this.isEditingPost){
       await this.updateRemovedImage();
+      const slackSyncs = await this.authService.getSlackSyncs();
+      const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
+      const postContent = Object.assign({}, this.postContentForm.value);
+      postContent.slack = selectedSlackSync;
+
       this.blogService
       .update(
         `blogs/${this.blogContent?.id}/posts/${this.postContentForm.value.id}`,
-        this.postContentForm.value
+        postContent
       )
       .then(() => {
         this.toastHelper.showSuccess('Post Update', 'Success!');
@@ -363,6 +371,26 @@ export class PostComponent implements OnInit, OnDestroy {
       else if (result.dismiss === Swal.DismissReason.cancel) {
       }
     });
+  }
+
+  async clickSlackSync(): Promise<void> {
+    const slackSyncs = await this.authService.getSlackSyncs();
+    const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
+    const itemlist: Array<string> = [];
+    let selectedIndex = -1;
+    slackSyncs.forEach((slackSync: any, index: number) => {
+      itemlist.push(slackSync.name);
+      if (slackSync.selected) {
+        selectedIndex = index;
+      }
+    });
+
+    const { value } = await this.toastHelper.selectOneFromArray(itemlist, selectedIndex);
+    selectedIndex = value;
+    slackSyncs.forEach((slackSync: any, index: number) => {
+      slackSync.selected = selectedIndex === index;
+    });
+    await this.authService.updateSlackSyncs(slackSyncs);
   }
 
   public dropped(files: NgxFileDropEntry[]): void {

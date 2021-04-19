@@ -51,6 +51,11 @@
               *ngIf="authService.isSignedIn() && isEditingPost"
               (click)="clickPostEditCancel()"
             >Cancel</Button>
+            <Button
+              class="btn btn-sm btn-outline-light me-2"
+              *ngIf="authService.isSignedIn() && isEditingPost"
+              (click)="clickSlackSync()"
+            >SlackSync</Button>
           </div>
           <div class="col-6 d-flex">
             <Button
