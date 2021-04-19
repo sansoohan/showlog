@@ -1,4 +1,4 @@
-export class AdditaionProfileContent {
+export class AdditionalProfileContent {
   title: string;
   largeGroups: Array<LargeGroup>;
   constructor(

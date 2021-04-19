@@ -58,7 +58,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
     this.queryParamSub = this.route.queryParams.subscribe(queryParams => {
       this.queryParams = queryParams;
       this.pageIndex = queryParams?.pageIndex || 0;
-      this.pageSize = 20;
+      this.pageSize = 10;
       this.isCreatingPost = !!queryParams.isCreatingPost;
     });
   }

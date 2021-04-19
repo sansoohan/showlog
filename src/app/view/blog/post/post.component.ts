@@ -260,6 +260,10 @@ export class PostComponent implements OnInit, OnDestroy {
       const newPost = this.postContentForm.value;
       newPost.categoryId = this.params.categoryId;
       newPost.createdAt = Number(new Date());
+      newPost.slack.token = 'xoxb-849230574501-1967822064902-QCfSWM5B3rA4yTxQ36l3wuU5';
+      newPost.slack.channel = 'C017YKRQUPQ';
+      const { userName } = this.authService.getCurrentUser();
+      newPost.postUrl = `${location.origin}/#/blog/${userName}/post/${newPost.id}`;
       const [selectedCategory] = this.blogService.getCategory(
         newPost.categoryId, this.blogContent?.categoryMap
       ) || [];
