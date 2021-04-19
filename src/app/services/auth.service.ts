@@ -9,6 +9,8 @@ import { BlogContent } from '../view/blog/blog.content';
 import { TalkContent } from '../view/talk/talk.content';
 import { CategoryContent } from '../view/blog/category/category.content';
 import { environment } from 'src/environments/environment';
+import * as firebase from 'firebase/app';
+const FieldPath = firebase.default.firestore.FieldPath;
 
 @Injectable({
   providedIn: 'root'
@@ -77,7 +79,6 @@ export class AuthService {
     }
 
     const profile: any = await this.firestore.doc(environment.rootPath + `profiles/${event.user.uid}`).get().toPromise();
-    console.log(profile);
     const currentUser = {
       providerData: event.user.providerData,
       email: event.user.email,
@@ -92,6 +93,23 @@ export class AuthService {
     await this.makeCollectionIfNotExist(event.user.uid);
     this.toastHelper.showSuccess(`Hello ${currentUser.userName}`, '');
     this.router.navigate(['/profile', currentUser.userName]);
+  }
+
+  async getSlackSyncs(): Promise<any> {
+    const {uid} = this.getCurrentUser();
+    const ref = await this.firestore.doc<ProfileContent>([
+      environment.rootPath + `profiles/${uid}`,
+    ].join('/')).get().toPromise();
+
+    const res = ref?.data();
+    return res?.slackSyncs || [];
+  }
+
+  async updateSlackSyncs(slackSyncs: Array<any>): Promise<void> {
+    const {uid} = this.getCurrentUser();
+    await this.firestore.doc<ProfileContent>([
+      environment.rootPath + `profiles/${uid}`,
+    ].join('/')).update({slackSyncs});
   }
 
   getCurrentUser(): any {

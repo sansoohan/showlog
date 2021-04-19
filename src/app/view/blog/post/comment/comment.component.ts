@@ -209,7 +209,6 @@ export class CommentComponent implements OnInit, OnDestroy {
       } as CollectionSelect
     );
     this.commentContentsSub = this.commentContentsObserver?.subscribe(commentContents => {
-      console.log(commentContents);
       this.commentContents = commentContents;
       this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
     });

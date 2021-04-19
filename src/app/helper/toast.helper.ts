@@ -169,4 +169,27 @@ export class ToastHelper {
       reverseButtons: true,
     });
   }
+
+  async selectOneFromArray(array: Array<string>, selectedIndex: number): Promise<any> {
+    const inputOptions: any = {'-1': 'None'};
+    array.forEach((value: string, key: number) => inputOptions[key] = value);
+
+    return Swal.fire({
+      title: 'Select Slack Chat for Posting',
+      input: 'select',
+      inputOptions,
+      inputPlaceholder: array[selectedIndex] ? array[selectedIndex] : 'None',
+      showCancelButton: true,
+      preConfirm: (value) => {
+        return new Promise(resolve => {
+          const isSelected = value !== '';
+          if (isSelected) {
+            resolve(Number(value));
+          } else {
+            resolve(array[selectedIndex] ? selectedIndex : -1);
+          }
+        });
+      },
+    });
+  }
 }

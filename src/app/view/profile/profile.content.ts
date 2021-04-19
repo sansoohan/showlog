@@ -17,6 +17,7 @@ export class ProfileContent {
   projectsContent: ProjectsContent;
   skillsContent: SkillsContent;
   additionalProfilesContent: Array<AdditionalProfileContent>;
+  slackSyncs: Array<any>;
   constructor(
     id: string = '',
     ownerId: string = '',
@@ -29,6 +30,7 @@ export class ProfileContent {
     projectsContent: ProjectsContent = new ProjectsContent(),
     skillsContent: SkillsContent = new SkillsContent(),
     additionalProfilesContent: Array<AdditionalProfileContent> = [new AdditionalProfileContent()],
+    slackSyncs: Array<any> = [],
   ) {
     this.id = id;
     this.ownerId = ownerId;
@@ -41,5 +43,6 @@ export class ProfileContent {
     this.projectsContent = projectsContent;
     this.skillsContent = skillsContent;
     this.additionalProfilesContent = additionalProfilesContent;
+    this.slackSyncs = slackSyncs;
   }
 }
