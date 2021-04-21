@@ -315,7 +315,14 @@ export class PostComponent implements OnInit, OnDestroy {
       const slackSyncs = await this.authService.getSlackSyncs();
       const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
       const postContent = Object.assign({}, this.postContentForm.value);
-      postContent.slack = selectedSlackSync;
+
+      if (!postContent.slack?.ts || postContent.slack?.channel !== selectedSlackSync.channel) {
+        postContent.slack.channel = selectedSlackSync.channel;
+      }
+
+      if (postContent.slack?.token !== selectedSlackSync.token) {
+        postContent.slack.token = selectedSlackSync.token;
+      }
 
       this.blogService
       .update(
@@ -378,6 +385,7 @@ export class PostComponent implements OnInit, OnDestroy {
     const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
     const itemlist: Array<string> = [];
     let selectedIndex = -1;
+    console.log(slackSyncs);
     slackSyncs.forEach((slackSync: any, index: number) => {
       itemlist.push(slackSync.name);
       if (slackSync.selected) {
