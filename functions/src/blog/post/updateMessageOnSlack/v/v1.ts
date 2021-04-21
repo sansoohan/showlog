@@ -15,6 +15,7 @@ export const v1 = async (
     postTitle,
     postMarkdown,
   } = change.after.data()
+  const { slack: beforeSlack } = change.before.data()
 
   const slackCreateOrUpdate: any = {
     channel,
@@ -38,15 +39,39 @@ export const v1 = async (
   }
 
   const web = new WebClient(token);
-  if (token && channel && ts) {
-    slackCreateOrUpdate.ts = ts;
-    await web.chat.update(slackCreateOrUpdate)
-  } else if (token && channel) {
+
+  if (!beforeSlack?.token || !beforeSlack?.channel || !beforeSlack?.ts) {
     const res = await web.chat.postMessage(slackCreateOrUpdate)
     await change.after.ref.update({slack: {
       token,
       channel,
       ts: `${res.ts}`,
     }})
+
+    return
+  }
+
+  // Move Into Other Channel
+  if (beforeSlack.channel !== channel) {
+    await web.chat.delete({
+      channel: beforeSlack.channel,
+      ts,
+    });
+    const res = await web.chat.postMessage(slackCreateOrUpdate)
+    await change.after.ref.update({slack: {
+      token,
+      channel,
+      ts: `${res.ts}`,
+    }})
+
+    return
+  }
+
+  // Upload
+  if (token && channel && ts) {
+    slackCreateOrUpdate.ts = ts;
+    await web.chat.update(slackCreateOrUpdate)
+
+    return
   }
 }
