@@ -263,7 +263,7 @@ export class PostComponent implements OnInit, OnDestroy {
 
       const slackSyncs = await this.authService.getSlackSyncs();
       const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
-      newPost.slack = selectedSlackSync;
+      newPost.slack = selectedSlackSync || {};
 
       const { userName } = this.authService.getCurrentUser();
       newPost.postUrl = `${location.origin}/#/blog/${userName}/post/${newPost.id}`;
