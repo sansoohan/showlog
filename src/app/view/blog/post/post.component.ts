@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
 import { ImageHelper, ImageContent } from 'src/app/helper/image.helper';
 import { ImageStorage } from 'src/app/storages/image.storage';
 import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 'ngx-file-drop';
+// import { WebClient } from '@slack/web-api';
 
 @Component({
   selector: 'app-blog-post',
@@ -385,7 +386,6 @@ export class PostComponent implements OnInit, OnDestroy {
     const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
     const itemlist: Array<string> = [];
     let selectedIndex = -1;
-    console.log(slackSyncs);
     slackSyncs.forEach((slackSync: any, index: number) => {
       itemlist.push(slackSync.name);
       if (slackSync.selected) {
@@ -398,6 +398,35 @@ export class PostComponent implements OnInit, OnDestroy {
     slackSyncs.forEach((slackSync: any, index: number) => {
       slackSync.selected = selectedIndex === index;
     });
+    await this.authService.updateSlackSyncs(slackSyncs);
+  }
+
+  async clickAddSlackSync(): Promise<void> {
+    const { value } = await this.toastHelper.addSlackSync();
+    if (!value) {
+      return;
+    }
+
+    if (!value?.channel || !value?.name || value?.token) {
+      this.toastHelper.showError('Add Slack Sync', 'Please Enter channel, name and token');
+      return;
+    }
+
+    try {
+      // const web = new WebClient(value?.token);
+      // const res = await web.chat.postMessage({ channel: value?.channel, text: 'Hello there' });
+    } catch (error) {
+      this.toastHelper.showError('Slack Sync Error', 'Can not push Message. Please Check channel and token');
+    }
+
+    value.selected = value.selected === 'on';
+    const slackSyncs = await this.authService.getSlackSyncs();
+    if (value.selected) {
+      slackSyncs.forEach((slackSync: any) => {
+        slackSync.selected = false;
+      });
+    }
+    slackSyncs.push(value);
     await this.authService.updateSlackSyncs(slackSyncs);
   }
 
