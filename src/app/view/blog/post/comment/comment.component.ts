@@ -224,6 +224,10 @@ export class CommentComponent implements OnInit, OnDestroy {
       this.commentContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
       this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
     });
+
+    if (selectedCreatedAtList.length === 0) {
+      this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
+    }
   }
 
   ngOnInit(): void {
