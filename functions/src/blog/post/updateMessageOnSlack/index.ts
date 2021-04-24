@@ -19,7 +19,7 @@ export const showlogBlogPostUpdateMessageOnSlack = functions.firestore.document(
     adminDatabase.ref([
       env,
       'showlog',
-      'FUNCTION_V'
+      'FUNCTION_V',
     ].join('/')).once("value", (functionSnapshot: any) => {
       resolve(functionSnapshot.val())
     })

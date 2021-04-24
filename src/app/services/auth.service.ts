@@ -105,7 +105,7 @@ export class AuthService {
     return res?.slackSyncs || [];
   }
 
-  async updateSlackSyncs(slackSyncs: Array<any>): Promise<void> {
+  async updateSlackSyncs(slackSyncs: Array<any>, updatedFrom: any): Promise<void> {
     const {uid} = this.getCurrentUser();
     await this.firestore.doc<ProfileContent>([
       environment.rootPath + `profiles/${uid}`,

@@ -12,7 +12,7 @@ export class CategoryContent {
     isExpanded: boolean = false,
     postCreatedAtList: Array<number> = [],
     children: Array<CategoryContent> = [],
-  ){
+  ) {
     this.id = id;
     this.name = name;
     this.createdAt = createdAt;

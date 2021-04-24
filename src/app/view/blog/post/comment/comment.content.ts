@@ -7,6 +7,7 @@ export class CommentContent {
   commentImageSrcs: any;
   likes: Array<string>;
   ownerId: string;
+  updatedFrom: any;
   constructor(
     id: string = '',
     postId: string = '',
@@ -16,6 +17,7 @@ export class CommentContent {
     commentImageSrcs: any = [],
     likes: Array<string> = [],
     ownerId: string = '',
+    updatedFrom: any = {},
   ){
     this.id = id;
     this.postId = postId;
@@ -25,5 +27,6 @@ export class CommentContent {
     this.commentImageSrcs = commentImageSrcs;
     this.likes = likes;
     this.ownerId = ownerId;
+    this.updatedFrom = updatedFrom;
   }
 }

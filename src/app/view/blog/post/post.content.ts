@@ -13,6 +13,7 @@ export class PostContent {
   commentCreatedAtList: Array<number>;
   slack: any;
   postUrl: string;
+  updatedFrom: any;
   constructor(
     id: string = '',
     blogId: string = '',
@@ -28,7 +29,8 @@ export class PostContent {
     commentCreatedAtList: Array<number> = [],
     slack: any = {},
     postUrl: string = '',
-  ){
+    updatedFrom: any = {},
+  ) {
     this.id = id;
     this.blogId = blogId;
     this.categoryId = categoryId;
@@ -43,5 +45,6 @@ export class PostContent {
     this.commentCreatedAtList = commentCreatedAtList;
     this.slack = slack;
     this.postUrl = postUrl;
+    this.updatedFrom = updatedFrom;
   }
 }
