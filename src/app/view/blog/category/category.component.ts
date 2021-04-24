@@ -133,12 +133,17 @@ export class CategoryComponent implements OnInit, OnDestroy {
     }
 
     this.postList = [];
-    this.postListSub = merge(...this.postListObservers)?.subscribe(postList => {
+    this.postListSub = merge(...this.postListObservers)?.subscribe((postList) => {
       this.postList = [...this.postList || [], ...postList];
       this.postList.sort((postA, postB) => postB.createdAt - postA.createdAt);
       this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
       this.isLoading = false;
     });
+
+    if (selectedCreatedAtList.length === 0) {
+      this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
+      this.isLoading = false;
+    }
   }
 
   ngOnInit(): void {
