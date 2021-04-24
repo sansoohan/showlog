@@ -310,11 +310,17 @@ export class PostComponent implements OnInit, OnDestroy {
   }
 
   async handleClickEditPostUpdate(): Promise<void> {
-    if (this.isEditingPost){
+    if (this.isEditingPost) {
       await this.updateRemovedImage();
       const slackSyncs = await this.authService.getSlackSyncs();
       const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
       const postContent = Object.assign({}, this.postContentForm.value);
+      const { uid } = this.authService.getCurrentUser();
+      postContent.updatedFrom = {
+        source: 'webclient',
+        name: 'handleClickEditPostUpdate',
+        uid,
+      };
 
       if (!postContent.slack?.ts || postContent.slack?.channel !== selectedSlackSync.channel) {
         postContent.slack.channel = selectedSlackSync.channel;
@@ -353,13 +359,22 @@ export class PostComponent implements OnInit, OnDestroy {
           selectedCategory.postCreatedAtList = selectedCategory.postCreatedAtList
             .filter((createdAt) => createdAt !== targetCreatedAt);
 
+          const { uid } = this.authService.getCurrentUser();
+          if (this.blogContent) {
+            this.blogContent.updatedFrom = {
+              source: 'webclient',
+              name: 'handleClickEditPostDelete',
+              uid,
+            };
+          }
+
           Promise.all([
             this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent),
             this.blogService.delete(
               `blogs/${this.blogContent?.id}/posts/${this.postContentForm.value.id}`, {
                 parentKeyName: null,
                 collectionPath: `blogs/${this.blogContent?.id}/posts`,
-                childrenStorage: ['images'],
+                // childrenStorage: ['images'],
                 children: [{
                   parentKeyName: 'postId',
                   collectionPath: `blogs/${this.blogContent?.id}/comments`,
@@ -398,7 +413,14 @@ export class PostComponent implements OnInit, OnDestroy {
     slackSyncs.forEach((slackSync: any, index: number) => {
       slackSync.selected = selectedIndex === index;
     });
-    await this.authService.updateSlackSyncs(slackSyncs);
+    const { uid } = this.authService.getCurrentUser();
+    const updatedFrom = {
+      source: 'webclient',
+      name: 'clickSlackSync',
+      uid,
+    };
+
+    await this.authService.updateSlackSyncs(slackSyncs, updatedFrom);
   }
 
   public dropped(files: NgxFileDropEntry[]): void {

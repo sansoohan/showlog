@@ -14,8 +14,15 @@ export const v1 = async (
     postUrl,
     postTitle,
     postMarkdown,
-  } = change.after.data()
-  const { slack: beforeSlack } = change.before.data()
+    updatedFrom,
+  } = change.after.data();
+
+  // Ignore update by functions
+  if (updatedFrom?.source === 'functions') {
+    return
+  }
+
+  const { slack: beforeSlack } = change.before.data();
 
   const slackCreateOrUpdate: any = {
     channel,
@@ -42,11 +49,17 @@ export const v1 = async (
 
   if (!beforeSlack?.token || !beforeSlack?.channel || !beforeSlack?.ts) {
     const res = await web.chat.postMessage(slackCreateOrUpdate)
-    await change.after.ref.update({slack: {
-      token,
-      channel,
-      ts: `${res.ts}`,
-    }})
+    await change.after.ref.update({
+      slack: {
+        token,
+        channel,
+        ts: `${res.ts}`,
+      },
+      updatedFrom: {
+        source: 'functions',
+        name: 'showlogBlogPostUpdateMessageOnSlack',
+      },
+    });
 
     return
   }
@@ -58,11 +71,17 @@ export const v1 = async (
       ts,
     });
     const res = await web.chat.postMessage(slackCreateOrUpdate)
-    await change.after.ref.update({slack: {
-      token,
-      channel,
-      ts: `${res.ts}`,
-    }})
+    await change.after.ref.update({
+      slack: {
+        token,
+        channel,
+        ts: `${res.ts}`,
+      },
+      updatedFrom: {
+        source: 'functions',
+        name: 'showlogBlogPostUpdateMessageOnSlack',
+      },
+    });
 
     return
   }

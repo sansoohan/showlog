@@ -145,6 +145,14 @@ export class CommentComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const commentData = Object.assign({}, commentForm.value);
+    const { uid } = this.authService.getCurrentUser();
+    commentData.updatedFrom = {
+      source: 'webclient',
+      name: 'handleClickEditCommentUpdate',
+      uid,
+    };
+
     this.blogService
     .update(
       `blogs/${this.postContent?.id}/comments/${commentForm.value.id}`,

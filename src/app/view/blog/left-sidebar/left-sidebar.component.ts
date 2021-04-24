@@ -72,6 +72,15 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   }
   handleEditCategory(categoryId: string): void {
     const [category] = this.blogService.getCategory(categoryId, this.blogContent?.categoryMap);
+    const { uid } = this.authService.getCurrentUser();
+    if (this.blogContent) {
+      this.blogContent.updatedFrom = {
+        source: 'webclient',
+        name: 'handleEditCategory',
+        uid,
+      };
+    }
+
     this.toastHelper.askUpdateDelete('Edit Category', 'Category Name', category.name)
     .then(async (data) => {
       if (data.value) {
@@ -109,6 +118,14 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
   handleAddCategory(categoryId?: string): void {
     const categoryContent = new CategoryContent();
     categoryContent.id = this.blogService.newId();
+    const { uid } = this.authService.getCurrentUser();
+    if (this.blogContent) {
+      this.blogContent.updatedFrom = {
+        source: 'webclient',
+        name: 'handleAddCategory',
+        uid,
+      };
+    }
 
     if (!categoryId && this.blogContent) {
       this.blogContent.categoryMap = [
