@@ -74,6 +74,7 @@ export class PrologueComponent implements OnInit, OnDestroy {
       } as CollectionSelect
     );
     this.postListSub = this.postListObserver?.subscribe(postList => {
+      postList.sort((postA, postB) => postB.createdAt - postA.createdAt);
       this.postList = postList;
       this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
       this.isLoading = false;

@@ -58,20 +58,20 @@ export abstract class CommonService {
       let nextRef: any = ref;
 
       for (const where of clause?.where || []) {
-        nextRef = nextRef.where(
+        nextRef = nextRef?.where(
           where.fieldPath,
           where.operator,
           where.value,
         );
       }
       for (const orderBy of clause?.orderBy || []) {
-        nextRef = nextRef.orderBy(
+        nextRef = nextRef?.orderBy(
           orderBy.fieldPath,
           orderBy.direction,
         );
       }
       if (clause?.limit) {
-        nextRef.limit(clause.limit);
+        nextRef = nextRef?.limit(clause.limit);
       }
 
       return nextRef;
