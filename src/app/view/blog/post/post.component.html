@@ -35,8 +35,8 @@
           <Button
             class="btn btn-sm btn-outline-light me-2"
             *ngIf="authService.isSignedIn() && isEditingPost"
-            (click)="clickAddSlackSync()"
-          >AddSlackSync</Button>
+            (click)="clickEditSlackSync()"
+          >EditSlackSync</Button>
         </div>
 
         <div *ngIf="!isCreatingPost" class="row">
@@ -69,8 +69,8 @@
             <Button
               class="btn btn-sm btn-outline-light me-2"
               *ngIf="authService.isSignedIn() && isEditingPost"
-              (click)="clickAddSlackSync()"
-            >AddSlackSync</Button>
+              (click)="clickEditSlackSync()"
+            >EditSlackSync</Button>
           </div>
           <div class="col-4 d-flex">
             <Button

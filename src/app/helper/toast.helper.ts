@@ -175,11 +175,10 @@ export class ToastHelper {
     array.forEach((value: string, key: number) => inputOptions[key] = value);
 
     return Swal.fire({
-      title: 'Select Slack Chat for Posting',
+      title: 'Edit Slack Chat for Posting',
       input: 'select',
       inputOptions,
       inputPlaceholder: array[selectedIndex] ? array[selectedIndex] : 'None',
-      showCancelButton: true,
       preConfirm: (value) => {
         return new Promise(resolve => {
           const isSelected = value !== '';
@@ -190,22 +189,48 @@ export class ToastHelper {
           }
         });
       },
+      showCancelButton: true,
+      showCloseButton: true,
+      showConfirmButton: true,
+      cancelButtonText: 'Add',
+    });
+  }
+
+  async editOneFromArray(array: Array<string>, selectedIndex: number): Promise<any> {
+    const inputOptions: any = {'-1': 'None'};
+    array.forEach((value: string, key: number) => inputOptions[key] = value);
+
+    return Swal.fire({
+      title: 'Edit Slack Chat for Posting',
+      input: 'select',
+      inputOptions,
+      inputPlaceholder: array[selectedIndex] ? array[selectedIndex] : 'None',
+      preConfirm: (value) => {
+        return new Promise(resolve => {
+          const isSelected = value !== '';
+          if (isSelected) {
+            resolve(Number(value));
+          } else {
+            resolve(array[selectedIndex] ? selectedIndex : -1);
+          }
+        });
+      },
+      showCancelButton: true,
+      showCloseButton: true,
+      showConfirmButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Edit',
+      denyButtonText: 'Delete',
     });
   }
 
   async addSlackSync(): Promise<SweetAlertResult> {
     return Swal.mixin({
-      customClass: {
-        confirmButton: 'btn btn-success',
-        cancelButton: 'btn btn-danger me-2',
-        closeButton: 'btn btn-secondary me-2',
-      },
-      buttonsStyling: false
     }).fire({
       title: 'Add Slack Sync',
       html: `
         <div class="row">
-          <div class="d-flex col-12">
+          <div class="d-flex col-12 mt-2">
             <p style="width:100px;" class="my-auto">Name</p>
             <input
               id="swal-input1"
@@ -213,7 +238,7 @@ export class ToastHelper {
               class="form-control"
             />
           </div>
-          <div class="d-flex col-12">
+          <div class="d-flex col-12 mt-2">
             <p style="width:100px;" class="my-auto">Token</p>
             <input
               id="swal-input2"
@@ -221,7 +246,7 @@ export class ToastHelper {
               class="form-control"
             />
           </div>
-          <div class="d-flex col-12">
+          <div class="d-flex col-12 mt-2">
             <p style="width:100px;" class="my-auto">Channel</p>
             <input
               id="swal-input3"
@@ -229,11 +254,11 @@ export class ToastHelper {
               class="form-control"
             />
           </div>
-          <div class="d-flex col-12">
-            <p style="width:200px;" class="my-auto">Select This Channel</p>
+          <div class="d-flex col-12 mt-2">
+            <p style="width:200px;" class="ms-auto my-auto">Select This Channel</p>
             <input
               id="swal-input4"
-              class="form-check-input"
+              class="me-auto my-auto form-check-input"
               type="checkbox"
             >
           </div>
@@ -244,7 +269,85 @@ export class ToastHelper {
           name: (document.getElementById('swal-input1') as HTMLInputElement).value,
           token: (document.getElementById('swal-input2') as HTMLInputElement).value,
           channel: (document.getElementById('swal-input3') as HTMLInputElement).value,
-          selected: (document.getElementById('swal-input4') as HTMLInputElement).value,
+          selected: (document.getElementById('swal-input4') as HTMLInputElement).checked,
+        });
+      }),
+      inputValidator: (value: any) => {
+        const {
+          name,
+          token,
+          channel,
+        } = value;
+
+        console.log(value);
+
+        if (!name) {
+          return 'You need to write slack name!';
+        }
+        if (!token) {
+          return 'You need to write slack token!';
+        }
+        if (!channel) {
+          return 'You need to write slack channel!';
+        }
+
+        return null;
+      },
+      showCancelButton: true,
+      showConfirmButton: true,
+    });
+  }
+
+  async editSlackSync(slack: any): Promise<SweetAlertResult> {
+    return Swal.mixin({
+    }).fire({
+      title: 'Edit Slack Sync',
+      html: `
+        <div class="row">
+          <div class="d-flex col-12 mt-2">
+            <p style="width:100px;" class="my-auto">Name</p>
+            <input
+              id="swal-input1"
+              type="text"
+              class="form-control"
+              value=${slack?.name}
+            />
+          </div>
+          <div class="d-flex col-12 mt-2">
+            <p style="width:100px;" class="my-auto">Token</p>
+            <input
+              id="swal-input2"
+              type="text"
+              class="form-control"
+              value=${slack?.token}
+            />
+          </div>
+          <div class="d-flex col-12 mt-2">
+            <p style="width:100px;" class="my-auto">Channel</p>
+            <input
+              id="swal-input3"
+              type="text"
+              class="form-control"
+              value=${slack?.channel}
+            />
+          </div>
+          <div class="d-flex col-12 mt-2">
+            <p style="width:200px;" class="ms-auto my-auto">Select This Channel</p>
+            <input
+              id="swal-input4"
+              class="me-auto my-auto form-check-input"
+              type="checkbox"
+              ${slack?.selected ? 'checked' : ''}
+            >
+          </div>
+        </div>
+      `,
+      preConfirm: () => new Promise((resolve) => {
+        resolve({
+          name: (document.getElementById('swal-input1') as HTMLInputElement).value,
+          token: (document.getElementById('swal-input2') as HTMLInputElement).value,
+          channel: (document.getElementById('swal-input3') as HTMLInputElement).value,
+          selected: (document.getElementById('swal-input4') as HTMLInputElement).checked,
         });
       }),
       inputValidator: (value: any) => {
@@ -270,10 +373,10 @@ export class ToastHelper {
       },
       showCancelButton: true,
       showCloseButton: true,
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
+      showConfirmButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Update',
+      denyButtonText: 'Delete',
     });
   }
-
 }
