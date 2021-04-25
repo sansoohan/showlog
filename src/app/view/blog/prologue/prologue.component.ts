@@ -73,8 +73,11 @@ export class PrologueComponent implements OnInit, OnDestroy {
         limit: 10,
       } as CollectionSelect
     );
+
+    this.postList = [];
     this.postListSub = this.postListObserver?.subscribe(postList => {
-      this.postList = postList;
+      postList.sort((postA, postB) => postB.createdAt - postA.createdAt);
+      this.postList = [...this.postList || [], ...postList];
       this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
       this.isLoading = false;
     });

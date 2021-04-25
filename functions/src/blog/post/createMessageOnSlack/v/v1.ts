@@ -10,8 +10,14 @@ export const v1 = async (
       token,
       channel,
     },
-    postMarkdown, postTitle, postUrl
+    postMarkdown, postTitle, postUrl, updatedFrom
   } = snapshot.data()
+
+  // Don't Run on Data Copy
+  if (updatedFrom?.source) {
+    return;
+  }
+
   if (token && channel) {
     const web = new WebClient(token);
     const res = await web.chat.postMessage({
@@ -34,10 +40,16 @@ export const v1 = async (
         },
       ],
     });
-    await snapshot.ref.update({slack: {
-      token,
-      channel,
-      ts: `${res.ts}`,
-    }})
+    await snapshot.ref.update({
+      slack: {
+        token,
+        channel,
+        ts: `${res.ts}`,
+      },
+      updatedFrom: {
+        source: 'functions',
+        name: 'showlogBlogPostCreateMessageOnSlack',
+      },
+    })
   }
 }

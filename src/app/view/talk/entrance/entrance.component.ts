@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, zip, Observable } from 'rxjs';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { TalkService } from 'src/app/services/talk.service';
@@ -17,12 +17,11 @@ const FieldPath = firebase.default.firestore.FieldPath;
   styleUrls: ['./entrance.component.scss']
 })
 export class EntranceComponent implements OnInit, OnDestroy {
-  @Input() roomContents?: Array<RoomContent>;
-
   params: any;
   paramSub: Subscription;
-  roomContentsObserver: any;
+  roomContentsObservers?: Array<Observable<RoomContent[]>>;
   roomContentsSub?: Subscription;
+  roomContents?: Array<RoomContent>;
   blogId?: string;
   talkId?: string;
 
@@ -116,21 +115,35 @@ export class EntranceComponent implements OnInit, OnDestroy {
     if (this.roomContentsSub) {
       this.roomContentsSub.unsubscribe();
     }
+
+    const startIndex = this.pageIndex * this.pageSize;
     const selectedCreatedAtList = Object.assign([], this.roomCreatedAtList)
     .sort((createdA, createdB) => createdA - createdB)
-    .splice(this.pageIndex * this.pageSize, this.pageSize);
-    this.roomContentsObserver = this.talkService.select<RoomContent>(
-      `talks/${this.talkId}/rooms`,
-      {
-        where: [{
-          fieldPath: new FieldPath('createdAt'),
-          operator: 'in',
-          value: selectedCreatedAtList.length ? selectedCreatedAtList : [-1],
-        }]
-      } as CollectionSelect
-    );
-    this.roomContentsSub = this.roomContentsObserver?.subscribe((roomContents: any) => {
-      this.roomContents = roomContents;
+    .splice(startIndex, startIndex + this.pageSize);
+
+    this.roomContentsObservers = [];
+    for (let index = 0; index < selectedCreatedAtList.length; index += 10) {
+      const createdAtList = Object.assign([], selectedCreatedAtList).splice(index, index + 10);
+      const commentContentsObserver = this.talkService.select<RoomContent>(
+        `talks/${this.talkId}/rooms`,
+        {
+          where: [{
+            fieldPath: new FieldPath('createdAt'),
+            operator: 'in',
+            value: createdAtList.length ? createdAtList : [-1],
+          }]
+        } as CollectionSelect
+      );
+
+      this.roomContentsObservers.push(commentContentsObserver);
+    }
+
+    this.roomContents = [];
+    this.roomContentsSub = zip(...this.roomContentsObservers)?.subscribe((roomContentsList) => {
+      roomContentsList.forEach((roomContents) => {
+        this.roomContents = [...this.roomContents || [], ...roomContents];
+        this.roomContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
+      });
     });
   }
 

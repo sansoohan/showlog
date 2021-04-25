@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription, Observable, zip } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { CommentContent } from './comment.content';
 import { BlogService } from 'src/app/services/blog.service';
@@ -29,7 +29,7 @@ export class CommentComponent implements OnInit, OnDestroy {
   commentContents?: CommentContent[];
   commentContentsSub?: Subscription;
   commentContentsForm: any;
-  commentContentsObserver?: Observable<CommentContent[]>;
+  commentContentsObservers?: Array<Observable<CommentContent[]>>;
 
   paramSub: Subscription;
   params: any;
@@ -145,6 +145,14 @@ export class CommentComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const commentData = Object.assign({}, commentForm.value);
+    const { uid } = this.authService.getCurrentUser();
+    commentData.updatedFrom = {
+      source: 'webclient',
+      name: 'handleClickEditCommentUpdate',
+      uid,
+    };
+
     this.blogService
     .update(
       `blogs/${this.postContent?.id}/comments/${commentForm.value.id}`,
@@ -195,23 +203,41 @@ export class CommentComponent implements OnInit, OnDestroy {
     if (this.commentContentsSub) {
       this.commentContentsSub.unsubscribe();
     }
+
+    const startIndex = this.pageIndex * this.pageSize;
     const selectedCreatedAtList = Object.assign([], this.commentCreatedAtList)
     .sort((createdA, createdB) => createdA - createdB)
-    .splice(this.pageIndex * this.pageSize, this.pageSize);
-    this.commentContentsObserver = this.blogService.select<CommentContent>(
-      `blogs/${this.blogId}/comments`,
-      {
-        where: [{
-          fieldPath: new FieldPath('createdAt'),
-          operator: 'in',
-          value: selectedCreatedAtList.length ? selectedCreatedAtList : [-1],
-        }]
-      } as CollectionSelect
-    );
-    this.commentContentsSub = this.commentContentsObserver?.subscribe(commentContents => {
-      this.commentContents = commentContents;
-      this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
+    .splice(startIndex, startIndex + this.pageSize);
+
+    this.commentContentsObservers = [];
+    for (let index = 0; index < selectedCreatedAtList.length; index += 10) {
+      const createdAtList = Object.assign([], selectedCreatedAtList).splice(index, index + 10);
+      const commentContentsObserver = this.blogService.select<CommentContent>(
+        `blogs/${this.blogId}/posts`,
+        {
+          where: [{
+            fieldPath: new FieldPath('createdAt'),
+            operator: 'in',
+            value: createdAtList.length ? createdAtList : [-1],
+          }]
+        } as CollectionSelect
+      );
+
+      this.commentContentsObservers.push(commentContentsObserver);
+    }
+
+    this.commentContents = [];
+    this.commentContentsSub = zip(...this.commentContentsObservers)?.subscribe((commentContentsList) => {
+      commentContentsList.forEach(commentContents => {
+        this.commentContents = [...this.commentContents || [], ...commentContents];
+        this.commentContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
+        this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
+      });
     });
+
+    if (selectedCreatedAtList.length === 0) {
+      this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
+    }
   }
 
   ngOnInit(): void {

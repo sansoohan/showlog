@@ -135,7 +135,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       if (result.value) {
         if (this.isEditing) {
-          const { userName, ownerId, id } = this.profileForm.value;
+          const profileData = Object.assign({}, this.profileForm.value);
+          const { uid } = this.authService.getCurrentUser();
+          profileData.updatedFrom = {
+            source: 'webclient',
+            name: 'handleClickEditProfileUpdate',
+            uid,
+          };
+          const { userName, ownerId, id } = profileData;
           Promise.all([
             this.isUserNameChanged() ? this.blogService.update(
               `blogs/${id}`,
@@ -148,7 +155,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.profileService
             .update(
               `profiles/${id}`,
-              this.profileForm.value
+              profileData,
             )
           ].filter(Boolean))
           .then(() => {

@@ -10,6 +10,8 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { CommonService } from './abstract/common.service';
 import { environment } from 'src/environments/environment';
 import * as firebase from 'firebase/app';
+import { RouterHelper } from '../helper/router.helper';
+import { ToastHelper } from '../helper/toast.helper';
 
 const FieldPath = firebase.default.firestore.FieldPath;
 
@@ -26,6 +28,8 @@ export class BlogService extends CommonService {
     public firestore: AngularFirestore,
     public authService: AuthService,
     public storage: AngularFireStorage,
+    private routerHelper: RouterHelper,
+    private toastHelper: ToastHelper,
   ) {
     super(authService, firestore, storage);
   }
@@ -42,10 +46,10 @@ export class BlogService extends CommonService {
     return results.filter(Boolean);
   }
 
-  removeCategoryPosts(
+  async removeCategoryPosts(
     blogId: string,
     postCreatedAtList: Array<number>,
-  ): Promise<void>|undefined {
+  ): Promise<void> {
     if (!blogId){
       return;
     }
@@ -53,24 +57,39 @@ export class BlogService extends CommonService {
       postCreatedAtList = [-1];
     }
 
-    return this.firestore
-    .collection<BlogContent>(environment.rootPath + 'blogs').doc(blogId)
-    .collection<PostContent>('posts', ref => ref
-      .where('createdAt', 'in', postCreatedAtList)
-    ).get().toPromise().then(posts => posts.forEach(postDoc => {
-      const cascade = {
-        parentKeyName: null,
-        collectionPath: `blogs/${blogId}/posts`,
-        childrenStorage: ['images'],
-        children: [{
-          parentKeyName: 'postId',
-          collectionPath: `blogs/${blogId}/comments`,
-          children: []
-        }]
-      };
-      this.delete(
-        `blogs/${blogId}/posts/${postDoc.id}`, cascade
-      );
-    }));
+    const postContentsPromises = [];
+    for (let index = 0; index < postCreatedAtList.length; index += 10) {
+      const createdAtList = Object.assign([], postCreatedAtList).splice(index, index + 10);
+      const postContentPromise = this.firestore
+      .collection<BlogContent>(environment.rootPath + 'blogs').doc(blogId)
+      .collection<PostContent>('posts', ref => ref
+        .where('createdAt', 'in', createdAtList)
+      ).get().toPromise();
+
+      postContentsPromises.push(postContentPromise);
+    }
+
+    await Promise.all(postContentsPromises).then((postContentsList) => {
+      postContentsList.forEach(posts => {
+        posts.forEach(postDoc => {
+          const cascade = {
+            parentKeyName: null,
+            collectionPath: `blogs/${blogId}/posts`,
+            // childrenStorage: ['images'],
+            children: [{
+              parentKeyName: 'postId',
+              collectionPath: `blogs/${blogId}/comments`,
+              children: []
+            }]
+          };
+          this.delete(
+            `blogs/${blogId}/posts/${postDoc.id}`, cascade
+          );
+        });
+      });
+    });
+
+    this.toastHelper.showSuccess('Category Removed', 'Success!');
+    this.routerHelper.goToBlogPrologue({});
   }
 }
