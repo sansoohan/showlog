@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, merge, Observable } from 'rxjs';
+import { Subscription, zip, Observable } from 'rxjs';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import { TalkService } from 'src/app/services/talk.service';
@@ -139,9 +139,11 @@ export class EntranceComponent implements OnInit, OnDestroy {
     }
 
     this.roomContents = [];
-    this.roomContentsSub = merge(...this.roomContentsObservers)?.subscribe((roomContents: any) => {
-      this.roomContents = [...this.roomContents || [], ...roomContents];
-      this.roomContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
+    this.roomContentsSub = zip(...this.roomContentsObservers)?.subscribe((roomContentsList) => {
+      roomContentsList.forEach((roomContents) => {
+        this.roomContents = [...this.roomContents || [], ...roomContents];
+        this.roomContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
+      });
     });
   }
 

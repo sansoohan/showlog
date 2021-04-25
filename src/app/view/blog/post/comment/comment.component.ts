@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { Subscription, Observable, merge } from 'rxjs';
+import { Subscription, Observable, zip } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { CommentContent } from './comment.content';
 import { BlogService } from 'src/app/services/blog.service';
@@ -227,10 +227,12 @@ export class CommentComponent implements OnInit, OnDestroy {
     }
 
     this.commentContents = [];
-    this.commentContentsSub = merge(...this.commentContentsObservers)?.subscribe(commentContents => {
-      this.commentContents = [...this.commentContents || [], ...commentContents];
-      this.commentContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
-      this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
+    this.commentContentsSub = zip(...this.commentContentsObservers)?.subscribe((commentContentsList) => {
+      commentContentsList.forEach(commentContents => {
+        this.commentContents = [...this.commentContents || [], ...commentContents];
+        this.commentContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
+        this.commentContentsForm = this.formHelper.buildFormRecursively({commentContents: this.commentContents});
+      });
     });
 
     if (selectedCreatedAtList.length === 0) {
