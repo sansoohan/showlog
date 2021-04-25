@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { PostContent } from '../post/post.content';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription, merge } from 'rxjs';
+import { Observable, Subscription, zip } from 'rxjs';
 import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
 import { CategoryContent } from '../category/category.content';
@@ -10,7 +10,6 @@ import { RouterHelper } from 'src/app/helper/router.helper';
 import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import * as firebase from 'firebase/app';
-import { CommentContent } from '../post/comment/comment.content';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
 const FieldPath = firebase.default.firestore.FieldPath;
 
@@ -23,7 +22,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
   @Input() canEdit?: boolean;
   @Input() isCreatingPost?: boolean;
 
-  postListObservers?: Array<Observable<PostContent[]>>;
+  postListsObservers?: Array<Observable<PostContent[]>>;
   postList?: PostContent[];
   postListSub?: Subscription;
   postListForm: any;
@@ -115,7 +114,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
     .sort((createdA, createdB) => createdB - createdA)
     .splice(startIndex, startIndex + this.pageSize);
 
-    this.postListObservers = [];
+    this.postListsObservers = [];
     for (let index = 0; index < selectedCreatedAtList.length; index += 10) {
       const createdAtList = Object.assign([], selectedCreatedAtList).splice(index, index + 10);
       const postListObserver = this.blogService.select<PostContent>(
@@ -129,15 +128,21 @@ export class CategoryComponent implements OnInit, OnDestroy {
         } as CollectionSelect
       );
 
-      this.postListObservers.push(postListObserver);
+      this.postListsObservers.push(postListObserver);
     }
 
+    console.log(this.postListsObservers);
+
     this.postList = [];
-    this.postListSub = merge(...this.postListObservers)?.subscribe((postList) => {
-      this.postList = [...this.postList || [], ...postList];
-      this.postList.sort((postA, postB) => postB.createdAt - postA.createdAt);
-      this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
-      this.isLoading = false;
+    this.postListForm = null;
+    this.postListSub = zip(...this.postListsObservers)?.subscribe((postLists) => {
+      postLists.forEach((postList) => {
+        console.log(postList);
+        this.postList = [...this.postList || [], ...postList];
+        this.postList.sort((postA, postB) => postB.createdAt - postA.createdAt);
+        this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});
+        this.isLoading = false;
+      });
     });
 
     if (selectedCreatedAtList.length === 0) {
@@ -151,6 +156,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.postListsObservers = [];
     this.paramSub?.unsubscribe();
     this.queryParamSub?.unsubscribe();
     this.postListSub?.unsubscribe();
