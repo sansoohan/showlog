@@ -27,10 +27,20 @@
             *ngIf="authService.isSignedIn() && isEditingPost"
             (click)="handleClickEditPostCreateCancel()"
           >Cancel</Button>
+          <Button
+            class="btn btn-sm btn-outline-light me-2"
+            *ngIf="authService.isSignedIn() && isEditingPost"
+            (click)="clickSlackSync()"
+          >SlackSync</Button>
+          <Button
+            class="btn btn-sm btn-outline-light me-2"
+            *ngIf="authService.isSignedIn() && isEditingPost"
+            (click)="clickEditSlackSync()"
+          >EditSlackSync</Button>
         </div>
 
         <div *ngIf="!isCreatingPost" class="row">
-          <div class="col-6">
+          <div class="col-8">
             <Button
               class="btn btn-sm btn-warning me-2"
               *ngIf="authService.isSignedIn() && !isEditingPost"
@@ -56,8 +66,13 @@
               *ngIf="authService.isSignedIn() && isEditingPost"
               (click)="clickSlackSync()"
             >SlackSync</Button>
+            <Button
+              class="btn btn-sm btn-outline-light me-2"
+              *ngIf="authService.isSignedIn() && isEditingPost"
+              (click)="clickEditSlackSync()"
+            >EditSlackSync</Button>
           </div>
-          <div class="col-6 d-flex">
+          <div class="col-4 d-flex">
             <Button
               class="btn btn-sm btn-warning ms-auto"
               *ngIf="authService.isSignedIn() && !isEditingPost"

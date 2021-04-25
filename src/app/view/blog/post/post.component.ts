@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { PostContent } from './post.content';
 import { ActivatedRoute } from '@angular/router';
+import { AngularFireFunctions } from '@angular/fire/functions';
 import { Observable, Subscription } from 'rxjs';
 import { BlogService } from 'src/app/services/blog.service';
 import { BlogContent } from '../blog.content';
@@ -10,10 +11,12 @@ import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { ProfileService } from 'src/app/services/profile.service';
 import { ToastHelper } from 'src/app/helper/toast.helper';
+import { environment } from 'src/environments/environment';
 import Swal from 'sweetalert2';
 import { ImageHelper, ImageContent } from 'src/app/helper/image.helper';
 import { ImageStorage } from 'src/app/storages/image.storage';
 import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 'ngx-file-drop';
+// import { WebClient } from '@slack/web-api';
 
 @Component({
   selector: 'app-blog-post',
@@ -32,6 +35,7 @@ export class PostComponent implements OnInit, OnDestroy {
     private blogService: BlogService,
     private formHelper: FormHelper,
     private imageStorage: ImageStorage,
+    private functions: AngularFireFunctions,
   ) {
     this.isPage = true;
     this.paramSub = this.route.params.subscribe(params => {
@@ -400,7 +404,6 @@ export class PostComponent implements OnInit, OnDestroy {
     const selectedSlackSync = slackSyncs.find((slackSync: any) => slackSync.selected);
     const itemlist: Array<string> = [];
     let selectedIndex = -1;
-    console.log(slackSyncs);
     slackSyncs.forEach((slackSync: any, index: number) => {
       itemlist.push(slackSync.name);
       if (slackSync.selected) {
@@ -408,11 +411,22 @@ export class PostComponent implements OnInit, OnDestroy {
       }
     });
 
-    const { value } = await this.toastHelper.selectOneFromArray(itemlist, selectedIndex);
-    selectedIndex = value;
-    slackSyncs.forEach((slackSync: any, index: number) => {
-      slackSync.selected = selectedIndex === index;
-    });
+    const res = await this.toastHelper.selectOneFromArray(itemlist, selectedIndex);
+    console.log(res);
+
+    // Add
+    if (res?.dismiss === 'cancel') {
+      await this.clickAddSlackSync(slackSyncs);
+    }
+
+    // Select
+    if (typeof(res.value) === 'number') {
+      selectedIndex = res.value;
+      slackSyncs.forEach((slackSync: any, index: number) => {
+        slackSync.selected = selectedIndex === index;
+      });
+    }
+
     const { uid } = this.authService.getCurrentUser();
     const updatedFrom = {
       source: 'webclient',
@@ -421,6 +435,119 @@ export class PostComponent implements OnInit, OnDestroy {
     };
 
     await this.authService.updateSlackSyncs(slackSyncs, updatedFrom);
+  }
+
+  async clickEditSlackSync(): Promise<void> {
+    const slackSyncs = await this.authService.getSlackSyncs();
+    const itemlist: Array<string> = [];
+    let selectedIndex = -1;
+    slackSyncs.forEach((slackSync: any, index: number) => {
+      itemlist.push(slackSync.name);
+      if (slackSync.selected) {
+        selectedIndex = index;
+      }
+    });
+
+    const selected = await this.toastHelper.selectOneFromArray(itemlist, selectedIndex);
+    console.log(selected);
+
+    let taskName;
+    // Add
+    if (selected?.dismiss === 'cancel') {
+      taskName = 'Add SlackSync';
+      await this.clickAddSlackSync(slackSyncs);
+    }
+
+    selectedIndex = selected?.value;
+    // Edit
+    if (typeof(selectedIndex) === 'number') {
+      if (selectedIndex < 0) {
+        return;
+      }
+
+      const res = await this.toastHelper.editSlackSync(slackSyncs[selectedIndex]);
+      console.log(res);
+
+      // Delete
+      if (res.isDenied) {
+        taskName = 'Delete SlackSync';
+        slackSyncs.splice(selectedIndex, 1);
+      }
+
+      // Update
+      if (res.value) {
+        taskName = 'Update SlackSync';
+        slackSyncs.forEach((slackSync: any, index: number) => {
+          slackSync.selected = selectedIndex === index;
+        });
+        slackSyncs[selectedIndex] = res.value;
+        await this.checkSlackCheck(res.value?.channel, res.value?.token);
+      }
+    }
+
+    const { uid } = this.authService.getCurrentUser();
+    const updatedFrom = {
+      source: 'webclient',
+      name: 'clickSlackSync',
+      uid,
+    };
+
+    if (taskName) {
+      await this.authService.updateSlackSyncs(slackSyncs, updatedFrom);
+      this.toastHelper.showSuccess(taskName, 'Success!');
+    }
+  }
+
+
+  async clickAddSlackSync(slackSyncs: Array<any>): Promise<void> {
+    const { value } = await this.toastHelper.addSlackSync();
+    if (!value) {
+      return;
+    }
+
+    if (!value?.channel || !value?.name || !value?.token) {
+      this.toastHelper.showError('Add Slack Sync', 'Please Enter channel, name and token');
+      return;
+    }
+
+    const res = await this.checkSlackCheck(value?.channel, value?.token);
+
+    if (res.ok) {
+      if (value.selected) {
+        slackSyncs.forEach((slackSync: any) => {
+          slackSync.selected = false;
+        });
+      }
+      slackSyncs.push(value);
+
+      const { uid } = this.authService.getCurrentUser();
+      const updatedFrom = {
+        source: 'webclient',
+        name: 'clickAddSlackSync',
+        uid,
+      };
+
+      await this.authService.updateSlackSyncs(slackSyncs, updatedFrom);
+      this.toastHelper.showError('Slack Sync Add', 'Success!');
+    }
+  }
+
+  async checkSlackCheck(channel: string, token: string): Promise<any> {
+    let res;
+    try {
+      res = await this.functions.httpsCallable(
+        'showlogBlogPostValidateChannelOnSlack'
+      )({
+        slack: {
+          channel,
+          token,
+        },
+        rootPath: environment.rootPath,
+      }).toPromise();
+    } catch (error) {
+      this.toastHelper.showError('Slack Sync Error', 'Can not push Message. Please Check channel and token');
+    }
+    return res;
   }
 
   public dropped(files: NgxFileDropEntry[]): void {

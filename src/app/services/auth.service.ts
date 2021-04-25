@@ -109,7 +109,7 @@ export class AuthService {
     const {uid} = this.getCurrentUser();
     await this.firestore.doc<ProfileContent>([
       environment.rootPath + `profiles/${uid}`,
-    ].join('/')).update({slackSyncs});
+    ].join('/')).update({slackSyncs, updatedFrom});
   }
 
   getCurrentUser(): any {
