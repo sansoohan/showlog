@@ -228,6 +228,7 @@ export class CommentComponent implements OnInit, OnDestroy {
 
     this.commentContents = [];
     this.commentContentsSub = zip(...this.commentContentsObservers)?.subscribe((commentContentsList) => {
+      this.commentContents = [];
       commentContentsList.forEach(commentContents => {
         this.commentContents = [...this.commentContents || [], ...commentContents];
         this.commentContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);

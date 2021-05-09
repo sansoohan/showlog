@@ -131,13 +131,11 @@ export class CategoryComponent implements OnInit, OnDestroy {
       this.postListsObservers.push(postListObserver);
     }
 
-    console.log(this.postListsObservers);
-
     this.postList = [];
     this.postListForm = null;
     this.postListSub = zip(...this.postListsObservers)?.subscribe((postLists) => {
+      this.postList = [];
       postLists.forEach((postList) => {
-        console.log(postList);
         this.postList = [...this.postList || [], ...postList];
         this.postList.sort((postA, postB) => postB.createdAt - postA.createdAt);
         this.postListForm = this.formHelper.buildFormRecursively({postList: this.postList});

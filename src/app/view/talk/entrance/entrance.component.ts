@@ -140,6 +140,7 @@ export class EntranceComponent implements OnInit, OnDestroy {
 
     this.roomContents = [];
     this.roomContentsSub = zip(...this.roomContentsObservers)?.subscribe((roomContentsList) => {
+      this.roomContents = [];
       roomContentsList.forEach((roomContents) => {
         this.roomContents = [...this.roomContents || [], ...roomContents];
         this.roomContents.sort((commentA: any, commentB: any) => commentB.createdAt - commentA.createdAt);
