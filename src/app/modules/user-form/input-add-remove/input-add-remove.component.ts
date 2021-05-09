@@ -62,11 +62,15 @@ export class InputAddRemoveComponent implements OnInit {
       cancelButtonText: 'No, cancel!',
       reverseButtons: true
     }).then((result) => {
-      if (result.value && this.targetArrayIndex) {
-        this.targetArrayForm?.removeAt(this.targetArrayIndex);
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        return
       }
-      else if (result.dismiss === Swal.DismissReason.cancel) {
+
+      if (result.dismiss === Swal.DismissReason.backdrop) {
+        return
       }
+
+      this.targetArrayForm?.removeAt(this.targetArrayIndex);
     });
   }
 
