@@ -7,14 +7,10 @@ import * as v from './v'
 const adminDatabase = admin.database()
 
 export const showlogTalkRoomCreateMember = functions.database.ref([
-  '{env}',
-  'showlog',
-  'talks',
-  '{talkId}',
-  'rooms',
-  '{roomId}',
-  '_broadcast_',
-  '{broadcastId}',
+  '{env}/showlog',
+  'talks/{talkId}',
+  'rooms/{roomId}',
+  '_broadcast_/{broadcastId}',
 ].join('/'))
 .onCreate(async (snapshot, context) => {
   const { env } = context.params

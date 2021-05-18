@@ -9,6 +9,7 @@ import * as firebase from 'firebase/app';
 import { TalkContent } from '../talk.content';
 import { RoomContent } from '../room/room.content';
 import { AuthService } from 'src/app/services/auth.service';
+import { environment } from 'src/environments/environment';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
@@ -69,8 +70,16 @@ export class EntranceComponent implements OnInit, OnDestroy {
       createdAt !== roomContent.createdAt);
     try {
       await Promise.all([
-        this.talkService.delete(`talks/${this.talkId}/rooms/${roomContent.id}`, {}),
-        this.talkService.update(`talks/${this.talkId}`, {roomCreatedAtList}),
+        this.talkService.delete([
+          environment.rootPath,
+          `talks/${this.talkId}`,
+          'rooms',
+          roomContent.id,
+        ].join('/'), {}),
+        this.talkService.update([
+          environment.rootPath,
+          `talks/${this.talkId}`,
+        ].join('/'), {roomCreatedAtList}),
       ]);
     } catch (error) {
       console.error(error);
@@ -91,8 +100,15 @@ export class EntranceComponent implements OnInit, OnDestroy {
     newRoom.ownerId = uid || '';
     try {
       await Promise.all([
-        this.talkService.create(`talks/${this.talkId}/rooms`, newRoom),
-        this.talkService.update(`talks/${this.talkId}`, {
+        this.talkService.create([
+          environment.rootPath,
+          `talks/${this.talkId}`,
+          'rooms',
+        ].join('/'), newRoom),
+        this.talkService.update([
+          environment.rootPath,
+          `talks/${this.talkId}`,
+        ].join('/'), {
           roomCreatedAtList: [...this.roomCreatedAtList, newRoom.createdAt]
         }),
       ]);
@@ -125,7 +141,11 @@ export class EntranceComponent implements OnInit, OnDestroy {
     for (let index = 0; index < selectedCreatedAtList.length; index += 10) {
       const createdAtList = Object.assign([], selectedCreatedAtList).splice(index, index + 10);
       const commentContentsObserver = this.talkService.select<RoomContent>(
-        `talks/${this.talkId}/rooms`,
+        [
+          environment.rootPath,
+          `talks/${this.talkId}`,
+          'rooms',
+        ].join('/'),
         {
           where: [{
             fieldPath: new FieldPath('createdAt'),

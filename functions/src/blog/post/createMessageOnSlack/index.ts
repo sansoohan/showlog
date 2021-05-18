@@ -5,12 +5,9 @@ import * as v from './v'
 const adminDatabase = admin.database()
 
 export const showlogBlogPostCreateMessageOnSlack = functions.firestore.document([
-  '{env}',
-  'showlog',
-  'blogs',
-  '{blogId}',
-  'posts',
-  '{postId}',
+  '{env}/showlog',
+  'blogs/{blogId}',
+  'posts/{postId}',
 ].join('/'))
 .onCreate(async (snapshot, context) => {
   const { env } = context.params

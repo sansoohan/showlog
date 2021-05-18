@@ -5,12 +5,9 @@ import * as v from './v'
 const adminDatabase = admin.database()
 
 export const showlogBlogPostUpdateMessageOnSlack = functions.firestore.document([
-  '{env}',
-  'showlog',
-  'blogs',
-  '{blogId}',
-  'posts',
-  '{postId}',
+  '{env}/showlog',
+  'blogs/{blogId}',
+  'posts/{postId}',
 ].join('/'))
 .onUpdate(async (change, context) => {
   const { env } = context.params

@@ -9,6 +9,7 @@ import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import { RouterHelper } from 'src/app/helper/router.helper';
 import * as firebase from 'firebase/app';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
+import { environment } from 'src/environments/environment';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
@@ -39,7 +40,10 @@ export class BlogComponent implements OnInit, OnDestroy {
     this.paramSub = this.route.params.subscribe(params => {
       this.params = params;
       this.blogContentsObserver = this.blogService.select<BlogContent>(
-        `blogs`,
+        [
+          environment.rootPath,
+          `blogs`,
+        ].join('/'),
         {
           where: [{
             fieldPath: new FieldPath('userName'),

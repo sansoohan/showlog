@@ -61,7 +61,7 @@ export class BlogService extends CommonService {
     for (let index = 0; index < postCreatedAtList.length; index += 10) {
       const createdAtList = Object.assign([], postCreatedAtList).splice(index, index + 10);
       const postContentPromise = this.firestore
-      .collection<BlogContent>(environment.rootPath + 'blogs').doc(blogId)
+      .collection<BlogContent>('blogs').doc(blogId)
       .collection<PostContent>('posts', ref => ref
         .where('createdAt', 'in', createdAtList)
       ).get().toPromise();

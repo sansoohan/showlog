@@ -68,7 +68,12 @@ export class PostComponent implements OnInit, OnDestroy {
         this.blogId = blogContent.id;
 
         this.imageContentsObserver = this.imageStorage.getImageContentsObserver(
-          `blogs/${this.blogId}/posts/${this.postId}/images`
+          [
+            environment.rootPath,
+            `blogs/${this.blogId}`,
+            `posts/${this.postId}`,
+            `images`,
+          ].join('/')
         );
         this.imageContentsSub = this.imageContentsObserver.subscribe(imageContents => {
           this.imageContents = imageContents;
@@ -76,7 +81,11 @@ export class PostComponent implements OnInit, OnDestroy {
 
         if (!this.isCreatingPost) {
           this.postContentObserver = this.blogService.observe<PostContent>(
-            `blogs/${this.blogId}/posts/${this.postId}`
+            [
+              environment.rootPath,
+              `blogs/${this.blogId}`,
+              `posts/${this.postId}`,
+            ].join('/')
           );
           this.postContentSub = this.postContentObserver?.subscribe(postContent => {
             if (!postContent) {
@@ -137,6 +146,7 @@ export class PostComponent implements OnInit, OnDestroy {
       });
 
       const path = [
+        environment.rootPath,
         `blogs/${this.blogId}`,
         `posts/${this.postId}`,
         `images/${postImageContent.id}`,
@@ -166,7 +176,12 @@ export class PostComponent implements OnInit, OnDestroy {
         const objectUrl = _URL.createObjectURL(data.value);
         img.src = objectUrl;
         img.onload = async () => {
-          const path = `blogs/${this.blogId}/posts/${this.postId}/images`;
+          const path = [
+            environment.rootPath,
+            `blogs/${this.blogId}`,
+            `posts/${this.postId}`,
+            'images',
+          ].join('/');
           let postImageContent = new ImageContent();
           postImageContent.attributes.style = [
             `width:${img.width}px`,
@@ -198,6 +213,7 @@ export class PostComponent implements OnInit, OnDestroy {
 
   async handleClickEditPostImage(postImageContent: ImageContent): Promise<void> {
     const path = [
+      environment.rootPath,
       `blogs/${this.blogId}`,
       `posts/${this.postId}`,
       `images/${postImageContent.id}`,
@@ -281,8 +297,15 @@ export class PostComponent implements OnInit, OnDestroy {
         ];
 
         Promise.all([
-          this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent),
-          this.blogService.set(`blogs/${this.blogContent?.id}/posts/${newPost.id}`, newPost),
+          this.blogService.update([
+            environment.rootPath,
+            `blogs/${this.blogContent?.id}`
+          ].join('/'), this.blogContent),
+          this.blogService.set([
+            environment.rootPath,
+            `blogs/${this.blogContent?.id}`,
+            `posts/${newPost.id}`
+          ].join('/'), newPost),
           this.updateRemovedImage(),
         ]).then(() => {
           this.toastHelper.showSuccess('Post Update', 'Success!');
@@ -299,13 +322,26 @@ export class PostComponent implements OnInit, OnDestroy {
   handleClickEditPostCreateCancel(): void {
     const newPost = this.postContentForm.value;
     this.blogService.delete(
-      `blogs/${this.blogContent?.id}/posts/${newPost.id}`, {
+      [
+        environment.rootPath,
+        `blogs/${this.blogContent?.id}`,
+        `posts/${newPost.id}`,
+      ].join('/'),
+      {
         parentKeyName: null,
-        collectionPath: `blogs/${this.blogContent?.id}/posts`,
+        collectionPath: [
+          environment.rootPath,
+          `blogs/${this.blogContent?.id}`,
+          'posts'
+        ].join('/'),
         childrenStorage: ['images'],
         children: [{
           parentKeyName: 'postId',
-          collectionPath: `blogs/${this.blogContent?.id}/comments`,
+          collectionPath: [
+            environment.rootPath,
+            `blogs/${this.blogContent?.id}`,
+            'comments'
+          ].join('/'),
           children: []
         }]
       }
@@ -335,8 +371,11 @@ export class PostComponent implements OnInit, OnDestroy {
       }
 
       this.blogService
-      .update(
-        `blogs/${this.blogContent?.id}/posts/${this.postContentForm.value.id}`,
+      .update([
+          environment.rootPath,
+          `blogs/${this.blogContent?.id}`,
+          `posts/${this.postContentForm.value.id}`,
+        ].join('/'),
         postContent
       )
       .then(() => {
@@ -373,15 +412,31 @@ export class PostComponent implements OnInit, OnDestroy {
           }
 
           Promise.all([
-            this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent),
+            this.blogService.update([
+              environment.rootPath,
+              `blogs/${this.blogContent?.id}`
+            ].join('/'), this.blogContent),
             this.blogService.delete(
-              `blogs/${this.blogContent?.id}/posts/${this.postContentForm.value.id}`, {
+              [
+                environment.rootPath,
+                `blogs/${this.blogContent?.id}`,
+                `posts/${this.postContentForm.value.id}`
+              ].join('/'),
+              {
                 parentKeyName: null,
-                collectionPath: `blogs/${this.blogContent?.id}/posts`,
+                collectionPath: [
+                  environment.rootPath,
+                  `blogs/${this.blogContent?.id}`,
+                  `posts`,
+                ].join('/'),
                 // childrenStorage: ['images'],
                 children: [{
                   parentKeyName: 'postId',
-                  collectionPath: `blogs/${this.blogContent?.id}/comments`,
+                  collectionPath: [
+                    environment.rootPath,
+                    `blogs/${this.blogContent?.id}`,
+                    `comments`,
+                  ].join('/'),
                   children: []
                 }]
               }

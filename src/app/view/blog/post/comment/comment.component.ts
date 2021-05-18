@@ -13,6 +13,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
 import * as firebase from 'firebase/app';
 import { PostContent } from '../post.content';
+import { environment } from 'src/environments/environment';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
@@ -114,10 +115,22 @@ export class CommentComponent implements OnInit, OnDestroy {
 
     this.creatingCommentForm = this.formHelper.buildFormRecursively(newComment);
     Promise.all([
-      this.blogService.create(`blogs/${this.postContent?.blogId}/comments`, newComment),
-      this.blogService.update(`blogs/${this.postContent?.blogId}/posts/${this.postContent?.id}`, {
-        commentCreatedAtList: [...this.commentCreatedAtList, createdAt]
-      }),
+      this.blogService.create(
+        [
+          environment.rootPath,
+          `blogs${this.postContent?.blogId}`,
+          `comments`
+        ].join('/'), newComment),
+      this.blogService.update(
+        [
+          environment.rootPath,
+          `blogs${this.postContent?.blogId}`,
+          `posts/${this.postContent?.id}`
+        ].join('/'),
+        {
+          commentCreatedAtList: [...this.commentCreatedAtList, createdAt]
+        }
+      ),
     ])
     .then(() => {
       this.toastHelper.showSuccess('Comment Update', 'Success!');
@@ -155,7 +168,11 @@ export class CommentComponent implements OnInit, OnDestroy {
 
     this.blogService
     .update(
-      `blogs/${this.postContent?.id}/comments/${commentForm.value.id}`,
+      [
+        environment.rootPath,
+        `blogs/${this.postContent?.id}`,
+        `comments/${commentForm.value.id}`,
+      ].join('/'),
       commentForm.value
     )
     .then(() => {
@@ -173,12 +190,23 @@ export class CommentComponent implements OnInit, OnDestroy {
         .filter((createdAt) => commentContent.value.createdAt !== createdAt);
         Promise.all([
           this.blogService.delete(
-            `blogs/${this.postContent?.blogId}/comments/${commentContent.value.id}`,
+            [
+              environment.rootPath,
+              `blogs/${this.postContent?.blogId}`,
+              `comments/${commentContent.value.id}`,
+            ].join('/'),
             {}
           ),
-          this.blogService.update(`blogs/${this.postContent?.blogId}/posts/${this.postContent?.id}`, {
-            commentCreatedAtList
-          }),
+          this.blogService.update(
+            [
+              environment.rootPath,
+              `blogs/${this.postContent?.blogId}`,
+              `posts/${this.postContent?.id}`,
+            ].join('/'),
+            {
+              commentCreatedAtList
+            }
+          ),
         ])
         .then(() => {
           this.toastHelper.showSuccess('Comment Delete', 'OK');
@@ -213,7 +241,11 @@ export class CommentComponent implements OnInit, OnDestroy {
     for (let index = 0; index < selectedCreatedAtList.length; index += 10) {
       const createdAtList = Object.assign([], selectedCreatedAtList).splice(index, index + 10);
       const commentContentsObserver = this.blogService.select<CommentContent>(
-        `blogs/${this.blogId}/posts`,
+        [
+          environment.rootPath,
+          `blogs/${this.blogId}`,
+          `posts`,
+        ].join('/'),
         {
           where: [{
             fieldPath: new FieldPath('createdAt'),

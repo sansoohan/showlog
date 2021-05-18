@@ -12,6 +12,7 @@ import { ToastHelper } from 'src/app/helper/toast.helper';
 import { ImageContent, ImageHelper } from 'src/app/helper/image.helper';
 import Swal from 'sweetalert2';
 import { FormControl } from '@angular/forms';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-blog-left-sidebar',
@@ -65,7 +66,10 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       return;
     }
     this.blogContent.categoryMap = categoryMap;
-    this.blogService.update(`blogs/${this.blogContent.id}`, this.blogContent)
+    this.blogService.update([
+      environment.rootPath,
+      `blogs/${this.blogContent.id}`
+    ].join('/'), this.blogContent)
     .catch(() => {
       this.toastHelper.showSuccess('Category Map', 'Updating Category Map is failed');
     });
@@ -85,7 +89,11 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
     .then(async (data) => {
       if (data.value) {
         category.name = data.value;
-        this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent)
+        this.blogService.update(
+          [
+            environment.rootPath,
+            `blogs/${this.blogContent?.id}`,
+          ].join('/'), this.blogContent)
         .then(() => {
           this.toastHelper.showSuccess('Category Name', 'Category Name is updated');
         })
@@ -100,7 +108,10 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
             this.blogContent.categoryMap = this.deleteCategory(
               blogId, categoryId, this.blogContent.categoryMap
             );
-            this.blogService.update(`blogs/${blogId}`, this.blogContent)
+            this.blogService.update([
+              environment.rootPath,
+              `blogs/${blogId}`,
+            ].join('/'), this.blogContent)
             .then(() => {
               this.toastHelper.showSuccess('Remove Category', 'Category is removed');
             })
@@ -140,7 +151,10 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       ];
     }
 
-    this.blogService.update(`blogs/${this.blogContent?.id}`, this.blogContent);
+    this.blogService.update([
+      environment.rootPath,
+      `blogs/${this.blogContent?.id}`
+    ].join('/'), this.blogContent);
   }
 
   getCategoryPageList(category: CategoryContent): Array<number> {

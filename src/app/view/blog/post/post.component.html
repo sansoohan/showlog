@@ -4,7 +4,7 @@
 <div *ngIf="isPage">
   <div *ngIf="isLoading">
     <app-modules-page-loading style="color:'white'"></app-modules-page-loading>
-  </div>  
+  </div>
   <app-blog-left-sidebar
     [isEditingPost]="isEditingPost"
     [canEdit]="canEdit"
@@ -131,15 +131,6 @@
               placeholder="Title"
             />
             <div style="position: relative;">
-              <ngx-file-drop
-                class="dropdown-wraper"
-                dropZoneClassName="h-100"
-                contentClassName="h-100"
-                (onFileDrop)="dropped($event)" 
-                (onFileOver)="fileOver($event)"
-                (onFileLeave)="fileLeave($event)"
-              >
-              </ngx-file-drop>
               <textarea
                 id="postTextArea"
                 #postTextArea

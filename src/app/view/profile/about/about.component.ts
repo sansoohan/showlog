@@ -4,6 +4,7 @@ import { ProfileService } from 'src/app/services/profile.service';
 import { ProfileContent } from '../profile.content';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
 import * as firebase from 'firebase/app';
+import { environment } from 'src/environments/environment';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 export type UserNameValidationError = {
@@ -52,7 +53,10 @@ export class AboutComponent implements OnInit {
     if (event.target.value) {
       await new Promise<void>((resolve) => {
         const tmpSubscription = this.profileService.select<ProfileContent>(
-          `profiles`,
+          [
+            environment.rootPath,
+            `profiles`,
+          ].join('/'),
           {
             where: [{
               fieldPath: new FieldPath('userName'),

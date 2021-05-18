@@ -5,22 +5,17 @@ import * as v from './v'
 const adminDatabase = admin.database()
 
 export const showlogTalkRoomDeleteMember = functions.database.ref([
-  '{env}',
-  'showlog',
-  'talks',
-  '{talkId}',
-  'rooms',
-  '{roomId}',
-  '_broadcast_',
-  '{broadcastId}',
+  '{env}/showlog',
+  'talks/{talkId}',
+  'rooms/{roomId}',
+  '_broadcast_/{broadcastId}',
 ].join('/'))
 .onDelete(async (snapshot, context) => {
   const { env } = context.params
   const databaseRootFunctionV: any = await new Promise((resolve) => {
     // tslint:disable-next-line: no-floating-promises
     adminDatabase.ref([
-      env,
-      'showlog',
+      `${env}/showlog`,
       'FUNCTION_V'
     ].join('/')).once("value", (functionSnapshot: any) => {
       resolve(functionSnapshot.val())

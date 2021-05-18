@@ -24,25 +24,70 @@ export const v1 = async (
 
   const { slack: beforeSlack } = change.before.data();
 
+  const imageTagAttributesList = postMarkdown.matchAll(/(<img (.+?)\/>)/g)
+  const postMarkdownIndexs = [[0]]
+  const imagesTagAttributes = []
+  const blocks: Array<any> = [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `<${postUrl}|${postTitle}>`,
+      },
+    },
+  ]
+
+  for (const tagAttribute of imageTagAttributesList) {
+    const imageTagAttribute: any = { attributes: {} }
+    postMarkdownIndexs[postMarkdownIndexs.length - 1].push(tagAttribute.index)
+    postMarkdownIndexs.push([tagAttribute.index + tagAttribute[1].length])
+    tagAttribute[2].split(' ').filter(Boolean).forEach((a: any) => {
+      const [key, value] = a.split('=\"');
+      imageTagAttribute.attributes[key] = value.replace(/\"/g, '');
+    });
+    imagesTagAttributes.push(imageTagAttribute)
+  }
+  postMarkdownIndexs[postMarkdownIndexs.length - 1].push(postMarkdown.length)
+
+  imagesTagAttributes.forEach((imagesTagAttribute, index) => {
+    if (postMarkdownIndexs[index][0] !== postMarkdownIndexs[index][1]) {
+      const markdownPart = postMarkdown.substring(
+        postMarkdownIndexs[index][0],
+        postMarkdownIndexs[index][1],
+      )
+      blocks.push({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: markdownPart,
+        },
+      })
+    }
+
+    blocks.push({
+      type: "image",
+      "image_url": imagesTagAttribute.attributes?.src,
+      "alt_text": "An incredibly cute kitten."
+    })
+  })
+
+  const startIndex = postMarkdownIndexs[postMarkdownIndexs.length - 1][0]
+  const endIndex = postMarkdownIndexs[postMarkdownIndexs.length - 1][1]
+  if (startIndex !== endIndex) {
+    const markdownPart = postMarkdown.substring(startIndex, endIndex)
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: markdownPart,
+      },
+    })
+  }
+
   const slackCreateOrUpdate: any = {
     channel,
     text: postTitle,
-    blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `<${postUrl}|${postTitle}>`,
-        },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: postMarkdown,
-        },
-      },
-    ],
+    blocks,
   }
 
   const web = new WebClient(token);

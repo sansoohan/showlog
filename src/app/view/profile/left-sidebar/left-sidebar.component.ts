@@ -14,6 +14,7 @@ import { ProfileService } from 'src/app/services/profile.service';
 import { ToastHelper } from 'src/app/helper/toast.helper';
 import { ImageContent } from 'src/app/helper/image.helper';
 import { ImageStorage } from 'src/app/storages/image.storage';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-profile-left-sidebar',
@@ -63,7 +64,12 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
       this.profileContent = profileForm?.value;
 
       this.imageContentsObserver = this.imageStorage.getImageContentsObserver(
-        `profiles/${this.profileContent?.id}/images`
+        [
+          environment.rootPath,
+          'profiles',
+          this.profileContent?.id,
+          'images',
+        ].join('/')
       );
       this.imageContentsSub = this.imageContentsObserver.subscribe((imageContents) => {
         this.imageContents = imageContents;
@@ -117,7 +123,12 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
         const objectUrl = _URL.createObjectURL(data.value);
         img.src = objectUrl;
         img.onload = async () => {
-          const path = `profiles/${this.profileContent?.id}/images`;
+          const path = [
+            environment.rootPath,
+            'profiles',
+            this.profileContent?.id,
+            'images'
+          ].join('/');
           let profileImageContent: ImageContent = new ImageContent();
           profileImageContent.attributes.style = [
             `width:${img.width}px`,
@@ -134,7 +145,13 @@ export class LeftSidebarComponent implements OnInit, OnDestroy {
         };
       }
       else if (data.dismiss === Swal.DismissReason.cancel) {
-        const path = `profiles/${this.profileContent?.id}/images/${this.imageContents?.[0].id}`;
+        const path = [
+          environment.rootPath,
+          'profiles',
+          this.profileContent?.id,
+          'images',
+          this.imageContents?.[0].id
+        ].join('/');
         this.toastHelper.askYesNo('Remove Profile Image', 'Are you sure?').then(result => {
           if (result.value) {
             Promise.all([
