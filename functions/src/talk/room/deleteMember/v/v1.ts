@@ -9,6 +9,10 @@ export const v1 = async (
   context: functions.EventContext,
 ): Promise<void> => {
   const {env, talkId, roomId, broadcastId} = context.params;
-  const roomRef = firestore.doc(`${env}/showlog/talks/${talkId}/rooms/${roomId}`);
+  const roomRef = firestore.doc([
+    `${env}/showlog`,
+    `talks/${talkId}`,
+    `rooms/${roomId}`
+  ].join('/'));
   await roomRef.update({broadcastIds: FieldValue.arrayRemove(broadcastId)});
 }

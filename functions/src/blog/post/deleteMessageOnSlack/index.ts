@@ -5,12 +5,9 @@ import * as v from './v'
 const adminDatabase = admin.database()
 
 export const showlogBlogPostDeleteMessageOnSlack = functions.firestore.document([
-  '{env}',
-  'showlog',
-  'blogs',
-  '{blogId}',
-  'posts',
-  '{postId}',
+  '{env}/showlog',
+  'blogs/{blogId}',
+  'posts/{postId}',
 ].join('/'))
 .onDelete(async (snapshot, context) => {
   const { env } = context.params

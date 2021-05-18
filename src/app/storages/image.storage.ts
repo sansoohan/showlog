@@ -37,6 +37,7 @@ export class ImageStorage extends CommonStorage {
       content.id = this.newId();
       const filePath = `${path}/${content.id}`;
       const src = await this.upload(filePath, file).catch((e) => reject(e));
+      content = Object.assign({}, content);
       content.attributes.src = src;
       await this.firestore.doc<ImageContent>(filePath).set(Object.assign({}, content)).catch((e) => reject(e));
       resolve(content);

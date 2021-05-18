@@ -146,6 +146,7 @@ export class PostComponent implements OnInit, OnDestroy {
       });
 
       const path = [
+        environment.rootPath,
         `blogs/${this.blogId}`,
         `posts/${this.postId}`,
         `images/${postImageContent.id}`,
@@ -176,6 +177,7 @@ export class PostComponent implements OnInit, OnDestroy {
         img.src = objectUrl;
         img.onload = async () => {
           const path = [
+            environment.rootPath,
             `blogs/${this.blogId}`,
             `posts/${this.postId}`,
             'images',
