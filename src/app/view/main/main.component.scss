@@ -7,7 +7,7 @@
  */
 
 .banner-background-image {
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/developers-8a830.appspot.com/o/developer%2Fresources%2Fimg%2Fbanner.png?alt=media&token=0c52ca2b-e799-4677-92c6-956bc88f57c6');
+  background-image: url('/assets/img/banner/banner.png');
   background-color: rgba(255,255,255,0.5);
   background-blend-mode: lighten;
   background-size:cover;
@@ -25,7 +25,7 @@
 }
 
 .blog-background-image {
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/developers-8a830.appspot.com/o/developer%2Fresources%2Fimg%2Fabout.png?alt=media&token=458236cf-1b28-412f-908b-66e63c56cfdb');
+  background-image: url('/assets/img/about/about.png');
   background-color:rgba(255,255,255,0.5);
   background-blend-mode:lighten;
   background-size:cover;
@@ -43,7 +43,7 @@
 }
 
 .video-chat-image {
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/developers-8a830.appspot.com/o/developer%2Fresources%2Fimg%2Fwork.png?alt=media&token=86796893-0365-4200-8dae-b2d1dcaa675e');
+  background-image: url('/assets/img/work/work.png');
   background-color:rgba(255,255,255,0.5);
   background-blend-mode:lighten;
   background-size:cover;

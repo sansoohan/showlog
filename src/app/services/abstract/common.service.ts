@@ -52,9 +52,9 @@ export abstract class CommonService {
     this.commonStorage = new CommonStorage(storage);
   }
   select<T>(path: string, clause?: CollectionSelect): Observable<T[]> {
-    console.log(environment.rootPath + path);
+    console.log(path);
     return this.firestore
-    .collection<T>(environment.rootPath + path, ref => {
+    .collection<T>(path, ref => {
       let nextRef: any = ref;
 
       for (const where of clause?.where || []) {
@@ -80,10 +80,10 @@ export abstract class CommonService {
   }
   observe<T>(path: string): Observable<T|undefined> {
     console.log(path);
-    return this.firestore.doc<T>(environment.rootPath + path).valueChanges();
+    return this.firestore.doc<T>(path).valueChanges();
   }
   async update(path: string, content: any): Promise<void> {
-    return this.firestore.doc(environment.rootPath + path).update(JSON.parse(JSON.stringify(content)));
+    return this.firestore.doc(path).update(JSON.parse(JSON.stringify(content)));
   }
   async delete(path = '', cascadeDeleteOption: CascadeDeleteOption): Promise<void> {
     const {
@@ -96,8 +96,8 @@ export abstract class CommonService {
     const docId = splitedPath[splitedPath.length - 1];
     if (childrenStorage.length !== 0) {
       for (const childStorage of childrenStorage) {
-        this.commonStorage.deleteFolderContents(`${environment.rootPath + path}/${childStorage}`);
-        this.firestore.collection(`${environment.rootPath + path}/${childStorage}`)
+        this.commonStorage.deleteFolderContents(`${path}/${childStorage}`);
+        this.firestore.collection(`${path}/${childStorage}`)
         .get().toPromise().then((querySnapshot) => {
           querySnapshot.docs.forEach((doc) => {
             doc.ref.delete();
@@ -105,10 +105,10 @@ export abstract class CommonService {
         });
       }
     }
-    await this.firestore.doc(environment.rootPath + path).delete();
+    await this.firestore.doc(path).delete();
     children.forEach(async (child) => {
       if (child.collectionPath) {
-        const tmpObserver = this.firestore.collection(environment.rootPath + child.collectionPath,
+        const tmpObserver = this.firestore.collection(child.collectionPath,
           ref => ref.where(new FieldPath(child?.parentKeyName || ''), '==', docId)
         ).valueChanges();
         const tmpSubscriber = tmpObserver.subscribe(async (childContents: Array<any>) => {
@@ -123,7 +123,7 @@ export abstract class CommonService {
   }
   async create(path: string, content: any): Promise<void> {
     content.ownerId = this.authService.getCurrentUser()?.uid;
-    return this.firestore.collection(environment.rootPath + path).add(JSON.parse(JSON.stringify(content)))
+    return this.firestore.collection(path).add(JSON.parse(JSON.stringify(content)))
     .then(async (collection) => {
       content.id = collection.id;
       await collection.update(JSON.parse(JSON.stringify(content)));
@@ -140,14 +140,14 @@ export abstract class CommonService {
   async set(path: string, content: any): Promise<void> {
     const {uid} = this.authService.getCurrentUser() || {};
     content.ownerId = uid;
-    await this.firestore.doc(environment.rootPath + path).set(JSON.parse(JSON.stringify(content)));
+    await this.firestore.doc(path).set(JSON.parse(JSON.stringify(content)));
   }
   async get(path: string): Promise<any> {
-    return this.firestore.doc(environment.rootPath + path).get().toPromise();
+    return this.firestore.doc(path).get().toPromise();
   }
   async isExists(path: string): Promise<boolean> {
     return new Promise(async (resolve) => {
-      const content = await this.firestore.doc(environment.rootPath + path).get().toPromise();
+      const content = await this.firestore.doc(path).get().toPromise();
       resolve(content.exists);
     });
   }

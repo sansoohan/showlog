@@ -6,6 +6,7 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { ImageContent } from '../helper/image.helper';
 import { AuthService } from '../services/auth.service';
 import { CommonStorage } from './abstract/common.storage';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'

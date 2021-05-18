@@ -63,7 +63,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   dataDebugFlag = false;
   isPage = true;
-  databaseRoot?: string;
+  roomsPath?: string;
   videoChunks: Array<any> = [];
   availableGrids: Array<Array<any>> = [[]];
   peerConnections: {[key: string]: any} = {};
@@ -102,7 +102,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.paramSub = this.route.params.subscribe((params) => {
       this.params = params;
       this.talkId = talkContent.id;
-      this.databaseRoot = environment.rootPath + `talks/${this.talkId}/rooms/`;
+      this.roomsPath = [
+        environment.rootPath,
+        `talks/${this.talkId}`,
+        'rooms',
+      ].join('/');
       this.isPage = true;
       this._talkContent = talkContent;
       this.startMeeting(this.params);
@@ -600,21 +604,33 @@ export class RoomComponent implements OnInit, OnDestroy {
     return new Promise((resolve) => {
       // tslint:disable-next-line: no-console
       console.log('join roomId = ' + roomId);
-      const key = this.database.list(this.databaseRoot + roomId + '/_join_')
+      const key = this.database.list([
+        `${this.roomsPath}/${roomId}`,
+        `_join_`,
+      ].join('/'))
       .push({ joined : 'unknown'}).key;
       this.clientId = 'member_' + key;
       // tslint:disable-next-line: no-console
       console.log('joined to roomId=' + roomId + ' as this.clientId=' + this.clientId);
-      this.database.object(this.databaseRoot + roomId + '/_join_/' + key)
+      this.database.object([
+        `${this.roomsPath}/${roomId}`,
+        `_join_/${key}`,
+      ].join('/'))
       .update({ joined : this.clientId});
 
       // remove join object
       if (!this.dataDebugFlag) {
-        const jooinRef =  this.database.object(this.databaseRoot + roomId + '/_join_/' + key);
+        const jooinRef =  this.database.object([
+          `${this.roomsPath}/${roomId}`,
+          `_join_/${key}`,
+        ].join('/'));
         jooinRef.remove();
       }
 
-      this.roomBroadcastRef = this.database.list(this.databaseRoot + roomId + '/_broadcast_');
+      this.roomBroadcastRef = this.database.list([
+        `${this.roomsPath}/${roomId}`,
+        '_broadcast_',
+      ].join('/'));
       this.roomBroadcastRef.stateChanges(['child_added']).forEach((data) => {
         // tslint:disable-next-line: no-console
         // console.log('roomBroadcastRef.on(data) data.key=' + data.key + ', data.val():', data.payload.val());
@@ -652,8 +668,14 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.clientRef = this.database.list(this.databaseRoot + roomId + '/_direct_/' + this.clientId);
-      this.database.database.ref(this.databaseRoot + roomId + '/_direct_/' + this.clientId).onDisconnect().remove();
+      this.clientRef = this.database.list([
+        `${this.roomsPath}/${roomId}`,
+        `_direct_/${this.clientId}`,
+      ].join('/'));
+      this.database.database.ref([
+        `${this.roomsPath}/${roomId}`,
+        `_direct_/${this.clientId}`,
+      ].join('/')).onDisconnect().remove();
       this.clientRef.stateChanges(['child_added']).forEach((data) => {
         // tslint:disable-next-line: no-console
         console.log('clientRef.on(data)  data.key=' + data.key + ', data.val():', data.payload.val());
@@ -689,7 +711,12 @@ export class RoomComponent implements OnInit, OnDestroy {
 
         if (!this.dataDebugFlag) {
           // remove direct message
-          const messageRef =  this.database.object(this.databaseRoot + roomId + '/_direct_/' + this.clientId + '/' + data.key);
+          const messageRef =  this.database.object(
+            [
+              `${this.roomsPath}/${roomId}`,
+              `_direct_/${this.clientId}`,
+              data.key,
+            ].join('/'));
           messageRef.remove();
         }
       });
@@ -719,8 +746,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     // tslint:disable-next-line: no-console
     // console.log('===== sending from=' + this.clientId + ' ,  to=' + id);
     msg.from = this.clientId;
-    if (this.databaseRoot && this.roomId) {
-      this.database.list(this.databaseRoot + this.roomId + '/_direct_/' + id).push(msg);
+    if (this.roomsPath && this.roomId) {
+      this.database.list([
+        `${this.roomsPath}/${this.roomId}`,
+        `_direct_/${id}`,
+      ].join('/')).push(msg);
     }
   }
 

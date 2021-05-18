@@ -14,6 +14,7 @@ import { TalkService } from 'src/app/services/talk.service';
 import { UserNameValidationError } from './about/about.component';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
 import * as firebase from 'firebase/app';
+import { environment } from 'src/environments/environment';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
@@ -49,7 +50,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.paramSub = this.route.params.subscribe(params => {
       this.params = params;
       this.profileContentsObserver = this.profileService.select<ProfileContent>(
-        `profiles`,
+        [
+          environment.rootPath,
+          `profiles`,
+        ].join('/'),
         {
           where: [{
             fieldPath: new FieldPath('userName'),
@@ -145,11 +149,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
           const { userName, ownerId, id } = profileData;
           Promise.all([
             this.isUserNameChanged() ? this.blogService.update(
-              `blogs/${id}`,
+              [
+                environment.rootPath,
+                'blogs',
+                id,
+              ].join('/'),
               {userName, ownerId}
             ) : null,
             this.isUserNameChanged() ? this.talkService.update(
-              `talks/${id}`,
+              [
+                environment.rootPath,
+                'talks',
+                id,
+              ].join('/'),
               {userName, ownerId}
             ) : null,
             this.profileService

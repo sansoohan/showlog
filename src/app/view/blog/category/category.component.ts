@@ -11,6 +11,7 @@ import { FormHelper } from 'src/app/helper/form.helper';
 import { DataTransferHelper } from 'src/app/helper/data-transfer.helper';
 import * as firebase from 'firebase/app';
 import { CollectionSelect } from 'src/app/services/abstract/common.service';
+import { environment } from 'src/environments/environment';
 const FieldPath = firebase.default.firestore.FieldPath;
 
 @Component({
@@ -118,7 +119,10 @@ export class CategoryComponent implements OnInit, OnDestroy {
     for (let index = 0; index < selectedCreatedAtList.length; index += 10) {
       const createdAtList = Object.assign([], selectedCreatedAtList).splice(index, index + 10);
       const postListObserver = this.blogService.select<PostContent>(
-        `blogs/${this.blogId}/posts`,
+        [
+          environment.rootPath,
+          `blogs/${this.blogId}/posts`,
+        ].join('/'),
         {
           where: [{
             fieldPath: new FieldPath('createdAt'),
