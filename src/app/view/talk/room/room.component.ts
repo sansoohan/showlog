@@ -1410,7 +1410,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (this.canvasStream) {
       // tslint:disable-next-line: no-console
       console.log('Adding local stream...');
-      peer.addStream(this.canvasStream);
+      this.canvasStream.getTracks().forEach((track) =>{
+        peer.addTrack(track, this.canvasStream);
+      });
     }
     else {
       console.warn('no local stream, but continue.');
