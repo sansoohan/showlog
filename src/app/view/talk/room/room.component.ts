@@ -221,6 +221,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     // await this.stopVideo();
     await this.ngOnDestroy();
     location.href = `${location.origin}/#/talk/${this.params.userName}`;
+    location.reload();
   }
 
   setAvailableGrids(until = 30): void {
