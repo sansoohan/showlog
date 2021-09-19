@@ -1,32 +1,40 @@
-# Developer
+# Packages
+| Package | Description |
+| - | - |
+|<img src="./doc/icons/firebase-48.png" width="48"/><br>firebase| v8, DB And Serverless|
+|<img src="./doc/icons/nodejs-48.png" width="48"/><br>node| v14, Server Side|
+|<img src="./doc/icons/angularjs-48.png" width="48"/><br>angular| v11, Web Framework |
+|<img src="./doc/icons/bootstrap-48.png" width="48"/><br>bootstrap| v5, CSS Framework|
+|<img src="./doc/icons/sweetalert.png" width="48"/><br>sweetalert2| Modal, Input Form|
+|moment|Time Format|
+|ngx-markdown<br>prism-themes<br>emoji-toolkit| Posting Blog as MarkDown|
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.3.
+# Run
+```
+ng serve
+```
+http://localhost:4200/
 
-## Development server
+# Deploy
+- All : ```firebase deploy```
+- Only Front End
+  - prod : ```firebase deploy --only hosting:prod```
+  - stage : ```firebase deploy --only hosting:stage```
+- Only Functions
+  - ```firebase deploy --only functions```
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+# Pages
+## Main
+<img src="./doc/images/main.png" width="100%"/>
 
-## Code scaffolding
+## Blog
+<img src="./doc/images/blog.png" width="100%"/>
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Profile
+<img src="./doc/images/profile.png" width="100%"/>
 
-## Build
+## Talk
+<img src="./doc/images/talk.png" width="100%"/>
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Deploy
-- Staging: ```ng deploy ng deploy developers-staging```
-- Production: ```ng deploy```
-- function: ```firebase deploy --only functions```
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+# Link
+https://showlog.me/#/
