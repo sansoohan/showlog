@@ -11,6 +11,9 @@
     "emul": "firebase emulators:start --import ./emulators_data --export-on-exit ./emulators_data"
   },
   "private": true,
+  "engines": {
+    "node": "14"
+  },
   "dependencies": {
     "@agentepsilon/decko": "^2.0.1",
     "@angular-material-extensions/password-strength": "^8.1.1",

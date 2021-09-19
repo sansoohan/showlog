@@ -2,10 +2,10 @@
   "targets": {
     "developers-8a830": {
       "hosting": {
-        "showlog": [
+        "prod": [
           "showlog-7367e"
         ],
-        "showlog-staging": [
+        "stage": [
           "showlog-7367e-stage"
         ]
       }

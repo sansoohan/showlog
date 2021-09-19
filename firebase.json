@@ -12,8 +12,9 @@
   },
   "hosting": [
     {
-      "target": "showlog",
-      "public": "dist/showlog",
+      "target": "prod",
+      "predeploy": "npm run build prod",
+      "public": "dist/prod",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -34,8 +35,9 @@
       }]
     },
     {
-      "target": "showlog-staging",
-      "public": "dist/showlog-staging",
+      "target": "stage",
+      "predeploy": "npm run build stage",
+      "public": "dist/stage",
       "ignore": [
         "firebase.json",
         "**/.*",
