@@ -156,6 +156,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
               ].join('/'),
               {userName, ownerId}
             ) : null,
+
             this.isUserNameChanged() ? this.talkService.update(
               [
                 environment.rootPath,
@@ -164,12 +165,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
               ].join('/'),
               {userName, ownerId}
             ) : null,
+
             this.profileService
             .update(
-              `profiles/${id}`,
+              [
+                environment.rootPath,
+                `profiles/${id}`,
+              ].join('/'),
               profileData,
             )
-          ].filter(Boolean))
+          ]
+          .filter(Boolean))
           .then(() => {
             this.toastHelper.showSuccess('Profile Update', 'Success!');
             const currentUser = JSON.parse(localStorage.currentUser || null);
