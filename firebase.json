@@ -13,7 +13,7 @@
   "hosting": [
     {
       "target": "prod",
-      "predeploy": "npm run build prod",
+      "predeploy": "ng build prod -c production",
       "public": "dist/prod",
       "ignore": [
         "firebase.json",
@@ -36,7 +36,7 @@
     },
     {
       "target": "stage",
-      "predeploy": "npm run build stage",
+      "predeploy": "ng build stage -c production",
       "public": "dist/stage",
       "ignore": [
         "firebase.json",
