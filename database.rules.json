@@ -1,48 +1,72 @@
 {
   "rules": {
-    ".read": false,
-    ".write": false,
-    "dev": {
-      "showlog": {
+  	"dev": {
+			"showlog": {
         "talks": {
-          ".read": true,
-          ".write": true
+          "$talkId": {
+            "rooms": {
+              ".read": true,
+          		".write": true
+						}
+					}
         }
-      },
+			},
       "teams": {
         "meetings": {
-          ".read": true,
-          ".write": true
+          "$meetingId": {
+            "rooms": {
+              ".read": true,
+          		".write": true
+						}
+          }
         }
       }
-    },
+		},
+
     "stage": {
-      "showlog": {
+			"showlog": {
         "talks": {
-          ".read": true,
-          ".write": true
+          "$talkId": {
+            "rooms": {
+              ".read": true,
+          		".write": true
+						}
+					}
         }
-      },
+			},
       "teams": {
         "meetings": {
-          ".read": true,
-          ".write": true
+          "$meetingId": {
+            "rooms": {
+              ".read": true,
+          		".write": true
+						}
+          }
         }
       }
-    },
-    "prod": {
-      "showlog": {
+		},
+
+  	"prod": {
+			"showlog": {
         "talks": {
-          ".read": true,
-          ".write": true
+          "$talkId": {
+            "rooms": {
+              ".read": true,
+          		".write": true
+						}
+					}
         }
-      },
+			},
       "teams": {
         "meetings": {
-          ".read": true,
-          ".write": true
+          "$meetingId": {
+            "rooms": {
+              ".read": true,
+          		".write": true
+						}
+          }
         }
       }
-    }
+		}
   }
 }

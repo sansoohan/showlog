@@ -1,81 +1,189 @@
 // rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-  	allow read;
-    allow create: if isSignedIn();
-    allow update: if isOwner();
-    allow delete: if isOwner();
-    // Default Collection Functions (can be overrided)
     function isOwner() {
       return resource.data.ownerId == request.auth.uid;
     }
     function isSignedIn() {
       return request.auth != null;
     }
-    // Default All Collection Rull
-    match /{document=**} {
+
+		match /dev/{devId} {
       allow read;
       allow create: if isSignedIn();
       allow update: if isOwner();
 	    allow delete: if isOwner();
-    }
 
-		match /dev/{devId} {
-      match /profiles/{profileId} {function cascaded(){return null}}
-      match /blogs/{blogId} {
-        match /posts/{postId} {
-          match /images/{imageId} {function cascaded(){return null}}
-        }
-        match /categories/{categoryId} {function cascaded(){return null}}
-        match /comments/{commentId} {function cascaded(){return null}}
+      match /profiles/{profileId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
       }
-      match /talks/{talkId}{
-        match /{document=**} {
-          allow create, read, update, delete;
+
+      match /blogs/{blogId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+
+        match /posts/{postId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+
+          match /images/{imageId} {
+            allow read;
+            allow create: if isSignedIn();
+            allow update: if isOwner();
+            allow delete: if isOwner();
+          }
         }
+        match /categories/{categoryId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+        }
+        match /comments/{commentId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+        }
+      }
+      match /talks/{talkId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+
         match /rooms/{roomId} {
-          match /callerCandidates/{callerCandidatesId} {function cascaded(){return null}}
-          match /calleeCandidates/{calleeCandidatesId} {function cascaded(){return null}}      
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
         }
       }
 		}
 
-		match /stage/{stageId} {
-      match /profiles/{profileId} {function cascaded(){return null}}
-      match /blogs/{blogId} {
-        match /posts/{postId} {
-          match /images/{imageId} {function cascaded(){return null}}
-        }
-        match /categories/{categoryId} {function cascaded(){return null}}
-        match /comments/{commentId} {function cascaded(){return null}}
+		match /stage/{devId} {
+      allow read;
+      allow create: if isSignedIn();
+      allow update: if isOwner();
+	    allow delete: if isOwner();
+
+      match /profiles/{profileId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
       }
-      match /talks/{talkId}{
-        match /{document=**} {
-          allow create, read, update, delete;
+
+      match /blogs/{blogId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+
+        match /posts/{postId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+
+          match /images/{imageId} {
+            allow read;
+            allow create: if isSignedIn();
+            allow update: if isOwner();
+            allow delete: if isOwner();
+          }
         }
+        match /categories/{categoryId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+        }
+        match /comments/{commentId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+        }
+      }
+      match /talks/{talkId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+
         match /rooms/{roomId} {
-          match /callerCandidates/{callerCandidatesId} {function cascaded(){return null}}
-          match /calleeCandidates/{calleeCandidatesId} {function cascaded(){return null}}      
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
         }
       }
 		}
 
-		match /prod/{prodId} {
-      match /profiles/{profileId} {function cascaded(){return null}}
-      match /blogs/{blogId} {
-        match /posts/{postId} {
-          match /images/{imageId} {function cascaded(){return null}}
-        }
-        match /categories/{categoryId} {function cascaded(){return null}}
-        match /comments/{commentId} {function cascaded(){return null}}
+    match /prod/{devId} {
+      allow read;
+      allow create: if isSignedIn();
+      allow update: if isOwner();
+	    allow delete: if isOwner();
+
+      match /profiles/{profileId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
       }
-      match /talks/{talkId}{
-        match /{document=**} {
-          allow create, read, update, delete;
+
+      match /blogs/{blogId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+
+        match /posts/{postId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+
+          match /images/{imageId} {
+            allow read;
+            allow create: if isSignedIn();
+            allow update: if isOwner();
+            allow delete: if isOwner();
+          }
         }
+        match /categories/{categoryId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+        }
+        match /comments/{commentId} {
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
+        }
+      }
+      match /talks/{talkId} {
+        allow read;
+        allow create: if isSignedIn();
+        allow update: if isOwner();
+        allow delete: if isOwner();
+
         match /rooms/{roomId} {
-          match /callerCandidates/{callerCandidatesId} {function cascaded(){return null}}
-          match /calleeCandidates/{calleeCandidatesId} {function cascaded(){return null}}      
+          allow read;
+          allow create: if isSignedIn();
+          allow update: if isOwner();
+          allow delete: if isOwner();
         }
       }
 		}
